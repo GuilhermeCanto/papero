@@ -26,6 +26,9 @@ import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
+import { AccountSelect, resolveFinanceAccountId } from "../../finance/_components/account-select";
+import { useFinanceAccounts } from "../../finance/_components/finance-accounts-store";
+
 type QuickCreateAction = "expense" | "income" | "supplier" | "customer";
 
 const today = new Intl.DateTimeFormat("pt-BR", {
@@ -88,11 +91,13 @@ function TransactionDialog({
   open: boolean;
 }) {
   const t = useTranslations("QuickCreate");
+  const { accounts } = useFinanceAccounts();
   const { addTransaction } = useFinanceTransactions([]);
   const [description, setDescription] = React.useState("");
   const [amount, setAmount] = React.useState("");
   const [dueDate, setDueDate] = React.useState(today);
   const [contact, setContact] = React.useState("");
+  const [accountId, setAccountId] = React.useState(() => resolveFinanceAccountId([]));
   const [notes, setNotes] = React.useState("");
   const [isSaving, setIsSaving] = React.useState(false);
 
@@ -106,9 +111,15 @@ function TransactionDialog({
     setAmount("");
     setDueDate(today);
     setContact("");
+    setAccountId(resolveFinanceAccountId(accounts));
     setNotes("");
     setIsSaving(false);
   };
+
+  React.useEffect(() => {
+    if (!open) return;
+    setAccountId((currentAccountId) => resolveFinanceAccountId(accounts, currentAccountId));
+  }, [accounts, open]);
 
   const saveTransaction = () => {
     if (isSaving) return;
@@ -117,6 +128,7 @@ function TransactionDialog({
     setIsSaving(true);
     addTransaction({
       amountCents: parseMoneyToCents(amount),
+      accountId: resolveFinanceAccountId(accounts, accountId),
       category: isIncome ? t("defaults.incomeCategory") : t("defaults.expenseCategory"),
       date: dueDate,
       description,
@@ -177,6 +189,10 @@ function TransactionDialog({
               value={contact}
             />
           </Label>
+          <div className="grid gap-1.5">
+            <Label>{t("fields.account")}</Label>
+            <AccountSelect accounts={accounts} onChange={setAccountId} triggerClassName="w-full" value={accountId} />
+          </div>
           <Label className="grid gap-1.5" htmlFor={`${kind}-notes`}>
             {t("fields.notes")}
             <Textarea id={`${kind}-notes`} onChange={(event) => setNotes(event.target.value)} value={notes} />

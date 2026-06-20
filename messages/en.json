@@ -130,6 +130,7 @@
         "description": "Description",
         "counterpart": "Suppliers",
         "counterpartIncome": "Customers",
+        "account": "Account",
         "category": "Category",
         "amount": "Amount",
         "paymentMode": "Payment Mode",
@@ -185,6 +186,7 @@
         "fields": {
           "dueDate": "Due date",
           "amount": "Amount",
+          "account": "Account",
           "competence": "Competence",
           "description": "Description",
           "document": "Document",
@@ -246,6 +248,10 @@
         "site": "Website",
         "address": "Address",
         "save": "Save contact"
+      },
+      "accountSelect": {
+        "placeholder": "Select account",
+        "archived": "Archived"
       },
       "sample": {
         "category": "Sales",
@@ -590,6 +596,7 @@
     "fields": {
       "address": "Address",
       "amount": "Amount",
+      "account": "Account",
       "companyName": "Company name",
       "customer": "Customer",
       "description": "Description",

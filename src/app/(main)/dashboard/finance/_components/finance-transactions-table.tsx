@@ -49,10 +49,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
+import { AccountSelect, getFinanceAccountName, resolveFinanceAccountId } from "./account-select";
 import { getFinanceCategoryTypeForTransactionKind } from "./categories-store";
 import { CategorySelect } from "./category-select";
 import { ContactSelect } from "./contact-select";
 import type { FinanceContactType } from "./contacts-store";
+import { type FinanceAccount, useFinanceAccounts } from "./finance-accounts-store";
 import {
   type PaymentTime,
   type FinanceTransaction as Transaction,
@@ -318,11 +320,13 @@ function TransactionActionsMenu({
 }
 
 function TransactionDetailsDrawer({
+  accounts,
   onOpenChange,
   onUpdate,
   open,
   transaction,
 }: {
+  accounts: FinanceAccount[];
   onOpenChange: (open: boolean) => void;
   onUpdate: (id: string, patch: Partial<Transaction>) => void;
   open: boolean;
@@ -365,6 +369,15 @@ function TransactionDetailsDrawer({
                 ariaLabel={t("drawer.aria.editCompetence", { description: transaction.description })}
                 onChange={(competenceDate) => onUpdate(transaction.id, { competenceDate })}
                 value={transaction.competenceDate ?? transaction.date}
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <span className="font-medium text-sm">{t("drawer.fields.account")}</span>
+              <AccountSelect
+                accounts={accounts}
+                onChange={(accountId) => onUpdate(transaction.id, { accountId })}
+                triggerClassName="w-full"
+                value={transaction.accountId}
               />
             </div>
             <div className="grid gap-1.5">
@@ -673,6 +686,7 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
   const t = useTranslations("Dashboard.financeTransactions");
   const availableKindIds = React.useMemo(() => getTransactionKindsForMode(mode), [mode]);
   const [activeKind, setActiveKind] = React.useState<TransactionKind>(availableKindIds[0]);
+  const { accounts } = useFinanceAccounts();
   const { addTransaction: createTransaction, setTransactions, transactions } = useFinanceTransactions([]);
   const [installmentTransaction, setInstallmentTransaction] = React.useState<Transaction | null>(null);
   const [recurringTransaction, setRecurringTransaction] = React.useState<Transaction | null>(null);
@@ -693,6 +707,7 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
     createTransaction({
       amountCents: 0,
       category: t("sample.category"),
+      accountId: resolveFinanceAccountId(accounts),
       date: "18/06/2026",
       description: t("table.add"),
       from: "",
@@ -881,6 +896,7 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
                   <TableHead className="w-30">{t("table.dueDate")}</TableHead>
                   <TableHead className="w-64">{t("table.description")}</TableHead>
                   <TableHead className="w-36">{contactColumnLabel}</TableHead>
+                  <TableHead className="w-34">{t("table.account")}</TableHead>
                   <TableHead className="w-34">{t("table.category")}</TableHead>
                   <TableHead className="w-28">{t("table.amount")}</TableHead>
                   <TableHead className="w-34">{t("table.paymentMode")}</TableHead>
@@ -922,6 +938,15 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
                         onChange={(contact) => updateTransactionContact(transaction.id, contact.name)}
                         value={transaction.from}
                       />
+                    </TableCell>
+                    <TableCell>
+                      <AccountSelect
+                        accounts={accounts}
+                        onChange={(accountId) => updateTransaction(transaction.id, { accountId })}
+                        triggerClassName="w-full"
+                        value={transaction.accountId}
+                      />
+                      <span className="sr-only">{getFinanceAccountName(accounts, transaction.accountId)}</span>
                     </TableCell>
                     <TableCell>
                       <CategorySelect
@@ -974,7 +999,7 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
 
                 {filteredTransactions.length === 0 && (
                   <TableRow>
-                    <TableCell className="h-24 text-center text-muted-foreground" colSpan={10}>
+                    <TableCell className="h-24 text-center text-muted-foreground" colSpan={11}>
                       {t("table.empty")}
                     </TableCell>
                   </TableRow>
@@ -1002,6 +1027,7 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
         transaction={recurringTransaction}
       />
       <TransactionDetailsDrawer
+        accounts={accounts}
         onOpenChange={(open) => {
           if (!open) setDetailsTransaction(null);
         }}

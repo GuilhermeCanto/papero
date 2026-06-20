@@ -130,6 +130,7 @@
         "description": "Descrição",
         "counterpart": "Fornecedores",
         "counterpartIncome": "Clientes",
+        "account": "Conta",
         "category": "Categoria",
         "amount": "Valor",
         "paymentMode": "Modalidade",
@@ -185,6 +186,7 @@
         "fields": {
           "dueDate": "Vencimento",
           "amount": "Valor",
+          "account": "Conta",
           "competence": "Competência",
           "description": "Descrição",
           "document": "Documento",
@@ -246,6 +248,10 @@
         "site": "Site",
         "address": "Endereço",
         "save": "Salvar contato"
+      },
+      "accountSelect": {
+        "placeholder": "Selecionar conta",
+        "archived": "Arquivada"
       },
       "sample": {
         "category": "Vendas",
@@ -590,6 +596,7 @@
     "fields": {
       "address": "Endereço",
       "amount": "Valor",
+      "account": "Conta",
       "companyName": "Nome da empresa",
       "customer": "Cliente",
       "description": "Descrição",
