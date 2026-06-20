@@ -259,9 +259,6 @@ export default function Page() {
         </TabsContent>
 
         <TabsContent value="12-months" className="flex flex-col gap-4">
-          <div className="rounded-xl border border-dashed bg-muted/20 px-4 py-3 text-muted-foreground text-sm">
-            {t("accountsNotice")}
-          </div>
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
             <BalanceDistributionCard accounts={accountSummaries} />
             <Wallet accounts={accountSummaries} />

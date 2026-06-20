@@ -11,7 +11,6 @@
       "accounts": "Contas",
       "transactions": "Transações"
     },
-    "accountsNotice": "O gerenciamento de contas estará disponível em breve. Estes widgets de contas ainda usam dados de demonstração enquanto o modelo local de contas do Papero é preparado.",
     "kpis": {
       "netWorth": "Saldo atual",
       "netWorthValue": "R$ 28.420,00",
@@ -315,6 +314,76 @@
       "reset": "Resetar demo",
       "clear": "Limpar dados locais"
     },
+    "financeAccounts": {
+      "title": "Contas",
+      "subtitle": "Gerencie contas financeiras locais usadas para calcular saldos e projeções.",
+      "create": "Nova conta",
+      "kpi": {
+        "total": "Contas",
+        "totalDescription": "Salvas neste navegador.",
+        "active": "Ativas",
+        "activeDescription": "Visíveis nos cálculos.",
+        "currentBalance": "Saldo atual",
+        "currentBalanceDescription": "Saldo inicial mais movimentações pagas.",
+        "projectedBalance": "Saldo previsto",
+        "projectedBalanceDescription": "{count, plural, one {# conta arquivada} other {# contas arquivadas}}"
+      },
+      "list": {
+        "title": "Contas financeiras",
+        "description": "Crie, edite e arquive contas locais. Transações sem conta são tratadas como Conta principal.",
+        "count": "{count, plural, one {# conta} other {# contas}}"
+      },
+      "table": {
+        "account": "Conta",
+        "institution": "Instituição",
+        "type": "Tipo",
+        "currency": "Moeda",
+        "openingBalance": "Saldo inicial",
+        "currentBalance": "Saldo atual",
+        "projectedBalance": "Saldo previsto",
+        "status": "Status",
+        "actions": "Editar",
+        "movements": "{count, plural, one {# movimentação} other {# movimentações}}",
+        "noInstitution": "Sem instituição",
+        "openActions": "Abrir ações de {name}"
+      },
+      "types": {
+        "cash": "Dinheiro",
+        "checking": "Conta corrente",
+        "credit_card": "Cartão de crédito",
+        "investment": "Investimento",
+        "other": "Outra",
+        "savings": "Poupança",
+        "wallet": "Carteira"
+      },
+      "status": {
+        "active": "Ativa",
+        "archived": "Arquivada"
+      },
+      "actions": {
+        "edit": "Editar conta",
+        "archive": "Arquivar conta"
+      },
+      "dialog": {
+        "createTitle": "Criar conta",
+        "editTitle": "Editar conta",
+        "description": "Apenas o nome é obrigatório. Os saldos são calculados pelas transações locais.",
+        "name": "Nome da conta",
+        "institution": "Instituição",
+        "type": "Tipo",
+        "currency": "Moeda",
+        "openingBalance": "Saldo inicial",
+        "archived": "Arquivada",
+        "archivedDescription": "Contas arquivadas continuam salvas, mas ficam fora dos resumos ativos.",
+        "saveCreate": "Criar conta",
+        "saveEdit": "Salvar alterações"
+      },
+      "empty": {
+        "title": "Nenhuma conta local ainda.",
+        "description": "Crie a primeira conta para começar a organizar saldos localmente.",
+        "action": "Criar conta"
+      }
+    },
     "financeCategories": {
       "title": "Categorias",
       "subtitle": "Organize categorias de receitas e despesas usadas nas transações.",
@@ -546,6 +615,7 @@
     "finance": "Financeiro",
     "overview": "Visão Geral",
     "transactions": "Transações",
+    "accounts": "Contas",
     "payables": "A Pagar",
     "receivables": "A Receber",
     "expenses": "Despesas",

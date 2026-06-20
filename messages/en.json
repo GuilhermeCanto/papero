@@ -11,7 +11,6 @@
       "accounts": "Accounts",
       "transactions": "Transactions"
     },
-    "accountsNotice": "Account management is coming soon. These account widgets currently use demo data while Papero's local account model is being prepared.",
     "kpis": {
       "netWorth": "Current balance",
       "netWorthValue": "R$ 28.420,00",
@@ -315,6 +314,76 @@
       "reset": "Reset demo data",
       "clear": "Clear local data"
     },
+    "financeAccounts": {
+      "title": "Accounts",
+      "subtitle": "Manage local finance accounts used to calculate balances and projections.",
+      "create": "New account",
+      "kpi": {
+        "total": "Accounts",
+        "totalDescription": "Stored in this browser.",
+        "active": "Active",
+        "activeDescription": "Visible in calculations.",
+        "currentBalance": "Current balance",
+        "currentBalanceDescription": "Opening balance plus paid movements.",
+        "projectedBalance": "Projected balance",
+        "projectedBalanceDescription": "{count, plural, one {# archived account} other {# archived accounts}}"
+      },
+      "list": {
+        "title": "Finance accounts",
+        "description": "Create, edit, and archive local accounts. Transactions without an account are treated as Main account.",
+        "count": "{count, plural, one {# account} other {# accounts}}"
+      },
+      "table": {
+        "account": "Account",
+        "institution": "Institution",
+        "type": "Type",
+        "currency": "Currency",
+        "openingBalance": "Opening balance",
+        "currentBalance": "Current balance",
+        "projectedBalance": "Projected balance",
+        "status": "Status",
+        "actions": "Edit",
+        "movements": "{count, plural, one {# movement} other {# movements}}",
+        "noInstitution": "No institution",
+        "openActions": "Open actions for {name}"
+      },
+      "types": {
+        "cash": "Cash",
+        "checking": "Checking",
+        "credit_card": "Credit card",
+        "investment": "Investment",
+        "other": "Other",
+        "savings": "Savings",
+        "wallet": "Wallet"
+      },
+      "status": {
+        "active": "Active",
+        "archived": "Archived"
+      },
+      "actions": {
+        "edit": "Edit account",
+        "archive": "Archive account"
+      },
+      "dialog": {
+        "createTitle": "Create account",
+        "editTitle": "Edit account",
+        "description": "Only the name is required. Balances are calculated from local transactions.",
+        "name": "Account name",
+        "institution": "Institution",
+        "type": "Type",
+        "currency": "Currency",
+        "openingBalance": "Opening balance",
+        "archived": "Archived",
+        "archivedDescription": "Archived accounts stay saved, but are hidden from active summaries.",
+        "saveCreate": "Create account",
+        "saveEdit": "Save changes"
+      },
+      "empty": {
+        "title": "No local accounts yet.",
+        "description": "Create your first account to start organizing balances locally.",
+        "action": "Create account"
+      }
+    },
     "financeCategories": {
       "title": "Categories",
       "subtitle": "Organize income and expense categories used in transactions.",
@@ -546,6 +615,7 @@
     "finance": "Finance",
     "overview": "Overview",
     "transactions": "Transactions",
+    "accounts": "Accounts",
     "payables": "Payables",
     "receivables": "Receivables",
     "expenses": "Expenses",
