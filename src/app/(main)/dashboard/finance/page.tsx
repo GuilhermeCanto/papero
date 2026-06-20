@@ -11,6 +11,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AccountActivityFlow } from "./_components/account-activity-flow";
 import { BalanceDistributionCard } from "./_components/balance-distribution-card";
 import {
+  getDefaultFinanceAccount,
+  getFinanceAccountsWithFallback,
+  useFinanceAccounts,
+} from "./_components/finance-accounts-store";
+import {
+  getAccountActivityByMonth,
+  getAccountBalanceSummaries,
   getCashFlowByDay,
   getDashboardFinanceMetrics,
   getForecastedEndOfMonthBalanceCents,
@@ -88,7 +95,22 @@ function toTransactionRecord(transaction: FinanceTransaction): TransactionRecord
 export default function Page() {
   const t = useTranslations("Dashboard");
   const today = React.useMemo(() => new Date(), []);
+  const { accounts } = useFinanceAccounts();
   const { transactions } = useFinanceTransactions([]);
+  const accountsWithFallback = React.useMemo(() => getFinanceAccountsWithFallback(accounts), [accounts]);
+  const defaultAccount = React.useMemo(() => getDefaultFinanceAccount(accountsWithFallback), [accountsWithFallback]);
+  const accountSummaries = React.useMemo(
+    () => getAccountBalanceSummaries(accountsWithFallback, transactions, defaultAccount),
+    [accountsWithFallback, defaultAccount, transactions],
+  );
+  const accountActivityData = React.useMemo(
+    () => getAccountActivityByMonth(transactions, today),
+    [transactions, today],
+  );
+  const paidAccountMovementCount = React.useMemo(
+    () => accountActivityData.reduce((total, item) => total + item.movementCount, 0),
+    [accountActivityData],
+  );
   const hasTransactions = transactions.length > 0;
   const metrics = React.useMemo(() => getDashboardFinanceMetrics(transactions, today), [transactions, today]);
   const cashFlowDays = React.useMemo(() => getCashFlowByDay(transactions, today), [transactions, today]);
@@ -241,10 +263,11 @@ export default function Page() {
             {t("accountsNotice")}
           </div>
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-            <BalanceDistributionCard />
-            <Wallet />
+            <BalanceDistributionCard accounts={accountSummaries} />
+            <Wallet accounts={accountSummaries} />
           </div>
           <AccountActivityFlow
+            activityData={accountActivityData}
             copy={{
               title: t("accountsActivity.title"),
               chartLabel: t("accountsActivity.chartLabel"),
@@ -257,7 +280,7 @@ export default function Page() {
               totalUnit: t("accountsActivity.totalUnit"),
               totalDescription: t("accountsActivity.totalDescription"),
               progressTitle: t("accountsActivity.progressTitle"),
-              progressValue: 184,
+              progressValue: paidAccountMovementCount,
               progressUnit: t("accountsActivity.progressUnit"),
               progressDescription: t("accountsActivity.progressDescription", { progress: "{progress}" }),
               progressCurrentLabel: t("accountsActivity.progressCurrentLabel"),
