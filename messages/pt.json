@@ -1,0 +1,565 @@
+{
+  "Dashboard": {
+    "title": "Dashboard",
+    "greeting": "Bom dia, {name}.",
+    "subtitle": "Aqui está o resumo financeiro da sua empresa.",
+    "updated": "Atualizado há {time}",
+    "settings": "Configurações",
+    "export": "Exportar",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "accounts": "Contas",
+      "transactions": "Transações"
+    },
+    "accountsNotice": "O gerenciamento de contas estará disponível em breve. Estes widgets de contas ainda usam dados de demonstração enquanto o modelo local de contas do Papero é preparado.",
+    "kpis": {
+      "netWorth": "Saldo atual",
+      "netWorthValue": "R$ 28.420,00",
+      "netWorthDesc": "+ R$ 4.200 em relação ao mês passado",
+      "netWorthBadge": "+8,4%",
+      "availableCash": "Caixa disponível",
+      "availableCashValue": "R$ 12.800,00",
+      "availableCashDesc": "R$ 410 acima da média dos últimos 30 dias",
+      "availableCashBadge": "+3,2%",
+      "monthlySpend": "Saídas do mês",
+      "monthlySpendValue": "R$ 2.140,00",
+      "monthlySpendDesc": "R$ 124 a mais que o mês passado",
+      "monthlySpendBadge": "+6,1%",
+      "savingsRate": "Resultado do mês",
+      "savingsRateValue": "R$ 7.420,00",
+      "savingsRateDesc": "Margem de 28% no mês",
+      "savingsRateBadge": "+2,4%"
+    },
+    "upcoming": {
+      "title": "Próximos vencimentos",
+      "total": "R$ 1.245",
+      "totalCents": ",00",
+      "description1": "Você tem ",
+      "description2": "3",
+      "description3": " contas vencendo este mês",
+      "autopay1": "O débito automático vai processar ",
+      "autopay2": "R$ 145,00",
+      "autopay3": " hoje",
+      "empty": "Nenhuma conta próxima.",
+      "items": {
+        "claude": "Claude Pro Subscription · R$ 110,00 · vence em 20 jun · Software",
+        "resend": "Resend Pro Team · R$ 145,00 · vence em 22 jun · E-mail/API",
+        "linear": "Linear Plus Plan · R$ 320,00 · vence em 28 jun · Gestão"
+      }
+    },
+    "cashflow": {
+      "title": "Fluxo de caixa do mês",
+      "currentResult": "Resultado previsto atual: R$ 7.420",
+      "status": "Status: Projetado",
+      "inflow": "Entradas: R$ 18.900",
+      "outflow": "Saídas: R$ 11.480",
+      "forecast": "Previsto: R$ 24.300",
+      "finalBalance": "Saldo final: R$ 32.620"
+    },
+    "shortcuts": {
+      "title": "Ações rápidas",
+      "newIncome": "Nova receita",
+      "newExpense": "Nova despesa",
+      "newAccount": "Nova conta",
+      "importStatement": "Importar extrato"
+    },
+    "health": {
+      "title": "Saúde do caixa",
+      "status": "78% saudável",
+      "chartLabel": "Saudável",
+      "inflows": "Entradas",
+      "outflows": "Saídas",
+      "balance": "Saldo"
+    },
+    "calendar": {
+      "title": "Agenda financeira",
+      "month": "Junho 2026",
+      "legendIncomes": "Recebimentos",
+      "legendExpenses": "Despesas",
+      "legendTransfers": "Transferências",
+      "legendDueDates": "Vencimentos"
+    },
+    "accountsActivity": {
+      "title": "Fluxo de movimentações",
+      "chartLabel": "Movimentações",
+      "rangePlaceholder": "Selecionar período",
+      "ranges": {
+        "last30Days": "Últimos 30 dias",
+        "lastQuarter": "Último trimestre",
+        "last12Months": "Últimos 12 meses"
+      },
+      "totalUnit": "lançamentos",
+      "totalDescription": "Total de lançamentos das contas revisados nos últimos 12 meses.",
+      "progressTitle": "Lançamentos conciliados",
+      "progressUnit": "lançamentos",
+      "progressDescription": "{progress}% das movimentações das contas já foram conciliadas.",
+      "progressCurrentLabel": "conciliados",
+      "progressTotalLabel": "revisados"
+    },
+    "financeTransactions": {
+      "title": "Transações",
+      "subtitle": "Acompanhe entradas, saídas e previsões do mês.",
+      "kpi": {
+        "account": "Conta principal",
+        "accountSubtitle": "Saldo atual",
+        "projected": "Resultado previsto",
+        "projectedSubtitle": "{month}",
+        "income": "Recebimentos",
+        "incomeSubtitle": "Recebido no mês",
+        "incomeProjected": "{amount} previsto",
+        "incomeProgress": "Recebido",
+        "expense": "Despesas",
+        "expenseSubtitle": "Pago no mês",
+        "expenseProjected": "{amount} previsto",
+        "expenseProgress": "Pago",
+        "projectedBadge": "Projetado",
+        "incomeBadge": "Entrada",
+        "expenseBadge": "Saída",
+        "flow": "Participação no fluxo"
+      },
+      "table": {
+        "title": "Transações do mês",
+        "count": "{count, plural, one {# transação} other {# transações}}",
+        "export": "Exportar transações",
+        "more": "Mais ações",
+        "previous": "Mês anterior",
+        "next": "Próximo mês",
+        "month": "Jun/2026",
+        "sort": "Ordenar transações",
+        "add": "Nova transação",
+        "dueDate": "Vencimento",
+        "description": "Descrição",
+        "counterpart": "Fornecedores",
+        "counterpartIncome": "Clientes",
+        "category": "Categoria",
+        "amount": "Valor",
+        "paymentMode": "Modalidade",
+        "paymentForm": "Forma de Pagamento",
+        "paid": "Pago?",
+        "actions": "Editar",
+        "selectTransaction": "Selecionar {description}",
+        "markAsPaid": "Marcar {description} como pago",
+        "empty": "Nenhuma transação nesta categoria.",
+        "selectAll": "Selecionar todas as transações"
+      },
+      "kinds": {
+        "income": "Recebimentos",
+        "fixed": "Despesas fixas",
+        "variable": "Despesas variáveis",
+        "people": "Pessoas",
+        "taxes": "Impostos",
+        "transfer": "Transferências"
+      },
+      "paymentTime": {
+        "cash": "À vista",
+        "installment": "Parcelado",
+        "recurring": "Recorrente",
+        "placeholder": "Modalidade"
+      },
+      "paymentForm": {
+        "automatic": "Automático",
+        "boleto": "Boleto",
+        "bankDeposit": "Depósito bancário",
+        "bankTransfer": "Transferência bancária",
+        "digitalWallet": "Carteira digital",
+        "creditCard": "Cartão de crédito",
+        "debitCard": "Cartão de débito",
+        "crypto": "Cripto",
+        "pix": "Pix",
+        "stripe": "Stripe",
+        "paypal": "PayPal",
+        "zelle": "Zelle",
+        "other": "Outro"
+      },
+      "actions": {
+        "menu": "Ações para {description}",
+        "incomeDetails": "Detalhes da receita",
+        "expenseDetails": "Detalhes da despesa",
+        "amountDetails": "Detalhes do valor",
+        "attachments": "Anexos",
+        "duplicate": "Duplicar",
+        "configureRecurrence": "Configurar recorrência",
+        "configureInstallments": "Configurar parcelamento",
+        "delete": "Excluir"
+      },
+      "drawer": {
+        "fields": {
+          "dueDate": "Vencimento",
+          "amount": "Valor",
+          "competence": "Competência",
+          "description": "Descrição",
+          "document": "Documento",
+          "tags": "Tags",
+          "additionalInfo": "Informações adicionais"
+        },
+        "placeholders": {
+          "document": "Nota, recibo ou contrato",
+          "tags": "Ex: recorrente, marketing",
+          "additionalInfo": "Observações internas sobre esta transação."
+        },
+        "aria": {
+          "editDueDate": "Alterar vencimento de {description}",
+          "editAmount": "Alterar valor de {description}",
+          "editCompetence": "Alterar competência de {description}",
+          "editDescription": "Editar descrição de {id}"
+        }
+      },
+      "amountDetails": {
+        "title": "Detalhes do valor",
+        "description": "A composição detalhada do valor será configurada na próxima etapa.",
+        "body": "Detalhamento de valor, descontos, taxas e regras de alocação vão ficar aqui."
+      },
+      "attachments": {
+        "title": "Anexos",
+        "description": "Envie recibos, notas ou documentos de apoio para esta transação.",
+        "body": "Enviar recibos ou documentos",
+        "hint": "Arquivos PDF, PNG ou JPG"
+      },
+      "installmentDialog": {
+        "title": "Plano de parcelamento",
+        "description": "Divida o lançamento em parcelas mensais e acompanhe cada vencimento.",
+        "totalAmount": "Valor total",
+        "installments": "Número de parcelas",
+        "frequency": "Frequência",
+        "monthly": "Mensal",
+        "installment": "Parcela",
+        "dueDate": "Data",
+        "installmentAmount": "Valor da parcela",
+        "paid": "Pago?",
+        "save": "Salvar"
+      },
+      "recurrenceDialog": {
+        "title": "Configurar recorrência",
+        "description": "Crie lançamentos mensais para receitas ou despesas recorrentes.",
+        "months": "Número de meses",
+        "frequency": "Frequência",
+        "monthly": "Mensal",
+        "summary": "Serão criadas {count} transações mensais de {amount}.",
+        "create": "Criar transações"
+      },
+      "contactSelect": {
+        "title": "Contato",
+        "description": "Escolha uma empresa existente ou crie uma nova.",
+        "newContact": "Nova empresa",
+        "companies": "Empresas",
+        "companyName": "Nome da empresa",
+        "companyId": "CNPJ / ID fiscal",
+        "site": "Site",
+        "address": "Endereço",
+        "save": "Salvar contato"
+      },
+      "sample": {
+        "category": "Vendas",
+        "description": "Nova transação",
+        "paymentMode": "Indefinido",
+        "singlePayment": "Único",
+        "monthlyPayment": "Mensal"
+      },
+      "categorySelect": {
+        "title": "Categoria",
+        "description": "Escolha uma categoria existente ou crie uma nova para {type}.",
+        "newCategory": "Nova categoria",
+        "categories": "Categorias",
+        "select": "Selecionar categoria"
+      }
+    },
+    "financeBreakdown": {
+      "viewAll": "Ver tudo",
+      "overviewTable": {
+        "dueDate": "Vencimento",
+        "description": "Descrição",
+        "amount": "Valor",
+        "paid": "Pago",
+        "edit": "Editar",
+        "markAsPaid": "Marcar {id} como pago",
+        "editRecord": "Editar {id}",
+        "empty": "Nenhuma transação ainda."
+      },
+      "recentIncomeTitle": "Recebimentos recentes",
+      "recentIncomeDescription": "Acompanhe recebíveis e lançamentos já pagos dos clientes ativos.",
+      "recentExpenseTitle": "Despesas recentes",
+      "recentExpenseDescription": "Acompanhe contas a pagar e lançamentos de despesas já pagos.",
+      "income": {
+        "title": "Recebimentos por origem",
+        "primary": "Receita principal · 68%",
+        "secondary": "Projetos avulsos · 21%",
+        "tertiary": "Dividendos e juros · 11%"
+      },
+      "expense": {
+        "title": "Despesas por origem",
+        "items": {
+          "software": "Software",
+          "payroll": "Folha",
+          "operations": "Operações"
+        }
+      }
+    },
+    "financeTransactionsOverview": {
+      "title": "Visão de despesas",
+      "periods": {
+        "weekly": "Semanal",
+        "monthly": "Mensal",
+        "yearly": "Anual"
+      },
+      "chart": {
+        "expense": "Despesa",
+        "income": "Receita"
+      }
+    },
+    "financeDemo": {
+      "title": "Dados locais de demonstração",
+      "description": "Ferramentas temporárias para carregar, resetar ou limpar os dados financeiros locais.",
+      "mode": "Modo demo",
+      "modeDescription": "Dados fictícios ficam salvos neste navegador e podem ser resetados a qualquer momento.",
+      "load": "Carregar demo",
+      "reset": "Resetar demo",
+      "clear": "Limpar dados locais"
+    },
+    "financeCategories": {
+      "title": "Categorias",
+      "subtitle": "Organize categorias de receitas e despesas usadas nas transações.",
+      "kpi": {
+        "totalTitle": "Categorias cadastradas",
+        "totalDescription": "Disponíveis nas transações.",
+        "incomesTitle": "Recebimentos",
+        "incomesDescription": "Categorias de entrada",
+        "incomeBadge": "Entrada",
+        "expensesTitle": "Despesas",
+        "expensesDescription": "Categorias de saída",
+        "expenseBadge": "Saída",
+        "usageTitle": "Uso",
+        "usageValue": "Transações",
+        "usageDescription": "Dropdowns e filtros."
+      },
+      "types": {
+        "income": {
+          "label": "Recebimentos",
+          "description": "Vendas e entradas de caixa."
+        },
+        "fixed": {
+          "label": "Despesas fixas",
+          "description": "Custos recorrentes mensais."
+        },
+        "variable": {
+          "label": "Despesas variáveis",
+          "description": "Custos que variam de mês para mês."
+        },
+        "people": {
+          "label": "Pessoas",
+          "description": "Equipe, sócios, prestadores e folha."
+        },
+        "taxes": {
+          "label": "Impostos",
+          "description": "Tributos, guias e obrigações."
+        },
+        "transfer": {
+          "label": "Transferências",
+          "description": "Movimentações entre contas."
+        }
+      },
+      "count": {
+        "one": "categoria",
+        "other": "categorias"
+      },
+      "newCategoryAria": "Nova categoria para {type}",
+      "newCategoryPlaceholder": "Nova categoria",
+      "createCategory": "Criar categoria",
+      "usage": {
+        "count": "{count, plural, one {# transação} other {# transações}}"
+      },
+      "empty": "Nenhuma categoria criada ainda."
+    },
+    "financeContacts": {
+      "suppliers": {
+        "title": "Fornecedores",
+        "subtitle": "Gerencie as empresas que recebem pagamentos do seu negócio.",
+        "newTitle": "Novo fornecedor",
+        "newDescription": "Cadastre uma empresa para usar em despesas, impostos, pessoas e transferências.",
+        "listTitle": "Empresas fornecedoras",
+        "listDescription": "Empresas vinculadas às transações de saída.",
+        "empty": "Nenhum fornecedor criado ainda."
+      },
+      "customers": {
+        "title": "Clientes",
+        "subtitle": "Gerencie as empresas que pagam o seu negócio.",
+        "newTitle": "Novo cliente",
+        "newDescription": "Cadastre uma empresa para usar em transações de recebimento.",
+        "listTitle": "Empresas clientes",
+        "listDescription": "Empresas vinculadas às transações de entrada.",
+        "empty": "Nenhum cliente criado ainda."
+      },
+      "kpi": {
+        "total": "Empresas",
+        "totalDescription": "Disponíveis nas transações.",
+        "taxIds": "Documentos fiscais",
+        "taxIdsDescription": "Com CNPJ ou ID fiscal.",
+        "websites": "Sites",
+        "websitesDescription": "Com site informado.",
+        "addresses": "Endereços",
+        "addressesDescription": "Com endereço informado.",
+        "usage": "Em uso",
+        "usageDescription": "Vinculadas a transações."
+      },
+      "dialog": {
+        "title": "Cadastrar empresa",
+        "description": "Complete os dados da empresa. Apenas o nome é obrigatório.",
+        "companyName": "Nome da empresa",
+        "taxId": "CNPJ / ID fiscal",
+        "website": "Site",
+        "address": "Endereço",
+        "save": "Salvar empresa"
+      },
+      "list": {
+        "count": "{count, plural, one {# empresa} other {# empresas}}",
+        "company": "Empresa",
+        "noTaxId": "CNPJ não informado",
+        "noAddress": "Endereço não informado",
+        "noWebsite": "Site não informado",
+        "transactions": "{count, plural, one {# transação} other {# transações}}",
+        "noTransactions": "Sem transações"
+      },
+      "newCompanyLabel": "Nome da nova empresa",
+      "newCompanyPlaceholder": "Nova empresa",
+      "addCompany": "Cadastrar empresa"
+    },
+    "financeOperationalPages": {
+      "incomes": {
+        "title": "Recebimentos",
+        "subtitle": "Acompanhe recebimentos, pagamentos de clientes e entradas previstas.",
+        "upcomingTitle": "Próximos recebimentos",
+        "upcomingSummary": "{count, plural, one {# recebimento previsto} other {# recebimentos previstos}} este mês",
+        "upcomingHighlight": "Próximo recebimento: ",
+        "upcomingEmpty": "Nenhum recebimento próximo."
+      },
+      "expenses": {
+        "title": "Despesas",
+        "subtitle": "Acompanhe contas, fornecedores, impostos, pessoas e transferências.",
+        "upcomingTitle": "Próximas despesas",
+        "upcomingSummary": "{count, plural, one {# conta próxima} other {# contas próximas}} este mês",
+        "upcomingHighlight": "Próxima conta: ",
+        "upcomingEmpty": "Nenhuma despesa próxima."
+      }
+    }
+  },
+  "Preferences": {
+    "title": "Preferências",
+    "description": "Personalize as preferências de layout do seu painel.",
+    "themePreset": "Tema visual",
+    "themePresetPlaceholder": "Selecionar tema",
+    "themePresetDefault": "Padrão",
+    "themePresetBrutalist": "Brutalista",
+    "themePresetSoftPop": "Soft Pop",
+    "themePresetTangerine": "Tangerina",
+    "fonts": "Fontes",
+    "fontsPlaceholder": "Selecionar fonte",
+    "themeMode": "Modo do tema",
+    "themeModeLight": "Claro",
+    "themeModeDark": "Escuro",
+    "themeModeSystem": "Sistema",
+    "language": "Idioma",
+    "languageEnglish": "Inglês",
+    "languagePortuguese": "Português",
+    "navbarPosition": "Posição da navbar",
+    "navbarPositionCenter": "Centro",
+    "navbarPositionRight": "Direita",
+    "navbarStyle": "Estilo da navbar",
+    "navbarStyleInset": "Embutida",
+    "navbarStyleNavbar": "Navbar",
+    "navbarStyleFloating": "Flutuante",
+    "avatarLocation": "Local do avatar",
+    "avatarLocationNavbar": "Navbar",
+    "avatarLocationSidebar": "Sidebar",
+    "sidebarStyle": "Estilo da sidebar",
+    "sidebarStyleInset": "Embutida",
+    "sidebarStyleSidebar": "Sidebar",
+    "sidebarStyleFloating": "Flutuante",
+    "sidebarCollapseMode": "Modo de recolhimento",
+    "sidebarCollapseModeIcon": "Ícone",
+    "sidebarCollapseModeOffCanvas": "Fora da tela",
+    "restoreDefaults": "Restaurar padrão"
+  },
+  "Search": {
+    "button": "Buscar",
+    "placeholder": "Buscar páginas, pessoas e mais…",
+    "empty": "Nenhum resultado encontrado."
+  },
+  "AccountMenu": {
+    "account": "Conta",
+    "billing": "Cobrança",
+    "notifications": "Notificações",
+    "logOut": "Sair"
+  },
+  "QuickCreate": {
+    "trigger": "Criação rápida",
+    "actions": {
+      "newExpense": "Nova despesa",
+      "newIncome": "Novo recebimento",
+      "newSupplier": "Novo fornecedor",
+      "newCustomer": "Novo cliente",
+      "save": "Salvar"
+    },
+    "expenseDialog": {
+      "title": "Nova despesa",
+      "description": "Crie uma despesa simples para o fluxo de caixa atual.",
+      "success": "Despesa criada"
+    },
+    "incomeDialog": {
+      "title": "Novo recebimento",
+      "description": "Crie um recebimento simples para o fluxo de caixa atual.",
+      "success": "Recebimento criado"
+    },
+    "supplierDialog": {
+      "title": "Novo fornecedor",
+      "description": "Cadastre uma empresa para usar nos lançamentos de despesas.",
+      "success": "Fornecedor criado"
+    },
+    "customerDialog": {
+      "title": "Novo cliente",
+      "description": "Cadastre uma empresa para usar nos lançamentos de recebimentos.",
+      "success": "Cliente criado"
+    },
+    "fields": {
+      "address": "Endereço",
+      "amount": "Valor",
+      "companyName": "Nome da empresa",
+      "customer": "Cliente",
+      "description": "Descrição",
+      "dueDate": "Vencimento",
+      "notes": "Observações",
+      "supplier": "Fornecedor",
+      "taxId": "CNPJ / ID fiscal",
+      "website": "Site"
+    },
+    "placeholders": {
+      "companyName": "Nome da empresa",
+      "customer": "Nome do cliente",
+      "description": "Ex: assinatura de software",
+      "supplier": "Nome do fornecedor"
+    },
+    "defaults": {
+      "expenseCategory": "Despesas variáveis",
+      "incomeCategory": "Vendas",
+      "singlePayment": "À vista"
+    }
+  },
+  "Navigation": {
+    "finance": "Financeiro",
+    "overview": "Visão Geral",
+    "transactions": "Transações",
+    "payables": "A Pagar",
+    "receivables": "A Receber",
+    "expenses": "Despesas",
+    "incomes": "Recebimentos",
+    "manage": "Gerenciar",
+    "contacts": "Contatos",
+    "customers": "Clientes",
+    "suppliers": "Fornecedores",
+    "categories": "Categorias",
+    "reports": "Relatórios",
+    "settings": "Configurações",
+    "quickCreate": "Criação rápida",
+    "soon": "Em breve",
+    "expandSidebar": "Expandir sidebar",
+    "other": "Outro"
+  }
+}

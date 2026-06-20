@@ -1,0 +1,565 @@
+{
+  "Dashboard": {
+    "title": "Dashboard",
+    "greeting": "Good morning, {name}.",
+    "subtitle": "Here is your company's financial summary.",
+    "updated": "Updated {time} ago",
+    "settings": "Settings",
+    "export": "Export",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "accounts": "Accounts",
+      "transactions": "Transactions"
+    },
+    "accountsNotice": "Account management is coming soon. These account widgets currently use demo data while Papero's local account model is being prepared.",
+    "kpis": {
+      "netWorth": "Current balance",
+      "netWorthValue": "R$ 28.420,00",
+      "netWorthDesc": "+ R$ 4.200 vs last month",
+      "netWorthBadge": "+8.4%",
+      "availableCash": "Available cash",
+      "availableCashValue": "R$ 12.800,00",
+      "availableCashDesc": "R$ 410 above your 30-day average",
+      "availableCashBadge": "+3.2%",
+      "monthlySpend": "Monthly outflow",
+      "monthlySpendValue": "R$ 2.140,00",
+      "monthlySpendDesc": "R$ 124 more than last month",
+      "monthlySpendBadge": "+6.1%",
+      "savingsRate": "Monthly result",
+      "savingsRateValue": "R$ 7.420,00",
+      "savingsRateDesc": "28% margin this month",
+      "savingsRateBadge": "+2.4%"
+    },
+    "upcoming": {
+      "title": "Upcoming Bills",
+      "total": "R$ 1.245",
+      "totalCents": ",00",
+      "description1": "You have ",
+      "description2": "3",
+      "description3": " bills due this month",
+      "autopay1": "Autopay will process ",
+      "autopay2": "R$ 145,00",
+      "autopay3": " today",
+      "empty": "No upcoming bills.",
+      "items": {
+        "claude": "Claude Pro Subscription · R$ 110,00 · due Jun 20 · Software",
+        "resend": "Resend Pro Team · R$ 145,00 · due Jun 22 · Email/API",
+        "linear": "Linear Plus Plan · R$ 320,00 · due Jun 28 · Management"
+      }
+    },
+    "cashflow": {
+      "title": "Monthly Cash Flow",
+      "currentResult": "Current projected result: R$ 7.420",
+      "status": "Status: Projected",
+      "inflow": "Inflows: R$ 18.900",
+      "outflow": "Outflows: R$ 11.480",
+      "forecast": "Forecast: R$ 24.300",
+      "finalBalance": "Final balance: R$ 32.620"
+    },
+    "shortcuts": {
+      "title": "Quick Actions",
+      "newIncome": "New income",
+      "newExpense": "New expense",
+      "newAccount": "New account",
+      "importStatement": "Import statement"
+    },
+    "health": {
+      "title": "Cash Health",
+      "status": "78% healthy",
+      "chartLabel": "Healthy",
+      "inflows": "Inflows",
+      "outflows": "Outflows",
+      "balance": "Balance"
+    },
+    "calendar": {
+      "title": "Financial Calendar",
+      "month": "June 2026",
+      "legendIncomes": "Incomes",
+      "legendExpenses": "Expenses",
+      "legendTransfers": "Transfers",
+      "legendDueDates": "Due dates"
+    },
+    "accountsActivity": {
+      "title": "Account Activity Flow",
+      "chartLabel": "Activity",
+      "rangePlaceholder": "Select range",
+      "ranges": {
+        "last30Days": "Last 30 days",
+        "lastQuarter": "Last quarter",
+        "last12Months": "Last 12 months"
+      },
+      "totalUnit": "entries",
+      "totalDescription": "Total account entries reviewed over the last 12 months.",
+      "progressTitle": "Reconciled Entries",
+      "progressUnit": "entries",
+      "progressDescription": "{progress}% of account activity has already been reconciled.",
+      "progressCurrentLabel": "reconciled",
+      "progressTotalLabel": "reviewed"
+    },
+    "financeTransactions": {
+      "title": "Transactions",
+      "subtitle": "Track income, expenses, and monthly projections.",
+      "kpi": {
+        "account": "Main account",
+        "accountSubtitle": "Current balance",
+        "projected": "Projected result",
+        "projectedSubtitle": "{month}",
+        "income": "Incomes",
+        "incomeSubtitle": "Received this month",
+        "incomeProjected": "{amount} projected",
+        "incomeProgress": "Received",
+        "expense": "Expenses",
+        "expenseSubtitle": "Paid this month",
+        "expenseProjected": "{amount} projected",
+        "expenseProgress": "Paid",
+        "projectedBadge": "Projected",
+        "incomeBadge": "Entry",
+        "expenseBadge": "Exit",
+        "flow": "Flow share"
+      },
+      "table": {
+        "title": "Month transactions",
+        "count": "{count, plural, one {# transaction} other {# transactions}}",
+        "export": "Export transactions",
+        "more": "More actions",
+        "previous": "Previous month",
+        "next": "Next month",
+        "month": "Jun/2026",
+        "sort": "Sort transactions",
+        "add": "New transaction",
+        "dueDate": "Due date",
+        "description": "Description",
+        "counterpart": "Suppliers",
+        "counterpartIncome": "Customers",
+        "category": "Category",
+        "amount": "Amount",
+        "paymentMode": "Payment Mode",
+        "paymentForm": "Payment Form",
+        "paid": "Paid?",
+        "actions": "Edit",
+        "selectTransaction": "Select {description}",
+        "markAsPaid": "Mark {description} as paid",
+        "empty": "No transactions in this category.",
+        "selectAll": "Select all transactions"
+      },
+      "kinds": {
+        "income": "Incomes",
+        "fixed": "Fixed expenses",
+        "variable": "Variable expenses",
+        "people": "People",
+        "taxes": "Taxes",
+        "transfer": "Transfers"
+      },
+      "paymentTime": {
+        "cash": "Cash",
+        "installment": "Installment",
+        "recurring": "Recurring",
+        "placeholder": "Payment time"
+      },
+      "paymentForm": {
+        "automatic": "Automatic",
+        "boleto": "Boleto",
+        "bankDeposit": "Bank Deposit",
+        "bankTransfer": "Bank Transfer",
+        "digitalWallet": "Digital Wallet",
+        "creditCard": "Credit Card",
+        "debitCard": "Debit Card",
+        "crypto": "Crypto",
+        "pix": "Pix",
+        "stripe": "Stripe",
+        "paypal": "PayPal",
+        "zelle": "Zelle",
+        "other": "Other"
+      },
+      "actions": {
+        "menu": "Actions for {description}",
+        "incomeDetails": "Income details",
+        "expenseDetails": "Expense details",
+        "amountDetails": "Amount details",
+        "attachments": "Attachments",
+        "duplicate": "Duplicate",
+        "configureRecurrence": "Configure recurrence",
+        "configureInstallments": "Configure installments",
+        "delete": "Delete"
+      },
+      "drawer": {
+        "fields": {
+          "dueDate": "Due date",
+          "amount": "Amount",
+          "competence": "Competence",
+          "description": "Description",
+          "document": "Document",
+          "tags": "Tags",
+          "additionalInfo": "Additional information"
+        },
+        "placeholders": {
+          "document": "Invoice, receipt, or contract",
+          "tags": "Example: recurring, marketing",
+          "additionalInfo": "Internal notes about this transaction."
+        },
+        "aria": {
+          "editDueDate": "Change due date for {description}",
+          "editAmount": "Change amount for {description}",
+          "editCompetence": "Change competence for {description}",
+          "editDescription": "Edit description for {id}"
+        }
+      },
+      "amountDetails": {
+        "title": "Amount details",
+        "description": "Detailed amount composition will be configured in the next pass.",
+        "body": "Amount breakdown, discounts, fees and allocation rules will live here."
+      },
+      "attachments": {
+        "title": "Attachments",
+        "description": "Upload receipts, invoices or supporting documents for this transaction.",
+        "body": "Upload receipts or documents",
+        "hint": "PDF, PNG or JPG files"
+      },
+      "installmentDialog": {
+        "title": "Installment plan",
+        "description": "Split the entry into monthly installments and track each due date.",
+        "totalAmount": "Total amount",
+        "installments": "Number of installments",
+        "frequency": "Frequency",
+        "monthly": "Monthly",
+        "installment": "Installment",
+        "dueDate": "Due date",
+        "installmentAmount": "Installment amount",
+        "paid": "Paid?",
+        "save": "Save"
+      },
+      "recurrenceDialog": {
+        "title": "Set up recurrence",
+        "description": "Create monthly entries for recurring income or expenses.",
+        "months": "Number of months",
+        "frequency": "Frequency",
+        "monthly": "Monthly",
+        "summary": "Will create {count} monthly transactions of {amount}.",
+        "create": "Create transactions"
+      },
+      "contactSelect": {
+        "title": "Contact",
+        "description": "Choose an existing company or add a new one.",
+        "newContact": "New company",
+        "companies": "Companies",
+        "companyName": "Company name",
+        "companyId": "Tax ID",
+        "site": "Website",
+        "address": "Address",
+        "save": "Save contact"
+      },
+      "sample": {
+        "category": "Sales",
+        "description": "New transaction",
+        "paymentMode": "Unspecified",
+        "singlePayment": "One-off",
+        "monthlyPayment": "Monthly"
+      },
+      "categorySelect": {
+        "title": "Category",
+        "description": "Choose an existing category or create a new one for {type}.",
+        "newCategory": "New category",
+        "categories": "Categories",
+        "select": "Select category"
+      }
+    },
+    "financeBreakdown": {
+      "viewAll": "View all",
+      "overviewTable": {
+        "dueDate": "Due date",
+        "description": "Description",
+        "amount": "Amount",
+        "paid": "Paid",
+        "edit": "Edit",
+        "markAsPaid": "Mark {id} as paid",
+        "editRecord": "Edit {id}",
+        "empty": "No transactions yet."
+      },
+      "recentIncomeTitle": "Recent receipts",
+      "recentIncomeDescription": "Track receivables and customer entries that are already paid.",
+      "recentExpenseTitle": "Recent expenses",
+      "recentExpenseDescription": "Track bills payable and expense entries that are already paid.",
+      "income": {
+        "title": "Income by source",
+        "primary": "Primary revenue · 68%",
+        "secondary": "One-off projects · 21%",
+        "tertiary": "Dividends and interest · 11%"
+      },
+      "expense": {
+        "title": "Expenses by source",
+        "items": {
+          "software": "Software",
+          "payroll": "Payroll",
+          "operations": "Operations"
+        }
+      }
+    },
+    "financeTransactionsOverview": {
+      "title": "Expense overview",
+      "periods": {
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      },
+      "chart": {
+        "expense": "Expense",
+        "income": "Income"
+      }
+    },
+    "financeDemo": {
+      "title": "Local demo data",
+      "description": "Temporary developer tools for loading, resetting, or clearing local finance data.",
+      "mode": "Demo mode",
+      "modeDescription": "Fictional data is stored in this browser and can be reset anytime.",
+      "load": "Load demo data",
+      "reset": "Reset demo data",
+      "clear": "Clear local data"
+    },
+    "financeCategories": {
+      "title": "Categories",
+      "subtitle": "Organize income and expense categories used in transactions.",
+      "kpi": {
+        "totalTitle": "Registered categories",
+        "totalDescription": "Available in transactions.",
+        "incomesTitle": "Receipts",
+        "incomesDescription": "Income categories",
+        "incomeBadge": "Entry",
+        "expensesTitle": "Expenses",
+        "expensesDescription": "Expense categories",
+        "expenseBadge": "Exit",
+        "usageTitle": "Usage",
+        "usageValue": "Transactions",
+        "usageDescription": "Dropdowns and filters."
+      },
+      "types": {
+        "income": {
+          "label": "Receipts",
+          "description": "Sales and incoming cash."
+        },
+        "fixed": {
+          "label": "Fixed expenses",
+          "description": "Recurring monthly costs."
+        },
+        "variable": {
+          "label": "Variable expenses",
+          "description": "Costs that vary from month to month."
+        },
+        "people": {
+          "label": "People",
+          "description": "Team, partners, contractors and payroll."
+        },
+        "taxes": {
+          "label": "Taxes",
+          "description": "Taxes, forms, and obligations."
+        },
+        "transfer": {
+          "label": "Transfers",
+          "description": "Cash movements between accounts."
+        }
+      },
+      "count": {
+        "one": "category",
+        "other": "categories"
+      },
+      "newCategoryAria": "New category for {type}",
+      "newCategoryPlaceholder": "New category",
+      "createCategory": "Create category",
+      "usage": {
+        "count": "{count, plural, one {# transaction} other {# transactions}}"
+      },
+      "empty": "No category created yet."
+    },
+    "financeContacts": {
+      "suppliers": {
+        "title": "Suppliers",
+        "subtitle": "Manage companies that receive payments from your business.",
+        "newTitle": "New supplier",
+        "newDescription": "Add a company to use in expenses, taxes, people costs, and transfers.",
+        "listTitle": "Supplier companies",
+        "listDescription": "Companies connected to outgoing transactions.",
+        "empty": "No suppliers created yet."
+      },
+      "customers": {
+        "title": "Customers",
+        "subtitle": "Manage companies that pay your business.",
+        "newTitle": "New customer",
+        "newDescription": "Add a company to use in receipt transactions.",
+        "listTitle": "Customer companies",
+        "listDescription": "Companies connected to incoming transactions.",
+        "empty": "No customers created yet."
+      },
+      "kpi": {
+        "total": "Companies",
+        "totalDescription": "Available in transactions.",
+        "taxIds": "Tax IDs",
+        "taxIdsDescription": "With tax ID.",
+        "websites": "Websites",
+        "websitesDescription": "With website added.",
+        "addresses": "Addresses",
+        "addressesDescription": "With address added.",
+        "usage": "In use",
+        "usageDescription": "Linked to transactions."
+      },
+      "dialog": {
+        "title": "Add company",
+        "description": "Complete the company details. Only the name is required.",
+        "companyName": "Company name",
+        "taxId": "Tax ID",
+        "website": "Website",
+        "address": "Address",
+        "save": "Save company"
+      },
+      "list": {
+        "count": "{count, plural, one {# company} other {# companies}}",
+        "company": "Company",
+        "noTaxId": "No tax ID",
+        "noAddress": "No address",
+        "noWebsite": "No website",
+        "transactions": "{count, plural, one {# transaction} other {# transactions}}",
+        "noTransactions": "No transactions"
+      },
+      "newCompanyLabel": "New company name",
+      "newCompanyPlaceholder": "New company",
+      "addCompany": "Add company"
+    },
+    "financeOperationalPages": {
+      "incomes": {
+        "title": "Incomes",
+        "subtitle": "Track receipts, customer payments, and expected incoming cash.",
+        "upcomingTitle": "Upcoming incomes",
+        "upcomingSummary": "{count, plural, one {# expected receipt} other {# expected receipts}} this month",
+        "upcomingHighlight": "Next expected receipt: ",
+        "upcomingEmpty": "No upcoming incomes."
+      },
+      "expenses": {
+        "title": "Expenses",
+        "subtitle": "Track bills, supplier payments, taxes, people costs, and transfers.",
+        "upcomingTitle": "Upcoming expenses",
+        "upcomingSummary": "{count, plural, one {# upcoming bill} other {# upcoming bills}} this month",
+        "upcomingHighlight": "Next bill: ",
+        "upcomingEmpty": "No upcoming expenses."
+      }
+    }
+  },
+  "Preferences": {
+    "title": "Preferences",
+    "description": "Customize your dashboard layout preferences.",
+    "themePreset": "Theme Preset",
+    "themePresetPlaceholder": "Select theme",
+    "themePresetDefault": "Default",
+    "themePresetBrutalist": "Brutalist",
+    "themePresetSoftPop": "Soft Pop",
+    "themePresetTangerine": "Tangerine",
+    "fonts": "Fonts",
+    "fontsPlaceholder": "Select font",
+    "themeMode": "Theme Mode",
+    "themeModeLight": "Light",
+    "themeModeDark": "Dark",
+    "themeModeSystem": "System",
+    "language": "Language",
+    "languageEnglish": "English",
+    "languagePortuguese": "Portuguese",
+    "navbarPosition": "Navbar Position",
+    "navbarPositionCenter": "Center",
+    "navbarPositionRight": "Right",
+    "navbarStyle": "Navbar Style",
+    "navbarStyleInset": "Inset",
+    "navbarStyleNavbar": "Navbar",
+    "navbarStyleFloating": "Floating",
+    "avatarLocation": "Avatar Location",
+    "avatarLocationNavbar": "Navbar",
+    "avatarLocationSidebar": "Sidebar",
+    "sidebarStyle": "Sidebar Style",
+    "sidebarStyleInset": "Inset",
+    "sidebarStyleSidebar": "Sidebar",
+    "sidebarStyleFloating": "Floating",
+    "sidebarCollapseMode": "Sidebar Collapse Mode",
+    "sidebarCollapseModeIcon": "Icon",
+    "sidebarCollapseModeOffCanvas": "OffCanvas",
+    "restoreDefaults": "Restore Defaults"
+  },
+  "Search": {
+    "button": "Search",
+    "placeholder": "Search pages, people, and more…",
+    "empty": "No results found."
+  },
+  "AccountMenu": {
+    "account": "Account",
+    "billing": "Billing",
+    "notifications": "Notifications",
+    "logOut": "Log out"
+  },
+  "QuickCreate": {
+    "trigger": "Quick Create",
+    "actions": {
+      "newExpense": "New Expense",
+      "newIncome": "New Income",
+      "newSupplier": "New Supplier",
+      "newCustomer": "New Customer",
+      "save": "Save"
+    },
+    "expenseDialog": {
+      "title": "New expense",
+      "description": "Create a simple expense entry for the current cash flow.",
+      "success": "Expense created"
+    },
+    "incomeDialog": {
+      "title": "New income",
+      "description": "Create a simple income entry for the current cash flow.",
+      "success": "Income created"
+    },
+    "supplierDialog": {
+      "title": "New supplier",
+      "description": "Register a company that Papero can use in expense entries.",
+      "success": "Supplier created"
+    },
+    "customerDialog": {
+      "title": "New customer",
+      "description": "Register a company that Papero can use in income entries.",
+      "success": "Customer created"
+    },
+    "fields": {
+      "address": "Address",
+      "amount": "Amount",
+      "companyName": "Company name",
+      "customer": "Customer",
+      "description": "Description",
+      "dueDate": "Due date",
+      "notes": "Notes",
+      "supplier": "Supplier",
+      "taxId": "Tax ID",
+      "website": "Website"
+    },
+    "placeholders": {
+      "companyName": "Company name",
+      "customer": "Customer name",
+      "description": "Example: Software subscription",
+      "supplier": "Supplier name"
+    },
+    "defaults": {
+      "expenseCategory": "Variable expenses",
+      "incomeCategory": "Sales",
+      "singlePayment": "Cash"
+    }
+  },
+  "Navigation": {
+    "finance": "Finance",
+    "overview": "Overview",
+    "transactions": "Transactions",
+    "payables": "Payables",
+    "receivables": "Receivables",
+    "expenses": "Expenses",
+    "incomes": "Incomes",
+    "manage": "Manage",
+    "contacts": "Contacts",
+    "customers": "Customers",
+    "suppliers": "Suppliers",
+    "categories": "Categories",
+    "reports": "Reports",
+    "settings": "Settings",
+    "quickCreate": "Quick Create",
+    "soon": "Soon",
+    "expandSidebar": "Expand Sidebar",
+    "other": "Other"
+  }
+}

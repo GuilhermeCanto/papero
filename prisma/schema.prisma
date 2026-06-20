@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships CompanyMember[]
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  document  String?
+  currency  String   @default("BRL")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts     BankAccount[]
+  categories   Category[]
+  contacts     Contact[]
+  members      CompanyMember[]
+  transactions Transaction[]
+}
+
+model CompanyMember {
+  id        String      @id @default(cuid())
+  userId    String
+  companyId String
+  role      CompanyRole @default(MEMBER)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, companyId])
+  @@index([companyId])
+}
+
+model Category {
+  id          String       @id @default(cuid())
+  companyId   String
+  name        String
+  type        CategoryType
+  description String?
+  color       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([companyId, name, type])
+  @@index([companyId, type])
+}
+
+model Contact {
+  id        String      @id @default(cuid())
+  companyId String
+  type      ContactType
+  name      String
+  document  String?
+  address   String?
+  website   String?
+  email     String?
+  phone     String?
+  notes     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([companyId, type])
+  @@index([companyId, name])
+}
+
+model BankAccount {
+  id                  String   @id @default(cuid())
+  companyId           String
+  name                String
+  bankName            String?
+  initialBalanceCents Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([companyId])
+}
+
+model Transaction {
+  id              String          @id @default(cuid())
+  companyId       String
+  categoryId      String?
+  contactId       String?
+  bankAccountId   String?
+  kind            TransactionKind
+  description     String
+  amountCents     Int
+  date            DateTime
+  competenceDate  DateTime?
+  paid            Boolean         @default(false)
+  paymentTime     PaymentTime     @default(CASH)
+  paymentForm     PaymentForm?
+  documentNumber  String?
+  tags            String[]
+  notes           String?
+  installmentGroupId String?
+  recurrenceGroupId  String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id], onDelete: SetNull)
+  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  company     Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contact     Contact?     @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, date])
+  @@index([companyId, kind])
+  @@index([companyId, paid])
+  @@index([companyId, contactId])
+  @@index([companyId, categoryId])
+}
+
+enum CompanyRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum CategoryType {
+  INCOME
+  FIXED_EXPENSE
+  VARIABLE_EXPENSE
+  PEOPLE
+  TAXES
+  TRANSFER
+}
+
+enum ContactType {
+  CUSTOMER
+  SUPPLIER
+}
+
+enum TransactionKind {
+  INCOME
+  FIXED
+  VARIABLE
+  PEOPLE
+  TAXES
+  TRANSFER
+}
+
+enum PaymentTime {
+  CASH
+  INSTALLMENT
+  RECURRING
+}
+
+enum PaymentForm {
+  AUTOMATIC
+  BOLETO
+  BANK_DEPOSIT
+  BANK_TRANSFER
+  DIGITAL_WALLET
+  CREDIT_CARD
+  DEBIT_CARD
+  CRYPTO
+  PIX
+  STRIPE
+  PAYPAL
+  ZELLE
+  OTHER
+}

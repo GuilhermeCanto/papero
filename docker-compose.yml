@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: papero-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: papero
+      POSTGRES_USER: papero
+      POSTGRES_PASSWORD: papero
+    ports:
+      - "5432:5432"
+    volumes:
+      - papero_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U papero -d papero"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  papero_postgres_data:

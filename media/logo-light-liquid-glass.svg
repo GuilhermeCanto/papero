@@ -1,0 +1,126 @@
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 766.08 876.9">
+  <title>Papero logo</title>
+  <!-- Generator: Adobe Illustrator 30.5.1, SVG Export Plug-In . SVG Version: 2.1.4 Build 3)  -->
+  <defs>
+    <style>
+      .st0 {
+        filter: url(#drop-shadow-1);
+      }
+
+      .st1 {
+        filter: url(#drop-shadow-3);
+      }
+
+      .st2 {
+        filter: url(#drop-shadow-2);
+      }
+
+      .st3 {
+        filter: url(#drop-shadow-5);
+      }
+
+      .st4 {
+        filter: url(#drop-shadow-4);
+      }
+
+      .st5 {
+        stroke: url(#linear-gradient);
+      }
+
+      .st5, .st6, .st7, .st8, .st9 {
+        fill: #f8f3f0;
+        stroke-miterlimit: 10;
+        stroke-width: 3px;
+      }
+
+      .st10 {
+        fill: #ed1c24;
+      }
+
+      .st6 {
+        stroke: url(#linear-gradient1);
+      }
+
+      .st7 {
+        stroke: url(#linear-gradient2);
+      }
+
+      .st8 {
+        stroke: url(#linear-gradient4);
+      }
+
+      .st9 {
+        stroke: url(#linear-gradient3);
+      }
+    </style>
+    <filter id="drop-shadow-1" x="311.52" y="305.7" width="127.92" height="571.2" filterUnits="userSpaceOnUse">
+      <feOffset dx="3" dy="3"/>
+      <feGaussianBlur result="blur" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".15"/>
+      <feComposite in2="blur" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient" x1="321.7" y1="350.87" x2="403.74" y2="350.87" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity=".05"/>
+      <stop offset=".2" stop-color="#fff"/>
+      <stop offset=".8" stop-color="#fff"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".05"/>
+    </linearGradient>
+    <filter id="drop-shadow-2" x="156" y="436.26" width="127.92" height="440.64" filterUnits="userSpaceOnUse">
+      <feOffset dx="3" dy="3"/>
+      <feGaussianBlur result="blur1" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".15"/>
+      <feComposite in2="blur1" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient1" x1="218.09" y1="394.34" x2="300.13" y2="394.34" xlink:href="#linear-gradient"/>
+    <filter id="drop-shadow-3" x="0" y="567.06" width="128.16" height="308.88" filterUnits="userSpaceOnUse">
+      <feOffset dx="3" dy="3"/>
+      <feGaussianBlur result="blur2" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".15"/>
+      <feComposite in2="blur2" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient2" x1="114.35" y1="437.56" x2="196.39" y2="437.56" xlink:href="#linear-gradient"/>
+    <filter id="drop-shadow-4" x="0" y="44.58" width="766.08" height="530.64" filterUnits="userSpaceOnUse">
+      <feOffset dx="3" dy="3"/>
+      <feGaussianBlur result="blur3" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".15"/>
+      <feComposite in2="blur3" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient3" x1="114.35" y1="163.49" x2="621.33" y2="163.49" xlink:href="#linear-gradient"/>
+    <filter id="drop-shadow-5" x="0" y="44.58" width="111.12" height="110.88" filterUnits="userSpaceOnUse">
+      <feOffset dx="3" dy="3"/>
+      <feGaussianBlur result="blur4" stdDeviation="1"/>
+      <feFlood flood-color="#000" flood-opacity=".15"/>
+      <feComposite in2="blur4" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <linearGradient id="linear-gradient4" x1="114.35" y1="23.75" x2="185.08" y2="23.75" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity=".05"/>
+      <stop offset=".2" stop-color="#fff"/>
+      <stop offset=".8" stop-color="#fff"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".05"/>
+    </linearGradient>
+  </defs>
+  <path class="st10" d="M18.66,3.81"/>
+  <path class="st10" d="M22.38,0"/>
+  <g>
+    <g class="st0">
+      <path class="st5" d="M313.09,398.32v458.21c0,7.02,5.69,12.71,12.71,12.71h93.27c7.02,0,12.71-5.69,12.71-12.71V320.06c0-10.8-12.61-16.68-20.88-9.74l-93.27,78.26c-2.88,2.42-4.54,5.98-4.54,9.74Z"/>
+    </g>
+    <g class="st2">
+      <path class="st6" d="M157.51,528.87v327.66c0,7.02,5.69,12.72,12.72,12.72h93.26c7.02,0,12.72-5.69,12.72-12.72v-405.91c0-10.8-12.62-16.68-20.89-9.74l-93.26,78.25c-2.88,2.42-4.54,5.98-4.54,9.74Z"/>
+    </g>
+    <g class="st1">
+      <path class="st7" d="M1.74,659.58v196.03c0,7.02,5.69,12.72,12.72,12.72h93.25c7.02,0,12.72-5.69,12.72-12.72v-274.28c0-10.8-12.62-16.69-20.89-9.74L6.28,649.84c-2.88,2.42-4.54,5.98-4.54,9.74Z"/>
+    </g>
+    <g class="st4">
+      <path class="st9" d="M506.79,46.23H73.93c-2.99,0-5.88,1.05-8.18,2.98L6.28,99.11c-2.88,2.42-4.54,5.98-4.54,9.74v403.13c0,10.8,12.62,16.69,20.89,9.74l93.25-78.25c2.88-2.42,4.54-5.98,4.54-9.74V177.64c0-7.02,5.69-12.72,12.72-12.72h373.64v-.02c78.94,0,142.94,64,142.94,142.94s-57.82,136.58-131.35,142.48c-6.57.53-11.59,6.07-11.59,12.66v91.9c0,7.49,6.45,13.33,13.91,12.67,133.3-11.87,237.81-123.84,237.81-260.23S646.65,51.27,506.79,46.23Z"/>
+    </g>
+    <g class="st3">
+      <path class="st8" d="M1.74,108.86v39.08h88.99c7.02,0,12.72-5.69,12.72-12.72V46.23h-29.51c-2.99,0-5.88,1.05-8.17,2.98L6.28,99.11c-2.88,2.42-4.54,5.98-4.54,9.74Z"/>
+    </g>
+  </g>
+</svg>

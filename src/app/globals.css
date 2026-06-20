@@ -1,0 +1,483 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Theme preset styles: these override CSS variables based on the selected data-theme-preset */
+@import "../styles/presets/brutalist.css";
+@import "../styles/presets/soft-pop.css";
+@import "../styles/presets/tangerine.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sans);
+}
+
+/* Default theme styles (used when no data-theme-preset is set or when 'default' is selected).
+These serve as the fallback; there is no separate default.css file. */
+:root {
+  --radius: 0.875rem;
+  --card: oklch(0.995 0.002 255 / 40%);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(0.995 0.002 255 / 96%);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.705 0.213 47.604);
+  --primary-hover: oklch(0.646 0.222 41.116);
+  --primary-foreground: oklch(0.99 0.003 75);
+  --secondary: oklch(0.965 0.006 255 / 74%);
+  --secondary-foreground: oklch(0.24 0.018 255);
+  --muted: oklch(0.955 0.006 255 / 68%);
+  --muted-foreground: oklch(0.46 0.018 255);
+  --accent: oklch(0.98 0.016 73 / 86%);
+  --accent-foreground: oklch(0.42 0.12 45);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.78 0.012 255 / 38%);
+  --input: oklch(0.93 0.006 255 / 66%);
+  --ring: oklch(0.705 0.213 47.604);
+  --chart-1: oklch(0.62 0.11 168);
+  --chart-2: oklch(0.62 0.08 245);
+  --chart-3: oklch(0.705 0.213 47.604);
+  --chart-4: oklch(0.68 0.12 25);
+  --chart-5: oklch(0.48 0.05 255);
+  --sidebar: oklch(0.99 0.002 255 / 40%);
+  --sidebar-foreground: oklch(0.19 0.012 255);
+  --sidebar-primary: oklch(0.705 0.213 47.604);
+  --sidebar-primary-foreground: oklch(0.99 0.003 75);
+  --sidebar-accent: oklch(0.98 0.016 73 / 86%);
+  --sidebar-accent-foreground: oklch(0.42 0.12 45);
+  --sidebar-border: oklch(0.78 0.012 255 / 36%);
+  --sidebar-ring: oklch(0.58 0.05 245);
+
+  /* fonts */
+  --font-geist: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-inter: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-noto-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-nunito-sans: "Avenir Next", system-ui, sans-serif;
+  --font-figtree: "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-roboto: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-raleway: "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-dm-sans: "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-public-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-outfit: "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-geist-mono: "SFMono-Regular", "SF Mono", Consolas, monospace;
+  --font-geist-pixel-square: "SFMono-Regular", "SF Mono", Consolas, monospace;
+  --font-jetbrains-mono: "SFMono-Regular", "SF Mono", Consolas, monospace;
+  --font-noto-serif: Georgia, "Times New Roman", serif;
+  --font-roboto-slab: Rockwell, Georgia, serif;
+  --font-merriweather: Georgia, "Times New Roman", serif;
+  --font-lora: Georgia, "Times New Roman", serif;
+  --font-playfair-display: Didot, Georgia, serif;
+  --font-sans: var(--font-geist);
+  --font-mono: var(--font-geist-mono);
+  --background: oklch(0.975 0.006 255);
+  --foreground: oklch(0.16 0.012 255);
+  --glass-background: oklch(0.99 0.003 255 / 62%);
+  --glass-card: oklch(0.995 0.002 255 / 40%);
+  --glass-panel: oklch(0.985 0.004 255 / 42%);
+  --glass-muted: oklch(0.945 0.008 255 / 44%);
+  --glass-border: oklch(1 0 0 / 66%);
+  --glass-highlight: oklch(1 0 0 / 78%);
+  --glass-shadow: 0 1px 1px oklch(0.18 0.012 255 / 4%), 0 12px 40px oklch(0.18 0.012 255 / 8%);
+  --glass-shadow-strong: 0 1px 1px oklch(0.18 0.012 255 / 5%), 0 18px 56px oklch(0.18 0.012 255 / 12%);
+  --glass-blur: 18px;
+}
+
+.dark {
+  --background: oklch(0.17 0.012 255);
+  --foreground: oklch(0.965 0.003 255);
+  --card: oklch(0.255 0.014 255 / 40%);
+  --card-foreground: oklch(0.965 0.003 255);
+  --popover: oklch(0.22 0.014 255 / 95%);
+  --popover-foreground: oklch(0.965 0.003 255);
+  --primary: oklch(0.75 0.17 52);
+  --primary-hover: oklch(0.705 0.213 47.604);
+  --primary-foreground: oklch(0.16 0.018 45);
+  --secondary: oklch(0.3 0.014 255 / 68%);
+  --secondary-foreground: oklch(0.955 0.003 255);
+  --muted: oklch(0.3 0.014 255 / 58%);
+  --muted-foreground: oklch(0.72 0.008 255);
+  --accent: oklch(0.34 0.07 45 / 62%);
+  --accent-foreground: oklch(0.94 0.055 75);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.75 0.17 52);
+  --chart-1: oklch(0.72 0.1 168);
+  --chart-2: oklch(0.73 0.06 235);
+  --chart-3: oklch(0.75 0.17 52);
+  --chart-4: oklch(0.74 0.11 25);
+  --chart-5: oklch(0.62 0.035 255);
+  --sidebar: oklch(0.22 0.014 255 / 40%);
+  --sidebar-foreground: oklch(0.965 0.003 255);
+  --sidebar-primary: oklch(0.75 0.17 52);
+  --sidebar-primary-foreground: oklch(0.16 0.018 45);
+  --sidebar-accent: oklch(0.34 0.07 45 / 62%);
+  --sidebar-accent-foreground: oklch(0.94 0.055 75);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.7 0.035 235);
+  --glass-background: oklch(0.22 0.014 255 / 54%);
+  --glass-card: oklch(0.245 0.014 255 / 40%);
+  --glass-panel: oklch(0.21 0.014 255 / 40%);
+  --glass-muted: oklch(1 0 0 / 7%);
+  --glass-border: oklch(1 0 0 / 15%);
+  --glass-highlight: oklch(1 0 0 / 18%);
+  --glass-shadow: 0 1px 1px oklch(0 0 0 / 20%), 0 16px 48px oklch(0 0 0 / 24%);
+  --glass-shadow-strong: 0 1px 1px oklch(0 0 0 / 24%), 0 24px 64px oklch(0 0 0 / 34%);
+  --glass-blur: 20px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans), system-ui, sans-serif;
+  }
+
+  :root[data-theme-preset="default"] body {
+    background-image:
+      radial-gradient(circle at 8% 0%, oklch(0.93 0.045 58 / 28%), transparent 28rem),
+      radial-gradient(circle at 92% 8%, oklch(0.88 0.025 170 / 22%), transparent 26rem),
+      linear-gradient(180deg, oklch(0.99 0.003 255), var(--background) 42rem);
+    background-attachment: fixed;
+  }
+
+  .dark:root[data-theme-preset="default"] body {
+    background-image:
+      radial-gradient(circle at 10% 0%, oklch(0.38 0.075 48 / 30%), transparent 30rem),
+      radial-gradient(circle at 92% 8%, oklch(0.31 0.028 170 / 20%), transparent 28rem),
+      linear-gradient(180deg, oklch(0.19 0.014 255), var(--background) 42rem);
+  }
+
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  :root[data-theme-preset="default"] .glass-surface {
+    background: var(--glass-background);
+    border-color: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  :root[data-theme-preset="default"] .glass-panel {
+    background: var(--glass-panel);
+    border-color: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  :root[data-theme-preset="default"] .glass-card,
+  :root[data-theme-preset="default"] [data-slot="card"] {
+    background: var(--glass-card);
+    box-shadow:
+      0 0 0 1px var(--glass-border),
+      var(--glass-shadow);
+  }
+
+  :root[data-theme-preset="default"] .glass-sidebar,
+  :root[data-theme-preset="default"] [data-slot="sidebar-inner"] {
+    background: var(--sidebar);
+    box-shadow:
+      0 0 0 1px var(--sidebar-border),
+      var(--glass-shadow-strong);
+  }
+
+  :root[data-theme-preset="default"] [data-variant="inset"] [data-slot="sidebar-inner"] {
+    -webkit-backdrop-filter: none;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  :root[data-theme-preset="default"] .glass-nav {
+    background: var(--glass-background);
+    border-color: var(--glass-border);
+    box-shadow:
+      0 1px 0 var(--glass-border),
+      0 8px 28px oklch(0.18 0.012 255 / 6%);
+  }
+
+  :root[data-theme-preset="default"][data-navbar-style="inset"] .glass-nav {
+    -webkit-backdrop-filter: none;
+    background: transparent;
+    backdrop-filter: none;
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  :root[data-theme-preset="default"] .glass-border {
+    border-color: var(--glass-border);
+    box-shadow: inset 0 1px 0 var(--glass-highlight);
+  }
+
+  :root[data-theme-preset="default"] .glass-muted {
+    background: var(--glass-muted);
+    border-color: var(--glass-border);
+  }
+
+  :root[data-theme-preset="default"] [data-slot="dropdown-menu-content"],
+  :root[data-theme-preset="default"] [data-slot="popover-content"],
+  :root[data-theme-preset="default"] [data-slot="select-content"],
+  :root[data-theme-preset="default"] [data-slot="context-menu-content"],
+  :root[data-theme-preset="default"] [data-slot="context-menu-sub-content"],
+  :root[data-theme-preset="default"] [data-slot="hover-card-content"],
+  :root[data-theme-preset="default"] [data-slot="menubar-content"],
+  :root[data-theme-preset="default"] [data-slot="menubar-sub-content"] {
+    background: var(--popover);
+    box-shadow:
+      0 0 0 1px var(--glass-border),
+      var(--glass-shadow-strong);
+  }
+
+  :root[data-theme-preset="default"] .glass-shell {
+    background: transparent;
+  }
+
+  :root[data-theme-preset="default"] [data-slot="button"][data-variant="default"]:hover {
+    background: var(--primary-hover);
+  }
+
+  @supports (backdrop-filter: blur(1px)) {
+    :root[data-theme-preset="default"] .glass-surface,
+    :root[data-theme-preset="default"] .glass-panel,
+    :root[data-theme-preset="default"] .glass-card,
+    :root[data-theme-preset="default"] .glass-sidebar,
+    :root[data-theme-preset="default"] .glass-nav,
+    :root[data-theme-preset="default"] [data-slot="dropdown-menu-content"],
+    :root[data-theme-preset="default"] [data-slot="popover-content"],
+    :root[data-theme-preset="default"] [data-slot="select-content"],
+    :root[data-theme-preset="default"] [data-slot="context-menu-content"],
+    :root[data-theme-preset="default"] [data-slot="context-menu-sub-content"],
+    :root[data-theme-preset="default"] [data-slot="hover-card-content"],
+    :root[data-theme-preset="default"] [data-slot="menubar-content"],
+    :root[data-theme-preset="default"] [data-slot="menubar-sub-content"],
+    :root[data-theme-preset="default"] [data-slot="card"],
+    :root[data-theme-preset="default"] [data-slot="sidebar-inner"] {
+      backdrop-filter: blur(var(--glass-blur)) saturate(1.18);
+    }
+
+    :root[data-theme-preset="default"] [data-slot="dropdown-menu-content"],
+    :root[data-theme-preset="default"] [data-slot="popover-content"],
+    :root[data-theme-preset="default"] [data-slot="select-content"],
+    :root[data-theme-preset="default"] [data-slot="context-menu-content"],
+    :root[data-theme-preset="default"] [data-slot="context-menu-sub-content"],
+    :root[data-theme-preset="default"] [data-slot="hover-card-content"],
+    :root[data-theme-preset="default"] [data-slot="menubar-content"],
+    :root[data-theme-preset="default"] [data-slot="menubar-sub-content"] {
+      backdrop-filter: blur(calc(var(--glass-blur) + 8px)) saturate(1.24);
+    }
+  }
+
+  @supports (-webkit-backdrop-filter: blur(1px)) {
+    :root[data-theme-preset="default"] .glass-surface,
+    :root[data-theme-preset="default"] .glass-panel,
+    :root[data-theme-preset="default"] .glass-card,
+    :root[data-theme-preset="default"] .glass-sidebar,
+    :root[data-theme-preset="default"] .glass-nav,
+    :root[data-theme-preset="default"] [data-slot="dropdown-menu-content"],
+    :root[data-theme-preset="default"] [data-slot="popover-content"],
+    :root[data-theme-preset="default"] [data-slot="select-content"],
+    :root[data-theme-preset="default"] [data-slot="context-menu-content"],
+    :root[data-theme-preset="default"] [data-slot="context-menu-sub-content"],
+    :root[data-theme-preset="default"] [data-slot="hover-card-content"],
+    :root[data-theme-preset="default"] [data-slot="menubar-content"],
+    :root[data-theme-preset="default"] [data-slot="menubar-sub-content"],
+    :root[data-theme-preset="default"] [data-slot="card"],
+    :root[data-theme-preset="default"] [data-slot="sidebar-inner"] {
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.18);
+    }
+
+    :root[data-theme-preset="default"] [data-slot="dropdown-menu-content"],
+    :root[data-theme-preset="default"] [data-slot="popover-content"],
+    :root[data-theme-preset="default"] [data-slot="select-content"],
+    :root[data-theme-preset="default"] [data-slot="context-menu-content"],
+    :root[data-theme-preset="default"] [data-slot="context-menu-sub-content"],
+    :root[data-theme-preset="default"] [data-slot="hover-card-content"],
+    :root[data-theme-preset="default"] [data-slot="menubar-content"],
+    :root[data-theme-preset="default"] [data-slot="menubar-sub-content"] {
+      -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 8px)) saturate(1.24);
+    }
+  }
+
+  [data-theme-preset]:not([data-theme-preset="default"]) .shadow-2xs {
+    box-shadow: var(--shadow-2xs);
+  }
+
+  [data-theme-preset]:not([data-theme-preset="default"]) .shadow-xs {
+    box-shadow: var(--shadow-xs);
+  }
+
+  [data-theme-preset]:not([data-theme-preset="default"]) .shadow-sm {
+    box-shadow: var(--shadow-sm);
+  }
+
+  [data-theme-preset]:not([data-theme-preset="default"]) .shadow {
+    box-shadow: var(--shadow);
+  }
+
+  [data-theme-preset]:not([data-theme-preset="default"]) .shadow-md {
+    box-shadow: var(--shadow-md);
+  }
+
+  [data-theme-preset]:not([data-theme-preset="default"]) .shadow-lg {
+    box-shadow: var(--shadow-lg);
+  }
+
+  [data-theme-preset]:not([data-theme-preset="default"]) .shadow-xl {
+    box-shadow: var(--shadow-xl);
+  }
+
+  [data-theme-preset]:not([data-theme-preset="default"]) .shadow-2xl {
+    box-shadow: var(--shadow-2xl);
+  }
+
+  html[data-font="inter"] body {
+    --font-sans: var(--font-inter);
+  }
+  html[data-font="notoSans"] body {
+    --font-sans: var(--font-noto-sans);
+  }
+  html[data-font="nunitoSans"] body {
+    --font-sans: var(--font-nunito-sans);
+  }
+  html[data-font="figtree"] body {
+    --font-sans: var(--font-figtree);
+  }
+  html[data-font="roboto"] body {
+    --font-sans: var(--font-roboto);
+  }
+  html[data-font="geist"] body {
+    --font-sans: var(--font-geist);
+  }
+  html[data-font="raleway"] body {
+    --font-sans: var(--font-raleway);
+  }
+  html[data-font="dmSans"] body {
+    --font-sans: var(--font-dm-sans);
+  }
+  html[data-font="publicSans"] body {
+    --font-sans: var(--font-public-sans);
+  }
+  html[data-font="outfit"] body {
+    --font-sans: var(--font-outfit);
+  }
+  html[data-font="geistMono"] body {
+    --font-sans: var(--font-geist-mono);
+  }
+  html[data-font="geistPixelSquare"] body {
+    --font-sans: var(--font-geist-pixel-square);
+  }
+  html[data-font="jetBrainsMono"] body {
+    --font-sans: var(--font-jetbrains-mono);
+  }
+  html[data-font="notoSerif"] body {
+    --font-sans: var(--font-noto-serif);
+  }
+  html[data-font="robotoSlab"] body {
+    --font-sans: var(--font-roboto-slab);
+  }
+  html[data-font="merriweather"] body {
+    --font-sans: var(--font-merriweather);
+  }
+  html[data-font="lora"] body {
+    --font-sans: var(--font-lora);
+  }
+  html[data-font="playfairDisplay"] body {
+    --font-sans: var(--font-playfair-display);
+  }
+}
+
+html {
+  overscroll-behavior: none;
+}
+
+.disable-transitions * {
+  transition: none !important;
+}
+
+[data-print-root] {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: Letter;
+    margin: 0;
+  }
+
+  html,
+  body {
+    width: 8.5in !important;
+    height: 11in !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body > *:not([data-print-root]) {
+    display: none !important;
+  }
+
+  [data-print-root] {
+    display: block !important;
+    width: 8.5in !important;
+    height: 11in !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    background: white !important;
+  }
+
+  [data-print-root] [data-print-paper] {
+    width: 8.5in !important;
+    height: 11in !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+
+  [data-print-root] [data-print-paper],
+  [data-print-root] [data-print-paper] * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
