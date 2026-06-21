@@ -4,6 +4,7 @@ import { CircleHelp, ClipboardList, Database, File, Search, Settings } from "luc
 import { useShallow } from "zustand/react/shallow";
 
 import { Sidebar, SidebarContent, SidebarFooter } from "@/components/ui/sidebar";
+import { isDatabaseMode } from "@/config/papero-mode";
 import { rootUser } from "@/data/users";
 import type { AvatarLocation } from "@/lib/preferences/layout";
 import { cn } from "@/lib/utils";
@@ -82,7 +83,7 @@ export function AppSidebar({ avatarLocation: initialAvatarLocation = "navbar", .
       </SidebarContent>
       <SidebarFooter>
         {/* SidebarSupportCard is intentionally kept in the codebase for a future support/onboarding surface. */}
-        {resolvedAvatarLocation === "sidebar" ? <NavUser user={rootUser} /> : null}
+        {resolvedAvatarLocation === "sidebar" ? <NavUser useAuthSession={isDatabaseMode()} user={rootUser} /> : null}
       </SidebarFooter>
     </Sidebar>
   );

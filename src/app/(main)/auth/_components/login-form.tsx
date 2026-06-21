@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -9,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldContent, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -17,6 +20,7 @@ const formSchema = z.object({
 });
 
 export function LoginForm() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -26,10 +30,36 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = (_data: z.infer<typeof formSchema>) => {
-    toast("Demo login", {
-      description: "Authentication is not connected yet. Papero is currently running as a local-first MVP.",
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    const result = await authClient.signIn.email({
+      email: data.email,
+      password: data.password,
+      rememberMe: data.remember,
     });
+
+    if (result.error) {
+      toast.error("Login failed", {
+        description: result.error.message || "Check your credentials and database configuration.",
+      });
+      return;
+    }
+
+    const bootstrapResult = await fetch("/api/auth/bootstrap-company", {
+      method: "POST",
+    });
+
+    if (!bootstrapResult.ok) {
+      toast.error("Workspace setup failed", {
+        description: "You are signed in, but Papero could not prepare your workspace. Try again in a moment.",
+      });
+      return;
+    }
+
+    toast.success("Welcome back", {
+      description: "You are signed in to Papero.",
+    });
+    router.push("/dashboard/finance");
+    router.refresh();
   };
 
   return (
@@ -93,7 +123,7 @@ export function LoginForm() {
           )}
         />
       </FieldGroup>
-      <Button className="w-full" type="submit">
+      <Button className="w-full" disabled={form.formState.isSubmitting} type="submit">
         Login
       </Button>
     </form>

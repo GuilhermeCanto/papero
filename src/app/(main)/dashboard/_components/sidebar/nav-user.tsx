@@ -16,14 +16,40 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { getInitials } from "@/lib/utils";
 
+import { type DashboardUser, localDashboardUser, useDatabaseDashboardUser } from "./dashboard-auth-user";
+
 export function NavUser({
+  useAuthSession = false,
   user,
 }: {
+  readonly useAuthSession?: boolean;
   readonly user: {
     readonly name: string;
     readonly email: string;
     readonly avatar: string;
   };
+}) {
+  if (useAuthSession) {
+    return <DatabaseNavUser fallbackUser={{ ...localDashboardUser, ...user, id: "fallback-user", role: "owner" }} />;
+  }
+
+  return <NavUserMenu isAuthenticated={false} user={localDashboardUser} />;
+}
+
+function DatabaseNavUser({ fallbackUser }: { fallbackUser: DashboardUser }) {
+  const { isAuthenticated, signOut, user } = useDatabaseDashboardUser(fallbackUser);
+
+  return <NavUserMenu isAuthenticated={isAuthenticated} onSignOut={signOut} user={user} />;
+}
+
+function NavUserMenu({
+  isAuthenticated,
+  onSignOut,
+  user,
+}: {
+  isAuthenticated: boolean;
+  onSignOut?: () => void;
+  user: DashboardUser;
 }) {
   const { isMobile } = useSidebar();
   const accountMenu = useTranslations("AccountMenu");
@@ -84,7 +110,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem disabled={!isAuthenticated} onClick={onSignOut}>
               <LogOut />
               {accountMenu("logOut")}
             </DropdownMenuItem>
