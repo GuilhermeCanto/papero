@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -8,9 +10,11 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 const formSchema = z
   .object({
+    name: z.string().min(2, { message: "Name must be at least 2 characters." }),
     email: z.string().email({ message: "Please enter a valid email address." }),
     password: z.string().min(6, { message: "Password must be at least 6 characters." }),
     confirmPassword: z.string().min(6, { message: "Confirm Password must be at least 6 characters." }),
@@ -21,24 +25,70 @@ const formSchema = z
   });
 
 export function RegisterForm() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
       email: "",
       password: "",
       confirmPassword: "",
     },
   });
 
-  const onSubmit = (_data: z.infer<typeof formSchema>) => {
-    toast("Demo registration", {
-      description: "Account creation is not connected yet. You can still explore Papero with local demo data.",
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    const result = await authClient.signUp.email({
+      email: data.email,
+      name: data.name,
+      password: data.password,
     });
+
+    if (result.error) {
+      toast.error("Registration failed", {
+        description: result.error.message || "Check your details and database configuration.",
+      });
+      return;
+    }
+
+    const bootstrapResult = await fetch("/api/auth/bootstrap-company", {
+      method: "POST",
+    });
+
+    if (!bootstrapResult.ok) {
+      toast.error("Workspace setup failed", {
+        description: "Your account was created, but Papero could not prepare your workspace. Try signing in again.",
+      });
+      return;
+    }
+
+    toast.success("Account created", {
+      description: "Your Papero workspace is ready.",
+    });
+    router.push("/dashboard/finance");
+    router.refresh();
   };
 
   return (
     <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <FieldGroup className="gap-4">
+        <Controller
+          control={form.control}
+          name="name"
+          render={({ field, fieldState }) => (
+            <Field className="gap-1.5" data-invalid={fieldState.invalid}>
+              <FieldLabel htmlFor="register-name">Name</FieldLabel>
+              <Input
+                {...field}
+                id="register-name"
+                type="text"
+                placeholder="Ana Financeira"
+                autoComplete="name"
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
         <Controller
           control={form.control}
           name="email"
@@ -94,7 +144,7 @@ export function RegisterForm() {
           )}
         />
       </FieldGroup>
-      <Button className="w-full" type="submit">
+      <Button className="w-full" disabled={form.formState.isSubmitting} type="submit">
         Register
       </Button>
     </form>
