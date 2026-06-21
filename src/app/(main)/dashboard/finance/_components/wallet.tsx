@@ -18,7 +18,15 @@ const accountTypeIcons: Record<FinanceAccountType, typeof Landmark> = {
   wallet: WalletCards,
 };
 
-export function Wallet({ accounts }: { accounts: AccountBalanceSummary[] }) {
+export function Wallet({
+  accounts,
+  sourceLabel = "Local",
+  statusDescription = "available locally",
+}: {
+  accounts: AccountBalanceSummary[];
+  sourceLabel?: string;
+  statusDescription?: string;
+}) {
   const visibleAccounts = accounts.filter((summary) => !summary.account.archived);
 
   return (
@@ -62,12 +70,12 @@ export function Wallet({ accounts }: { accounts: AccountBalanceSummary[] }) {
               Active accounts
             </span>
             <span className="text-muted-foreground text-xs">
-              {visibleAccounts.length} {visibleAccounts.length === 1 ? "account" : "accounts"} available locally
+              {visibleAccounts.length} {visibleAccounts.length === 1 ? "account" : "accounts"} {statusDescription}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="size-1 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
-            <span className="font-bold text-[9px] text-green-500 uppercase tracking-widest">Local</span>
+            <span className="font-bold text-[9px] text-green-500 uppercase tracking-widest">{sourceLabel}</span>
           </div>
         </div>
       </CardContent>

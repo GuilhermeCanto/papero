@@ -322,11 +322,12 @@
     },
     "financeAccounts": {
       "title": "Contas",
-      "subtitle": "Gerencie contas financeiras locais usadas para calcular saldos e projeções.",
+      "subtitle": "Gerencie contas financeiras usadas para calcular saldos e projeções.",
       "create": "Nova conta",
+      "loading": "Carregando contas financeiras...",
       "kpi": {
         "total": "Contas",
-        "totalDescription": "Salvas neste navegador.",
+        "totalDescription": "Disponíveis no modo de dados atual.",
         "active": "Ativas",
         "activeDescription": "Visíveis nos cálculos.",
         "currentBalance": "Saldo atual",
@@ -336,7 +337,7 @@
       },
       "list": {
         "title": "Contas financeiras",
-        "description": "Crie, edite e arquive contas locais. Transações sem conta são tratadas como Conta principal.",
+        "description": "Crie, edite e arquive contas. Transações sem conta são tratadas como Conta principal.",
         "count": "{count, plural, one {# conta} other {# contas}}"
       },
       "table": {
@@ -368,12 +369,17 @@
       },
       "actions": {
         "edit": "Editar conta",
-        "archive": "Arquivar conta"
+        "archive": "Arquivar conta",
+        "retry": "Tentar novamente"
+      },
+      "errors": {
+        "archive": "Não foi possível arquivar a conta.",
+        "save": "Não foi possível salvar a conta."
       },
       "dialog": {
         "createTitle": "Criar conta",
         "editTitle": "Editar conta",
-        "description": "Apenas o nome é obrigatório. Os saldos são calculados pelas transações locais.",
+        "description": "Apenas o nome é obrigatório. Os saldos são calculados pelo modo de dados atual.",
         "name": "Nome da conta",
         "institution": "Instituição",
         "type": "Tipo",
@@ -385,8 +391,8 @@
         "saveEdit": "Salvar alterações"
       },
       "empty": {
-        "title": "Nenhuma conta local ainda.",
-        "description": "Crie a primeira conta para começar a organizar saldos localmente.",
+        "title": "Nenhuma conta ainda.",
+        "description": "Crie a primeira conta para começar a organizar saldos.",
         "action": "Criar conta"
       }
     },

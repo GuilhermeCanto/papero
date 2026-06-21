@@ -15,6 +15,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { PrivacyValue } from "@/app/(main)/dashboard/_components/privacy-value";
 import { Badge } from "@/components/ui/badge";
@@ -41,15 +42,16 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
+import { getOpeningBalanceAccountSummaries } from "../_components/finance-account-summaries";
 import {
   type FinanceAccount,
   type FinanceAccountType,
   getDefaultFinanceAccount,
   getFinanceAccountsWithFallback,
-  useFinanceAccounts,
 } from "../_components/finance-accounts-store";
 import { getAccountBalanceSummaries } from "../_components/finance-calculations";
 import { useFinanceTransactions } from "../_components/finance-transactions-store";
+import { useFinanceAccountsData } from "../_components/use-finance-accounts-data";
 
 const accountTypes: FinanceAccountType[] = [
   "checking",
@@ -127,13 +129,15 @@ function getAccountIcon(type: FinanceAccountType) {
 
 function AccountFormDialog({
   account,
+  isSaving,
   onOpenChange,
   onSave,
   open,
 }: {
   account?: FinanceAccount;
+  isSaving: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (state: AccountFormState) => void;
+  onSave: (state: AccountFormState) => void | Promise<void>;
   open: boolean;
 }) {
   const t = useTranslations("Dashboard.financeAccounts");
@@ -235,7 +239,7 @@ function AccountFormDialog({
         </div>
 
         <DialogFooter>
-          <Button disabled={!form.name.trim()} onClick={() => onSave(form)}>
+          <Button disabled={isSaving || !form.name.trim()} onClick={() => void onSave(form)}>
             {t(account ? "dialog.saveEdit" : "dialog.saveCreate")}
           </Button>
         </DialogFooter>
@@ -246,15 +250,23 @@ function AccountFormDialog({
 
 export default function FinanceAccountsPage() {
   const t = useTranslations("Dashboard.financeAccounts");
-  const { accounts, archiveAccount, createAccount, updateAccount } = useFinanceAccounts();
+  const { accounts, archiveAccount, createAccount, error, isDatabaseMode, isLoading, refresh, updateAccount } =
+    useFinanceAccountsData();
   const { transactions } = useFinanceTransactions([]);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editingAccount, setEditingAccount] = React.useState<FinanceAccount | undefined>();
-  const accountsWithFallback = React.useMemo(() => getFinanceAccountsWithFallback(accounts), [accounts]);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const accountsWithFallback = React.useMemo(
+    () => (isDatabaseMode ? accounts : getFinanceAccountsWithFallback(accounts)),
+    [accounts, isDatabaseMode],
+  );
   const defaultAccount = React.useMemo(() => getDefaultFinanceAccount(accountsWithFallback), [accountsWithFallback]);
   const accountSummaries = React.useMemo(
-    () => getAccountBalanceSummaries(accountsWithFallback, transactions, defaultAccount),
-    [accountsWithFallback, defaultAccount, transactions],
+    () =>
+      isDatabaseMode
+        ? getOpeningBalanceAccountSummaries(accountsWithFallback)
+        : getAccountBalanceSummaries(accountsWithFallback, transactions, defaultAccount),
+    [accountsWithFallback, defaultAccount, isDatabaseMode, transactions],
   );
   const activeAccountsCount = accounts.filter((account) => !account.archived).length;
   const archivedAccountsCount = accounts.filter((account) => account.archived).length;
@@ -274,7 +286,7 @@ export default function FinanceAccountsPage() {
     setDialogOpen(true);
   };
 
-  const saveAccount = (form: AccountFormState) => {
+  const saveAccount = async (form: AccountFormState) => {
     const payload = {
       archived: form.archived,
       currency: form.currency,
@@ -284,14 +296,30 @@ export default function FinanceAccountsPage() {
       type: form.type,
     };
 
-    if (editingAccount) {
-      updateAccount(editingAccount.id, payload);
-    } else {
-      createAccount(payload);
-    }
+    setIsSaving(true);
 
-    setDialogOpen(false);
-    setEditingAccount(undefined);
+    try {
+      if (editingAccount) {
+        await updateAccount(editingAccount.id, payload);
+      } else {
+        await createAccount(payload);
+      }
+
+      setDialogOpen(false);
+      setEditingAccount(undefined);
+    } catch (saveError) {
+      toast.error(saveError instanceof Error ? saveError.message : t("errors.save"));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleArchiveAccount = async (id: string) => {
+    try {
+      await archiveAccount(id);
+    } catch (archiveError) {
+      toast.error(archiveError instanceof Error ? archiveError.message : t("errors.archive"));
+    }
   };
 
   return (
@@ -306,6 +334,15 @@ export default function FinanceAccountsPage() {
           {t("create")}
         </Button>
       </div>
+
+      {isDatabaseMode && error ? (
+        <div className="flex flex-col gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-destructive">{error}</p>
+          <Button onClick={() => void refresh()} size="sm" variant="outline">
+            {t("actions.retry")}
+          </Button>
+        </div>
+      ) : null}
 
       <div className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
         <div className="grid grid-cols-1 xl:grid-cols-8">
@@ -366,101 +403,107 @@ export default function FinanceAccountsPage() {
           </CardAction>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("table.account")}</TableHead>
-                  <TableHead>{t("table.institution")}</TableHead>
-                  <TableHead>{t("table.type")}</TableHead>
-                  <TableHead>{t("table.currency")}</TableHead>
-                  <TableHead className="text-left">{t("table.openingBalance")}</TableHead>
-                  <TableHead className="text-left">{t("table.currentBalance")}</TableHead>
-                  <TableHead className="text-left">{t("table.projectedBalance")}</TableHead>
-                  <TableHead>{t("table.status")}</TableHead>
-                  <TableHead className="w-16 text-right">{t("table.actions")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {accountSummaries.map((summary) => {
-                  const Icon = getAccountIcon(summary.account.type);
+          {isDatabaseMode && isLoading ? (
+            <div className="rounded-lg border border-dashed py-8 text-center text-muted-foreground text-sm">
+              {t("loading")}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("table.account")}</TableHead>
+                    <TableHead>{t("table.institution")}</TableHead>
+                    <TableHead>{t("table.type")}</TableHead>
+                    <TableHead>{t("table.currency")}</TableHead>
+                    <TableHead className="text-left">{t("table.openingBalance")}</TableHead>
+                    <TableHead className="text-left">{t("table.currentBalance")}</TableHead>
+                    <TableHead className="text-left">{t("table.projectedBalance")}</TableHead>
+                    <TableHead>{t("table.status")}</TableHead>
+                    <TableHead className="w-16 text-right">{t("table.actions")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {accountSummaries.map((summary) => {
+                    const Icon = getAccountIcon(summary.account.type);
 
-                  return (
-                    <TableRow className={cn(summary.account.archived && "opacity-60")} key={summary.account.id}>
-                      <TableCell>
-                        <div className="flex min-w-48 items-center gap-3">
-                          <div className="grid size-9 shrink-0 place-items-center rounded-md border bg-muted text-muted-foreground">
-                            <Icon className="size-4" />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="truncate font-medium">{summary.account.name}</div>
-                            <div className="text-muted-foreground text-xs">
-                              {t("table.movements", { count: summary.movementCount })}
+                    return (
+                      <TableRow className={cn(summary.account.archived && "opacity-60")} key={summary.account.id}>
+                        <TableCell>
+                          <div className="flex min-w-48 items-center gap-3">
+                            <div className="grid size-9 shrink-0 place-items-center rounded-md border bg-muted text-muted-foreground">
+                              <Icon className="size-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="truncate font-medium">{summary.account.name}</div>
+                              <div className="text-muted-foreground text-xs">
+                                {t("table.movements", { count: summary.movementCount })}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {summary.account.institution || t("table.noInstitution")}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{t(`types.${summary.account.type}`)}</Badge>
-                      </TableCell>
-                      <TableCell>{summary.account.currency}</TableCell>
-                      <TableCell>
-                        <PrivacyValue>
-                          {formatMoney(summary.account.openingBalanceCents, summary.account.currency)}
-                        </PrivacyValue>
-                      </TableCell>
-                      <TableCell>
-                        <PrivacyValue>
-                          {formatMoney(summary.currentBalanceCents, summary.account.currency)}
-                        </PrivacyValue>
-                      </TableCell>
-                      <TableCell>
-                        <PrivacyValue>
-                          {formatMoney(summary.projectedBalanceCents, summary.account.currency)}
-                        </PrivacyValue>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={summary.account.archived ? "secondary" : "outline"}>
-                          {t(summary.account.archived ? "status.archived" : "status.active")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              aria-label={t("table.openActions", { name: summary.account.name })}
-                              size="icon"
-                              variant="ghost"
-                            >
-                              <MoreHorizontal />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => openEditDialog(summary.account)}>
-                              <Pencil />
-                              {t("actions.edit")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              disabled={summary.account.archived}
-                              onClick={() => archiveAccount(summary.account.id)}
-                            >
-                              <Archive />
-                              {t("actions.archive")}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {summary.account.institution || t("table.noInstitution")}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{t(`types.${summary.account.type}`)}</Badge>
+                        </TableCell>
+                        <TableCell>{summary.account.currency}</TableCell>
+                        <TableCell>
+                          <PrivacyValue>
+                            {formatMoney(summary.account.openingBalanceCents, summary.account.currency)}
+                          </PrivacyValue>
+                        </TableCell>
+                        <TableCell>
+                          <PrivacyValue>
+                            {formatMoney(summary.currentBalanceCents, summary.account.currency)}
+                          </PrivacyValue>
+                        </TableCell>
+                        <TableCell>
+                          <PrivacyValue>
+                            {formatMoney(summary.projectedBalanceCents, summary.account.currency)}
+                          </PrivacyValue>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={summary.account.archived ? "secondary" : "outline"}>
+                            {t(summary.account.archived ? "status.archived" : "status.active")}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                aria-label={t("table.openActions", { name: summary.account.name })}
+                                size="icon"
+                                variant="ghost"
+                              >
+                                <MoreHorizontal />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => openEditDialog(summary.account)}>
+                                <Pencil />
+                                {t("actions.edit")}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                disabled={summary.account.archived}
+                                onClick={() => void handleArchiveAccount(summary.account.id)}
+                              >
+                                <Archive />
+                                {t("actions.archive")}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
 
-          {accounts.length === 0 ? (
+          {accounts.length === 0 && !(isDatabaseMode && isLoading) ? (
             <div className="mt-4 rounded-lg border border-dashed py-8 text-center">
               <div className="mx-auto mb-3 grid size-10 place-items-center rounded-full bg-primary/10 text-primary">
                 <Landmark className="size-5" />
@@ -478,6 +521,7 @@ export default function FinanceAccountsPage() {
 
       <AccountFormDialog
         account={editingAccount}
+        isSaving={isSaving}
         onOpenChange={(open) => {
           setDialogOpen(open);
           if (!open) setEditingAccount(undefined);

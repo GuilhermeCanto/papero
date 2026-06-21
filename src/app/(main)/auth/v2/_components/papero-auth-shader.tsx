@@ -4,7 +4,7 @@ import { MeshGradient } from "@paper-design/shaders-react";
 
 export function PaperoAuthShader() {
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 h-full min-h-full overflow-hidden [&>*]:absolute [&>*]:inset-0 [&>*]:h-full [&>*]:min-h-full [&>*]:w-full">
       <MeshGradient
         className="absolute inset-0 h-full w-full"
         colors={["#ef8539", "#ff6a00", "#e3660d", "#ff6a00db"]}

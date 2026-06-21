@@ -322,11 +322,12 @@
     },
     "financeAccounts": {
       "title": "Accounts",
-      "subtitle": "Manage local finance accounts used to calculate balances and projections.",
+      "subtitle": "Manage finance accounts used to calculate balances and projections.",
       "create": "New account",
+      "loading": "Loading finance accounts...",
       "kpi": {
         "total": "Accounts",
-        "totalDescription": "Stored in this browser.",
+        "totalDescription": "Available in the current data mode.",
         "active": "Active",
         "activeDescription": "Visible in calculations.",
         "currentBalance": "Current balance",
@@ -336,7 +337,7 @@
       },
       "list": {
         "title": "Finance accounts",
-        "description": "Create, edit, and archive local accounts. Transactions without an account are treated as Main account.",
+        "description": "Create, edit, and archive accounts. Transactions without an account are treated as Main account.",
         "count": "{count, plural, one {# account} other {# accounts}}"
       },
       "table": {
@@ -368,12 +369,17 @@
       },
       "actions": {
         "edit": "Edit account",
-        "archive": "Archive account"
+        "archive": "Archive account",
+        "retry": "Try again"
+      },
+      "errors": {
+        "archive": "Could not archive account.",
+        "save": "Could not save account."
       },
       "dialog": {
         "createTitle": "Create account",
         "editTitle": "Edit account",
-        "description": "Only the name is required. Balances are calculated from local transactions.",
+        "description": "Only the name is required. Balances are calculated from the current data mode.",
         "name": "Account name",
         "institution": "Institution",
         "type": "Type",
@@ -385,8 +391,8 @@
         "saveEdit": "Save changes"
       },
       "empty": {
-        "title": "No local accounts yet.",
-        "description": "Create your first account to start organizing balances locally.",
+        "title": "No accounts yet.",
+        "description": "Create your first account to start organizing balances.",
         "action": "Create account"
       }
     },

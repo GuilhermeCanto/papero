@@ -49,7 +49,7 @@ export default function Layout({ children }: Readonly<{ children: ReactNode }>) 
           {children}
         </div>
 
-        <section className="relative hidden overflow-hidden rounded-3xl border border-white/10 bg-card/35 shadow-2xl shadow-black/35 backdrop-blur-xl lg:order-1 lg:flex">
+        <section className="relative hidden min-h-[calc(100dvh-2rem)] overflow-hidden rounded-3xl border border-white/10 bg-card/35 shadow-2xl shadow-black/35 backdrop-blur-xl lg:order-1 lg:flex">
           <PaperoAuthShader />
           <div className="absolute -top-24 right-12 h-72 w-72 rounded-full bg-primary/35 blur-3xl" />
           <div className="absolute bottom-8 left-8 h-80 w-80 rounded-full bg-orange-900/45 blur-3xl" />

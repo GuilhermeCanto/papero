@@ -10,11 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AccountActivityFlow } from "./_components/account-activity-flow";
 import { BalanceDistributionCard } from "./_components/balance-distribution-card";
-import {
-  getDefaultFinanceAccount,
-  getFinanceAccountsWithFallback,
-  useFinanceAccounts,
-} from "./_components/finance-accounts-store";
+import { getOpeningBalanceAccountSummaries } from "./_components/finance-account-summaries";
+import { getDefaultFinanceAccount, getFinanceAccountsWithFallback } from "./_components/finance-accounts-store";
 import {
   getAccountActivityByMonth,
   getAccountBalanceSummaries,
@@ -40,6 +37,7 @@ import { ShortcutsCard } from "./_components/quick-actions";
 import { ExpenseBreakdown, RecentTransactionFlow, type TransactionRecord } from "./_components/transaction-flow";
 import { TransactionsOverviewCard } from "./_components/transactions-overview-card";
 import { UpcomingTransactions } from "./_components/upcoming-transactions";
+import { useFinanceAccountsData } from "./_components/use-finance-accounts-data";
 import { Wallet } from "./_components/wallet";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
@@ -95,17 +93,27 @@ function toTransactionRecord(transaction: FinanceTransaction): TransactionRecord
 export default function Page() {
   const t = useTranslations("Dashboard");
   const today = React.useMemo(() => new Date(), []);
-  const { accounts } = useFinanceAccounts();
+  const { accounts, isDatabaseMode: isDatabaseAccountsMode } = useFinanceAccountsData();
   const { transactions } = useFinanceTransactions([]);
-  const accountsWithFallback = React.useMemo(() => getFinanceAccountsWithFallback(accounts), [accounts]);
+  const accountsWithFallback = React.useMemo(
+    () => (isDatabaseAccountsMode ? accounts : getFinanceAccountsWithFallback(accounts)),
+    [accounts, isDatabaseAccountsMode],
+  );
   const defaultAccount = React.useMemo(() => getDefaultFinanceAccount(accountsWithFallback), [accountsWithFallback]);
   const accountSummaries = React.useMemo(
-    () => getAccountBalanceSummaries(accountsWithFallback, transactions, defaultAccount),
-    [accountsWithFallback, defaultAccount, transactions],
+    () =>
+      isDatabaseAccountsMode
+        ? getOpeningBalanceAccountSummaries(accountsWithFallback)
+        : getAccountBalanceSummaries(accountsWithFallback, transactions, defaultAccount),
+    [accountsWithFallback, defaultAccount, isDatabaseAccountsMode, transactions],
+  );
+  const accountTransactions = React.useMemo(
+    () => (isDatabaseAccountsMode ? [] : transactions),
+    [isDatabaseAccountsMode, transactions],
   );
   const accountActivityData = React.useMemo(
-    () => getAccountActivityByMonth(transactions, today),
-    [transactions, today],
+    () => getAccountActivityByMonth(accountTransactions, today),
+    [accountTransactions, today],
   );
   const paidAccountMovementCount = React.useMemo(
     () => accountActivityData.reduce((total, item) => total + item.movementCount, 0),
@@ -261,7 +269,11 @@ export default function Page() {
         <TabsContent value="12-months" className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
             <BalanceDistributionCard accounts={accountSummaries} />
-            <Wallet accounts={accountSummaries} />
+            <Wallet
+              accounts={accountSummaries}
+              sourceLabel={isDatabaseAccountsMode ? "Database" : "Local"}
+              statusDescription={isDatabaseAccountsMode ? "synced from database" : "available locally"}
+            />
           </div>
           <AccountActivityFlow
             activityData={accountActivityData}
