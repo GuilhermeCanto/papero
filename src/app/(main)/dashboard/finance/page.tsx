@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { isDemoMode } from "@/config/papero-mode";
 
 import { AccountActivityFlow } from "./_components/account-activity-flow";
 import { BalanceDistributionCard } from "./_components/balance-distribution-card";
@@ -92,6 +93,7 @@ function toTransactionRecord(transaction: FinanceTransaction): TransactionRecord
 export default function Page() {
   const t = useTranslations("Dashboard");
   const today = React.useMemo(() => new Date(), []);
+  const demoMode = isDemoMode();
   const { accounts, isDatabaseMode: isDatabaseAccountsMode } = useFinanceAccountsData();
   const {
     error: transactionsError,
@@ -217,6 +219,12 @@ export default function Page() {
         <h1 className="text-3xl text-foreground leading-none tracking-tight">{t("greeting", { name: "Guilherme" })}</h1>
         <p className="text-lg text-muted-foreground leading-none">{t("subtitle")}</p>
       </div>
+
+      {demoMode ? (
+        <div className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-primary text-sm">
+          <span className="font-medium">{t("financeDemo.mode")}.</span> {t("financeDemo.modeDescription")}
+        </div>
+      ) : null}
 
       {isDatabaseTransactionsMode && (isLoadingTransactions || transactionsError) ? (
         <div className="flex items-center justify-between gap-3 rounded-lg border bg-muted/40 px-3 py-2 text-sm">

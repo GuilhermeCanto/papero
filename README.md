@@ -74,6 +74,21 @@ The active MVP stores this data locally in your browser. Clearing browser storag
 
 Public demo deployments can set `NEXT_PUBLIC_PAPERO_DATA_MODE="demo"` to automatically load fictional localStorage data on the first empty visit. Demo mode remains browser-local and resettable; users can still create their own expenses and incomes while exploring.
 
+## Deploy Public Demo to Vercel
+
+For a public demo, deploy Papero in `demo` mode. This does not require PostgreSQL, Better Auth secrets or a shared backend.
+
+Set these Vercel environment variables:
+
+```env
+NEXT_PUBLIC_PAPERO_DATA_MODE="demo"
+PAPERO_DATA_MODE="demo"
+```
+
+In demo mode, fictional data is seeded into each visitor's browser `localStorage`. Visitor-created data stays in that browser and can be reset or cleared from the dashboard. This is useful for public exploration, not for a production SaaS deployment.
+
+Use `database` mode separately when you want PostgreSQL persistence and real auth.
+
 ## Tech Stack
 
 - Next.js
