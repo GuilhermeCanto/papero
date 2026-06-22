@@ -252,7 +252,7 @@ Fresh production builds may require network access because `next/font/google` fe
 
 ## Current Limitation
 
-Papero is still an early MVP. Transfers are currently stored as normal transactions, and real account-to-account transfer logic is deferred. Recurring and installment workflows exist but may still need product and QA polish. Database mode requires external PostgreSQL setup.
+Papero is still an early MVP. Transfers now support source and target accounts and are treated as account movements in balances, but advanced transfer workflows may still need product and QA polish. Recurring and installment workflows exist but may also need refinement. Database mode requires external PostgreSQL setup.
 
 Local/demo modes remain browser-local by design.
 
@@ -268,7 +268,7 @@ Papero welcomes QA reports, bug reports, feature requests and pull requests.
 ## Roadmap
 
 - Import localStorage data into the database
-- Real account-to-account transfers
+- Advanced account-to-account transfer workflows
 - Polish recurrence and installment workflows
 - Reports
 - Attachments and receipts
