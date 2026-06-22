@@ -22,7 +22,8 @@ import { SearchDialog } from "./_components/sidebar/search-dialog";
 
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
-  const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
+  const sidebarState = cookieStore.get("sidebar_state")?.value;
+  const defaultOpen = sidebarState ? sidebarState === "true" : false;
   const [variant, collapsible, avatarLocation] = await Promise.all([
     getPreference("sidebar_variant", SIDEBAR_VARIANT_VALUES, "inset"),
     getPreference("sidebar_collapsible", SIDEBAR_COLLAPSIBLE_VALUES, "icon"),
