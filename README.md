@@ -87,6 +87,8 @@ PAPERO_DATA_MODE="demo"
 
 In demo mode, fictional data is seeded into each visitor's browser `localStorage`. Visitor-created data stays in that browser and can be reset or cleared from the dashboard. This is useful for public exploration, not for a production SaaS deployment.
 
+Papero runs `prisma generate` during install so clean Vercel builds have Prisma Client types available. This generation step does not connect to a database and does not make database variables required for demo mode.
+
 Use `database` mode separately when you want PostgreSQL persistence and real auth.
 
 ## Tech Stack
