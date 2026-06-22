@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils";
 
 import { type FinanceCategory, type FinanceCategoryType, financeCategoryTypes } from "../_components/categories-store";
 import { getCategoryUsage, getFinanceUsageKey, type TransactionUsage } from "../_components/finance-calculations";
-import { useFinanceTransactions } from "../_components/finance-transactions-store";
 import { useFinanceCategoriesData } from "../_components/use-finance-categories-data";
+import { useFinanceTransactionsData } from "../_components/use-finance-transactions-data";
 
 function formatMoney(amountCents: number) {
   return new Intl.NumberFormat("pt-BR", {
@@ -204,12 +204,9 @@ function CategoryGroupCard({
 export default function CategoriesPage() {
   const t = useTranslations("Dashboard.financeCategories");
   const { addCategory, categories, error, isDatabaseMode, isLoading, refresh } = useFinanceCategoriesData();
-  const { transactions } = useFinanceTransactions([]);
+  const { transactions } = useFinanceTransactionsData();
   const totalCategories = categories.length;
-  const categoryUsage = React.useMemo(
-    () => (isDatabaseMode ? {} : getCategoryUsage(transactions)),
-    [isDatabaseMode, transactions],
-  );
+  const categoryUsage = React.useMemo(() => getCategoryUsage(transactions), [transactions]);
   const usedCategoriesCount = React.useMemo(
     () => categories.filter((category) => categoryUsage[getFinanceUsageKey(category.name)]).length,
     [categories, categoryUsage],

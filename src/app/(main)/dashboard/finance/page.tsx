@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AccountActivityFlow } from "./_components/account-activity-flow";
 import { BalanceDistributionCard } from "./_components/balance-distribution-card";
-import { getOpeningBalanceAccountSummaries } from "./_components/finance-account-summaries";
 import { getDefaultFinanceAccount, getFinanceAccountsWithFallback } from "./_components/finance-accounts-store";
 import {
   getAccountActivityByMonth,
@@ -27,7 +26,6 @@ import {
 import { FinanceDemoAutoSeed } from "./_components/finance-demo-auto-seed";
 import { FinanceDemoDataControls } from "./_components/finance-demo-data-controls";
 import type { FinanceTransaction } from "./_components/finance-transactions-store";
-import { useFinanceTransactions } from "./_components/finance-transactions-store";
 import { FinancialCalendarPanel } from "./_components/financial-calendar-panel";
 import { HealthStatus } from "./_components/health-status";
 import { IncomeBreakdown } from "./_components/income-breakdown";
@@ -38,6 +36,7 @@ import { ExpenseBreakdown, RecentTransactionFlow, type TransactionRecord } from 
 import { TransactionsOverviewCard } from "./_components/transactions-overview-card";
 import { UpcomingTransactions } from "./_components/upcoming-transactions";
 import { useFinanceAccountsData } from "./_components/use-finance-accounts-data";
+import { useFinanceTransactionsData } from "./_components/use-finance-transactions-data";
 import { Wallet } from "./_components/wallet";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
@@ -94,26 +93,25 @@ export default function Page() {
   const t = useTranslations("Dashboard");
   const today = React.useMemo(() => new Date(), []);
   const { accounts, isDatabaseMode: isDatabaseAccountsMode } = useFinanceAccountsData();
-  const { transactions } = useFinanceTransactions([]);
+  const {
+    error: transactionsError,
+    isDatabaseMode: isDatabaseTransactionsMode,
+    isLoading: isLoadingTransactions,
+    refresh: refreshTransactions,
+    transactions,
+  } = useFinanceTransactionsData();
   const accountsWithFallback = React.useMemo(
     () => (isDatabaseAccountsMode ? accounts : getFinanceAccountsWithFallback(accounts)),
     [accounts, isDatabaseAccountsMode],
   );
   const defaultAccount = React.useMemo(() => getDefaultFinanceAccount(accountsWithFallback), [accountsWithFallback]);
   const accountSummaries = React.useMemo(
-    () =>
-      isDatabaseAccountsMode
-        ? getOpeningBalanceAccountSummaries(accountsWithFallback)
-        : getAccountBalanceSummaries(accountsWithFallback, transactions, defaultAccount),
-    [accountsWithFallback, defaultAccount, isDatabaseAccountsMode, transactions],
-  );
-  const accountTransactions = React.useMemo(
-    () => (isDatabaseAccountsMode ? [] : transactions),
-    [isDatabaseAccountsMode, transactions],
+    () => getAccountBalanceSummaries(accountsWithFallback, transactions, defaultAccount),
+    [accountsWithFallback, defaultAccount, transactions],
   );
   const accountActivityData = React.useMemo(
-    () => getAccountActivityByMonth(accountTransactions, today),
-    [accountTransactions, today],
+    () => getAccountActivityByMonth(transactions, today),
+    [transactions, today],
   );
   const paidAccountMovementCount = React.useMemo(
     () => accountActivityData.reduce((total, item) => total + item.movementCount, 0),
@@ -217,6 +215,19 @@ export default function Page() {
         <h1 className="text-3xl text-foreground leading-none tracking-tight">{t("greeting", { name: "Guilherme" })}</h1>
         <p className="text-lg text-muted-foreground leading-none">{t("subtitle")}</p>
       </div>
+
+      {isDatabaseTransactionsMode && (isLoadingTransactions || transactionsError) ? (
+        <div className="flex items-center justify-between gap-3 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
+          <span className="text-muted-foreground">
+            {isLoadingTransactions ? t("financeData.loading") : transactionsError}
+          </span>
+          {transactionsError ? (
+            <Button onClick={() => void refreshTransactions()} size="sm" variant="outline">
+              {t("financeData.retry")}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
 
       <Tabs defaultValue="30-days" className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">

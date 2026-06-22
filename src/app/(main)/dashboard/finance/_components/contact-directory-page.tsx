@@ -24,8 +24,8 @@ import { cn } from "@/lib/utils";
 
 import type { FinanceContact, FinanceContactType } from "./contacts-store";
 import { getCustomerUsage, getFinanceUsageKey, getSupplierUsage, type TransactionUsage } from "./finance-calculations";
-import { useFinanceTransactions } from "./finance-transactions-store";
 import { useFinanceContactsData } from "./use-finance-contacts-data";
+import { useFinanceTransactionsData } from "./use-finance-transactions-data";
 
 type ContactDirectoryCopyKey = "customers" | "suppliers";
 
@@ -276,16 +276,11 @@ export function ContactDirectoryPage({ contactType, copyKey }: ContactDirectoryP
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [companyName, setCompanyName] = React.useState("");
   const { addContact, contacts, error, isDatabaseMode, isLoading, refresh } = useFinanceContactsData(contactType);
-  const { transactions } = useFinanceTransactions([]);
+  const { transactions } = useFinanceTransactionsData();
   const visibleContacts = contacts.filter((contact) => contact.type === contactType || contact.type === undefined);
   const contactUsage = React.useMemo(
-    () =>
-      isDatabaseMode
-        ? {}
-        : contactType === "customer"
-          ? getCustomerUsage(transactions)
-          : getSupplierUsage(transactions),
-    [contactType, isDatabaseMode, transactions],
+    () => (contactType === "customer" ? getCustomerUsage(transactions) : getSupplierUsage(transactions)),
+    [contactType, transactions],
   );
 
   const openContactDialog = () => {

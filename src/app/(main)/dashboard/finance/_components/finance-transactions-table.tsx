@@ -19,6 +19,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -54,13 +55,10 @@ import { getFinanceCategoryTypeForTransactionKind } from "./categories-store";
 import { CategorySelect } from "./category-select";
 import { ContactSelect } from "./contact-select";
 import type { FinanceContactType } from "./contacts-store";
-import { type FinanceAccount, useFinanceAccounts } from "./finance-accounts-store";
-import {
-  type PaymentTime,
-  type FinanceTransaction as Transaction,
-  type TransactionKind,
-  useFinanceTransactions,
-} from "./finance-transactions-store";
+import type { FinanceAccount } from "./finance-accounts-store";
+import type { PaymentTime, FinanceTransaction as Transaction, TransactionKind } from "./finance-transactions-store";
+import { useFinanceAccountsData } from "./use-finance-accounts-data";
+import { useFinanceTransactionsData } from "./use-finance-transactions-data";
 
 type FinanceTransactionsTableMode = "all" | "expenses" | "incomes";
 
@@ -110,8 +108,15 @@ function formatMoneyInput(amountCents: number) {
 }
 
 function parseBrazilianDate(date: string) {
-  const [day, month, year] = date.split("/").map(Number);
-  return new Date(year, (month ?? 1) - 1, day ?? 1);
+  const brazilianDate = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(date);
+  if (brazilianDate) {
+    return new Date(Number(brazilianDate[3]), Number(brazilianDate[2]) - 1, Number(brazilianDate[1]));
+  }
+
+  const parsedDate = new Date(date);
+  if (!Number.isNaN(parsedDate.getTime())) return parsedDate;
+
+  return new Date();
 }
 
 function formatBrazilianDate(date: Date) {
@@ -165,7 +170,7 @@ function DatePickerCell({
       <PopoverTrigger asChild>
         <Button className="h-8 justify-start px-2 font-medium" size="sm" variant="ghost">
           <CalendarIcon className="size-3.5 text-muted-foreground" />
-          {value}
+          {formatBrazilianDate(selectedDate)}
           <span className="sr-only">{ariaLabel}</span>
         </Button>
       </PopoverTrigger>
@@ -328,7 +333,7 @@ function TransactionDetailsDrawer({
 }: {
   accounts: FinanceAccount[];
   onOpenChange: (open: boolean) => void;
-  onUpdate: (id: string, patch: Partial<Transaction>) => void;
+  onUpdate: (id: string, patch: Partial<Transaction>) => Promise<void> | void;
   open: boolean;
   transaction: Transaction | null;
 }) {
@@ -351,7 +356,9 @@ function TransactionDetailsDrawer({
               <span className="font-medium text-sm">{t("drawer.fields.dueDate")}</span>
               <DatePickerCell
                 ariaLabel={t("drawer.aria.editDueDate", { description: transaction.description })}
-                onChange={(date) => onUpdate(transaction.id, { date })}
+                onChange={(date) => {
+                  void onUpdate(transaction.id, { date });
+                }}
                 value={transaction.date}
               />
             </div>
@@ -360,14 +367,18 @@ function TransactionDetailsDrawer({
               <AmountInputCell
                 amountCents={transaction.amountCents}
                 ariaLabel={t("drawer.aria.editAmount", { description: transaction.description })}
-                onChange={(amountCents) => onUpdate(transaction.id, { amountCents })}
+                onChange={(amountCents) => {
+                  void onUpdate(transaction.id, { amountCents });
+                }}
               />
             </div>
             <div className="grid gap-1.5">
               <span className="font-medium text-sm">{t("drawer.fields.competence")}</span>
               <DatePickerCell
                 ariaLabel={t("drawer.aria.editCompetence", { description: transaction.description })}
-                onChange={(competenceDate) => onUpdate(transaction.id, { competenceDate })}
+                onChange={(competenceDate) => {
+                  void onUpdate(transaction.id, { competenceDate });
+                }}
                 value={transaction.competenceDate ?? transaction.date}
               />
             </div>
@@ -375,7 +386,9 @@ function TransactionDetailsDrawer({
               <span className="font-medium text-sm">{t("drawer.fields.account")}</span>
               <AccountSelect
                 accounts={accounts}
-                onChange={(accountId) => onUpdate(transaction.id, { accountId })}
+                onChange={(accountId) => {
+                  void onUpdate(transaction.id, { accountId });
+                }}
                 triggerClassName="w-full"
                 value={transaction.accountId}
               />
@@ -384,7 +397,9 @@ function TransactionDetailsDrawer({
               <span className="font-medium text-sm">{t("drawer.fields.description")}</span>
               <Input
                 value={transaction.description}
-                onChange={(event) => onUpdate(transaction.id, { description: event.target.value })}
+                onChange={(event) => {
+                  void onUpdate(transaction.id, { description: event.target.value });
+                }}
               />
             </div>
             <div className="grid gap-1.5">
@@ -392,7 +407,9 @@ function TransactionDetailsDrawer({
               <Input
                 placeholder={t("drawer.placeholders.document")}
                 value={transaction.documentNumber ?? ""}
-                onChange={(event) => onUpdate(transaction.id, { documentNumber: event.target.value })}
+                onChange={(event) => {
+                  void onUpdate(transaction.id, { documentNumber: event.target.value });
+                }}
               />
             </div>
             <div className="grid gap-1.5">
@@ -400,7 +417,9 @@ function TransactionDetailsDrawer({
               <Input
                 placeholder={t("drawer.placeholders.tags")}
                 value={transaction.tags ?? ""}
-                onChange={(event) => onUpdate(transaction.id, { tags: event.target.value })}
+                onChange={(event) => {
+                  void onUpdate(transaction.id, { tags: event.target.value });
+                }}
               />
             </div>
             <div className="grid gap-1.5 md:col-span-3">
@@ -408,7 +427,9 @@ function TransactionDetailsDrawer({
               <Textarea
                 placeholder={t("drawer.placeholders.additionalInfo")}
                 value={transaction.notes ?? ""}
-                onChange={(event) => onUpdate(transaction.id, { notes: event.target.value })}
+                onChange={(event) => {
+                  void onUpdate(transaction.id, { notes: event.target.value });
+                }}
               />
             </div>
           </div>
@@ -451,12 +472,17 @@ function PaymentTimeSelect({
   onChange,
 }: {
   transaction: Transaction;
-  onChange: (transaction: Transaction, paymentTime: PaymentTime) => void;
+  onChange: (transaction: Transaction, paymentTime: PaymentTime) => Promise<void> | void;
 }) {
   const t = useTranslations("Dashboard.financeTransactions");
 
   return (
-    <Select value={transaction.paymentTime} onValueChange={(value) => onChange(transaction, value as PaymentTime)}>
+    <Select
+      value={transaction.paymentTime}
+      onValueChange={(value) => {
+        void onChange(transaction, value as PaymentTime);
+      }}
+    >
       <SelectTrigger className="w-30" size="sm">
         <SelectValue placeholder={t("paymentTime.placeholder")} />
       </SelectTrigger>
@@ -499,7 +525,7 @@ function InstallmentDialog({
   transaction,
 }: {
   onOpenChange: (open: boolean) => void;
-  onSave: (transaction: Transaction, amountCents: number, installments: number) => void;
+  onSave: (transaction: Transaction, amountCents: number, installments: number) => Promise<void> | void;
   open: boolean;
   transaction: Transaction | null;
 }) {
@@ -600,7 +626,7 @@ function InstallmentDialog({
         <DialogFooter>
           <Button
             onClick={() => {
-              onSave(transaction, amountCents, installmentCount);
+              void onSave(transaction, amountCents, installmentCount);
               onOpenChange(false);
             }}
           >
@@ -619,7 +645,7 @@ function RecurrenceDialog({
   transaction,
 }: {
   onOpenChange: (open: boolean) => void;
-  onSave: (transaction: Transaction, months: number) => void;
+  onSave: (transaction: Transaction, months: number) => Promise<void> | void;
   open: boolean;
   transaction: Transaction | null;
 }) {
@@ -670,7 +696,7 @@ function RecurrenceDialog({
         <DialogFooter>
           <Button
             onClick={() => {
-              onSave(transaction, monthCount);
+              void onSave(transaction, monthCount);
               onOpenChange(false);
             }}
           >
@@ -686,13 +712,23 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
   const t = useTranslations("Dashboard.financeTransactions");
   const availableKindIds = React.useMemo(() => getTransactionKindsForMode(mode), [mode]);
   const [activeKind, setActiveKind] = React.useState<TransactionKind>(availableKindIds[0]);
-  const { accounts } = useFinanceAccounts();
-  const { addTransaction: createTransaction, setTransactions, transactions } = useFinanceTransactions([]);
+  const { accounts } = useFinanceAccountsData();
+  const {
+    addTransaction: createTransaction,
+    deleteTransaction: removeTransaction,
+    error,
+    isDatabaseMode,
+    isLoading,
+    refresh,
+    transactions,
+    updateTransaction: persistTransaction,
+  } = useFinanceTransactionsData();
   const [installmentTransaction, setInstallmentTransaction] = React.useState<Transaction | null>(null);
   const [recurringTransaction, setRecurringTransaction] = React.useState<Transaction | null>(null);
   const [detailsTransaction, setDetailsTransaction] = React.useState<Transaction | null>(null);
   const [amountDetailsTransaction, setAmountDetailsTransaction] = React.useState<Transaction | null>(null);
   const [attachmentsTransaction, setAttachmentsTransaction] = React.useState<Transaction | null>(null);
+  const [isMutating, setIsMutating] = React.useState(false);
 
   const transactionKinds = availableKindIds.map((id) => ({ id, label: t(`kinds.${id}`) }));
   const filteredTransactions = transactions.filter((transaction) => transaction.kind === activeKind);
@@ -703,62 +739,85 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
     ? (transactions.find((transaction) => transaction.id === detailsTransaction.id) ?? detailsTransaction)
     : null;
 
-  const addTransaction = () => {
-    createTransaction({
-      amountCents: 0,
-      category: t("sample.category"),
-      accountId: resolveFinanceAccountId(accounts),
-      date: "18/06/2026",
-      description: t("table.add"),
-      from: "",
-      kind: activeKind,
-      paid: false,
-      paymentMode: paymentFormOptions[0].value,
-      paymentTime: "cash",
-      paymentType: t("paymentTime.cash"),
+  const runTransactionAction = React.useCallback(
+    async (action: () => Promise<void>) => {
+      setIsMutating(true);
+
+      try {
+        await action();
+      } catch (actionError) {
+        toast.error(actionError instanceof Error ? actionError.message : t("table.error"));
+      } finally {
+        setIsMutating(false);
+      }
+    },
+    [t],
+  );
+
+  const addTransaction = async () => {
+    await runTransactionAction(async () => {
+      await createTransaction({
+        amountCents: 0,
+        category: t("sample.category"),
+        accountId: resolveFinanceAccountId(accounts),
+        date: "18/06/2026",
+        description: t("table.add"),
+        from: "",
+        kind: activeKind,
+        paid: false,
+        paymentMode: paymentFormOptions[0].value,
+        paymentTime: "cash",
+        paymentType: t("paymentTime.cash"),
+      });
     });
   };
 
-  const togglePaid = (id: string, paid: boolean) => {
-    setTransactions((current) =>
-      current.map((transaction) => (transaction.id === id ? { ...transaction, paid } : transaction)),
-    );
+  const togglePaid = async (id: string, paid: boolean) => {
+    await runTransactionAction(async () => {
+      await persistTransaction(id, { paid });
+    });
   };
 
-  const updateTransaction = (id: string, patch: Partial<Transaction>) => {
-    setTransactions((current) =>
-      current.map((transaction) => (transaction.id === id ? { ...transaction, ...patch } : transaction)),
-    );
+  const updateTransaction = async (id: string, patch: Partial<Transaction>) => {
+    await runTransactionAction(async () => {
+      await persistTransaction(id, patch);
+    });
   };
 
-  const updateTransactionCategory = (id: string, category: string, kind: TransactionKind) => {
-    setTransactions((current) =>
-      current.map((transaction) => (transaction.id === id ? { ...transaction, category, kind } : transaction)),
-    );
+  const updateTransactionCategory = async (
+    id: string,
+    category: string,
+    kind: TransactionKind,
+    categoryId?: string,
+  ) => {
+    await runTransactionAction(async () => {
+      await persistTransaction(id, { category, categoryId, kind });
+    });
   };
 
-  const updateTransactionContact = (id: string, contactName: string) => {
-    setTransactions((current) =>
-      current.map((transaction) => (transaction.id === id ? { ...transaction, from: contactName } : transaction)),
-    );
+  const updateTransactionContact = async (id: string, contactName: string, contactId?: string) => {
+    await runTransactionAction(async () => {
+      await persistTransaction(id, { contactId, from: contactName });
+    });
   };
 
-  const duplicateTransaction = (transaction: Transaction) => {
-    setTransactions((current) => [
-      {
-        ...transaction,
-        id: `${transaction.id}-COPY-${current.length + 1}`,
+  const duplicateTransaction = async (transaction: Transaction) => {
+    await runTransactionAction(async () => {
+      const { createdAt: _createdAt, id: _id, updatedAt: _updatedAt, ...transactionCopy } = transaction;
+      await createTransaction({
+        ...transactionCopy,
         paid: false,
-      },
-      ...current,
-    ]);
+      });
+    });
   };
 
-  const deleteTransaction = (id: string) => {
-    setTransactions((current) => current.filter((transaction) => transaction.id !== id));
+  const deleteTransaction = async (id: string) => {
+    await runTransactionAction(async () => {
+      await removeTransaction(id);
+    });
   };
 
-  const updatePaymentTime = (transaction: Transaction, paymentTime: PaymentTime) => {
+  const updatePaymentTime = async (transaction: Transaction, paymentTime: PaymentTime) => {
     if (paymentTime === "installment") {
       setInstallmentTransaction(transaction);
       return;
@@ -769,58 +828,57 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
       return;
     }
 
-    setTransactions((current) =>
-      current.map((currentTransaction) =>
-        currentTransaction.id === transaction.id
-          ? {
-              ...currentTransaction,
-              paymentMode: transaction.paymentMode,
-              paymentTime: "cash",
-              paymentType: t("paymentTime.cash"),
-            }
-          : currentTransaction,
-      ),
-    );
+    await runTransactionAction(async () => {
+      await persistTransaction(transaction.id, {
+        paymentMode: transaction.paymentMode,
+        paymentTime: "cash",
+        paymentType: t("paymentTime.cash"),
+      });
+    });
   };
 
-  const saveInstallmentPlan = (transaction: Transaction, amountCents: number, installments: number) => {
+  const saveInstallmentPlan = async (transaction: Transaction, amountCents: number, installments: number) => {
     const firstDate = parseBrazilianDate(transaction.date);
     const installmentAmounts = splitAmountIntoInstallments(amountCents, installments);
     const installmentTransactions = installmentAmounts.map((installmentAmount, index) => ({
       ...transaction,
       amountCents: installmentAmount,
       date: formatBrazilianDate(addMonths(firstDate, index)),
-      id: `${transaction.id}-P${index + 1}`,
       paid: index === 0 ? transaction.paid : false,
       paymentMode: paymentFormOptions[0].value,
       paymentTime: "installment" as const,
       paymentType: `${index + 1}/${installments}`,
     }));
 
-    setTransactions((current) =>
-      current.flatMap((currentTransaction) =>
-        currentTransaction.id === transaction.id ? installmentTransactions : [currentTransaction],
-      ),
-    );
+    await runTransactionAction(async () => {
+      await removeTransaction(transaction.id);
+      await Promise.all(
+        installmentTransactions.map(({ createdAt: _createdAt, id: _id, updatedAt: _updatedAt, ...installment }) =>
+          createTransaction(installment),
+        ),
+      );
+    });
   };
 
-  const saveRecurringPlan = (transaction: Transaction, months: number) => {
+  const saveRecurringPlan = async (transaction: Transaction, months: number) => {
     const firstDate = parseBrazilianDate(transaction.date);
     const recurringTransactions = Array.from({ length: months }, (_, index) => ({
       ...transaction,
       date: formatBrazilianDate(addMonths(firstDate, index)),
-      id: `${transaction.id}-R${index + 1}`,
       paid: index === 0 ? transaction.paid : false,
       paymentMode: paymentFormOptions[0].value,
       paymentTime: "recurring" as const,
       paymentType: `${index + 1}/${months}`,
     }));
 
-    setTransactions((current) =>
-      current.flatMap((currentTransaction) =>
-        currentTransaction.id === transaction.id ? recurringTransactions : [currentTransaction],
-      ),
-    );
+    await runTransactionAction(async () => {
+      await removeTransaction(transaction.id);
+      await Promise.all(
+        recurringTransactions.map(({ createdAt: _createdAt, id: _id, updatedAt: _updatedAt, ...recurring }) =>
+          createTransaction(recurring),
+        ),
+      );
+    });
   };
 
   return (
@@ -844,7 +902,11 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
         <CardContent className="flex flex-col gap-4 px-0">
           <div className="flex flex-col gap-3 px-4 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex items-center gap-2">
-              <Button onClick={addTransaction} size="sm">
+              <Button
+                disabled={isDatabaseMode && (isLoading || isMutating)}
+                onClick={() => void addTransaction()}
+                size="sm"
+              >
                 <Plus />
                 {t("table.add")}
               </Button>
@@ -886,6 +948,17 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
             </div>
           </div>
 
+          {isDatabaseMode && (isLoading || error) ? (
+            <div className="mx-4 flex items-center justify-between gap-3 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
+              <span className="text-muted-foreground">{isLoading ? t("table.loading") : error}</span>
+              {error ? (
+                <Button onClick={() => void refresh()} size="sm" variant="outline">
+                  {t("table.retry")}
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
+
           <div className="overflow-hidden">
             <Table className="table-fixed **:data-[slot='table-cell']:px-3 **:data-[slot='table-head']:px-3">
               <TableHeader className="border-t **:data-[slot='table-head']:h-11 **:data-[slot='table-head']:font-normal **:data-[slot='table-head']:text-foreground **:data-[slot='table-head']:text-sm">
@@ -914,7 +987,7 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
                     <TableCell>
                       <DatePickerCell
                         ariaLabel={t("drawer.aria.editDueDate", { description: transaction.description })}
-                        onChange={(date) => updateTransaction(transaction.id, { date })}
+                        onChange={(date) => void updateTransaction(transaction.id, { date })}
                         value={transaction.date}
                       />
                     </TableCell>
@@ -923,7 +996,9 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
                         <Input
                           aria-label={t("drawer.aria.editDescription", { id: transaction.id })}
                           className="h-7 border-transparent bg-transparent px-0 font-medium shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:px-2"
-                          onChange={(event) => updateTransaction(transaction.id, { description: event.target.value })}
+                          onChange={(event) =>
+                            void updateTransaction(transaction.id, { description: event.target.value })
+                          }
                           value={transaction.description}
                         />
                         <div className="truncate text-muted-foreground text-xs">
@@ -935,14 +1010,14 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
                       <ContactSelect
                         contactType={getContactTypeForTransactionKind(transaction.kind)}
                         label={transaction.kind === "income" ? t("table.counterpartIncome") : t("table.counterpart")}
-                        onChange={(contact) => updateTransactionContact(transaction.id, contact.name)}
+                        onChange={(contact) => void updateTransactionContact(transaction.id, contact.name, contact.id)}
                         value={transaction.from}
                       />
                     </TableCell>
                     <TableCell>
                       <AccountSelect
                         accounts={accounts}
-                        onChange={(accountId) => updateTransaction(transaction.id, { accountId })}
+                        onChange={(accountId) => void updateTransaction(transaction.id, { accountId })}
                         triggerClassName="w-full"
                         value={transaction.accountId}
                       />
@@ -952,7 +1027,12 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
                       <CategorySelect
                         currentType={getFinanceCategoryTypeForTransactionKind(transaction.kind)}
                         onChange={(category) =>
-                          updateTransactionCategory(transaction.id, category.name, category.type as TransactionKind)
+                          void updateTransactionCategory(
+                            transaction.id,
+                            category.name,
+                            category.type as TransactionKind,
+                            category.id,
+                          )
                         }
                         value={transaction.category}
                       />
@@ -961,7 +1041,7 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
                       <AmountInputCell
                         amountCents={transaction.amountCents}
                         ariaLabel={t("drawer.aria.editAmount", { description: transaction.description })}
-                        onChange={(amountCents) => updateTransaction(transaction.id, { amountCents })}
+                        onChange={(amountCents) => void updateTransaction(transaction.id, { amountCents })}
                       />
                     </TableCell>
                     <TableCell>
@@ -969,7 +1049,7 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
                     </TableCell>
                     <TableCell>
                       <PaymentFormSelect
-                        onChange={(paymentMode) => updateTransaction(transaction.id, { paymentMode })}
+                        onChange={(paymentMode) => void updateTransaction(transaction.id, { paymentMode })}
                         value={transaction.paymentMode}
                       />
                     </TableCell>
@@ -977,14 +1057,15 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
                       <Switch
                         aria-label={t("table.markAsPaid", { description: transaction.description })}
                         checked={transaction.paid}
-                        onCheckedChange={(paid) => togglePaid(transaction.id, paid)}
+                        disabled={isDatabaseMode && isMutating}
+                        onCheckedChange={(paid) => void togglePaid(transaction.id, paid)}
                       />
                     </TableCell>
                     <TableCell>
                       <div className="flex w-full justify-end">
                         <TransactionActionsMenu
-                          onDelete={() => deleteTransaction(transaction.id)}
-                          onDuplicate={() => duplicateTransaction(transaction)}
+                          onDelete={() => void deleteTransaction(transaction.id)}
+                          onDuplicate={() => void duplicateTransaction(transaction)}
                           onOpenAmountDetails={() => setAmountDetailsTransaction(transaction)}
                           onOpenAttachments={() => setAttachmentsTransaction(transaction)}
                           onOpenDetails={() => setDetailsTransaction(transaction)}
