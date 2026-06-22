@@ -4,10 +4,33 @@ Papero is an open-source, local-first finance dashboard for small businesses, so
 
 Screenshot coming soon.
 
-# Live Demo
+## Live Demo
 
 Try Papero here: [papero-delta.vercel.app](https://papero-delta.vercel.app/dashboard/finance)
 
+## Screenshots
+
+### Main Dashboard
+
+| Light Mode | Dark Mode |
+|---|---|
+| ![Main dashboard in light mode](./public/demo/main-light-mode.png) | ![Main dashboard in dark mode](./public/demo/main-dark-mode.png) |
+
+### Transactions
+
+| Light Mode | Dark Mode |
+|---|---|
+| ![Transactions page in light mode](./public/demo/transactions-light-mode.png) | ![Transactions page in dark mode](./public/demo/transactions-dark-mode.png) |
+
+### Accounts
+
+| Light Mode | Dark Mode |
+|---|---|
+| ![Accounts page in light mode](./public/demo/accounts-light-mode.png) | ![Accounts page in dark mode](./public/demo/accounts-dark-mode.png) |
+
+### Login
+
+![Login page](./public/demo/login-page.png)
 
 ## Status
 
