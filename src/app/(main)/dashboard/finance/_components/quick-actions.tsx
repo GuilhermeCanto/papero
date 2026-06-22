@@ -1,3 +1,5 @@
+import { useRouter } from "next/navigation";
+
 import { ChevronRight, HandCoins, Receipt, ScrollText } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -17,25 +19,26 @@ const contacts = [
 
 export function ShortcutsCard({ className, limit }: { className?: string; limit?: number }) {
   const t = useTranslations("Dashboard.shortcuts");
+  const router = useRouter();
 
   const shortcuts = [
     {
       id: 1,
       label: t("newExpense"),
       icon: Receipt,
-      href: "/dashboard/coming-soon",
+      href: "/dashboard/finance/expenses",
     },
     {
       id: 2,
       label: t("newIncome"),
       icon: HandCoins,
-      href: "/dashboard/coming-soon",
+      href: "/dashboard/finance/incomes",
     },
     {
       id: 3,
       label: t("importStatement"),
       icon: ScrollText,
-      href: "/dashboard/coming-soon",
+      href: "/dashboard/finance/transactions",
     },
   ];
 
@@ -50,7 +53,12 @@ export function ShortcutsCard({ className, limit }: { className?: string; limit?
             const Icon = shortcut.icon;
             return (
               <div key={shortcut.id} className="flex flex-col items-center gap-2.5">
-                <Button variant="outline" className="size-12 rounded-full">
+                <Button
+                  variant="outline"
+                  className="size-12 rounded-full"
+                  onClick={() => router.push(shortcut.href)}
+                  type="button"
+                >
                   <Icon className="size-5" />
                 </Button>
                 <span className="text-center text-muted-foreground text-xs">{shortcut.label}</span>
