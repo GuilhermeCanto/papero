@@ -4,6 +4,11 @@ Papero is an open-source, local-first finance dashboard for small businesses, so
 
 Screenshot coming soon.
 
+# Live Demo
+
+Try Papero here: [papero-delta.vercel.app](https://papero-delta.vercel.app/dashboard/finance)
+
+
 ## Status
 
 Papero is currently an open-source MVP with local, demo and database modes.
