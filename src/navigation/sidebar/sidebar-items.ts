@@ -5,6 +5,7 @@ import {
   CircleDollarSign,
   ContactRound,
   FolderTree,
+  Landmark,
   LayoutDashboard,
   type LucideIcon,
   ReceiptText,
@@ -49,6 +50,11 @@ export const sidebarItems: NavGroup[] = [
         title: "transactions",
         url: "/dashboard/finance/transactions",
         icon: ReceiptText,
+      },
+      {
+        title: "accounts",
+        url: "/dashboard/finance/accounts",
+        icon: Landmark,
       },
       {
         title: "expenses",

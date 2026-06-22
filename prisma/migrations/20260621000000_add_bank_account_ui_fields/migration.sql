@@ -1,0 +1,8 @@
+-- CreateEnum
+CREATE TYPE "BankAccountType" AS ENUM ('CASH', 'CHECKING', 'CREDIT_CARD', 'INVESTMENT', 'OTHER', 'SAVINGS', 'WALLET');
+
+-- AlterTable
+ALTER TABLE "BankAccount"
+ADD COLUMN "type" "BankAccountType" NOT NULL DEFAULT 'CHECKING',
+ADD COLUMN "currency" TEXT NOT NULL DEFAULT 'BRL',
+ADD COLUMN "archived" BOOLEAN NOT NULL DEFAULT false;

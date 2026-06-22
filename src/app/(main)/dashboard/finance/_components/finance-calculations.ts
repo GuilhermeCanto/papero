@@ -1,3 +1,4 @@
+import type { FinanceAccount } from "./finance-accounts-store";
 import type { FinanceTransaction, TransactionKind } from "./finance-transactions-store";
 
 export type UpcomingFinanceItem = FinanceTransaction & {
@@ -42,6 +43,20 @@ export type TransactionUsage = {
   openAmountCents: number;
   paidAmountCents: number;
   totalAmountCents: number;
+};
+
+export type AccountBalanceSummary = {
+  account: FinanceAccount;
+  currentBalanceCents: number;
+  movementCount: number;
+  projectedBalanceCents: number;
+  share: number;
+};
+
+export type AccountActivityMonth = {
+  date: string;
+  movementCents: number;
+  movementCount: number;
 };
 
 const EXPENSE_KINDS = new Set<TransactionKind>(["fixed", "variable", "people", "taxes", "transfer"]);
@@ -141,6 +156,10 @@ export function isIncomeTransaction(transaction: FinanceTransaction) {
 
 export function isExpenseTransaction(transaction: FinanceTransaction) {
   return EXPENSE_KINDS.has(transaction.kind);
+}
+
+export function resolveTransactionAccountId(transaction: FinanceTransaction, defaultAccountId: string) {
+  return transaction.accountId ?? defaultAccountId;
 }
 
 export function getMonthTransactions(transactions: FinanceTransaction[], monthDate: Date) {
@@ -379,6 +398,94 @@ export function getForecastedEndOfMonthBalanceCents(transactions: FinanceTransac
   );
 
   return getCurrentBalanceCents(transactions) + openProjectedCents;
+}
+
+export function getCurrentBalanceCentsByAccount(
+  account: FinanceAccount,
+  transactions: FinanceTransaction[],
+  defaultAccountId: string,
+) {
+  return (
+    account.openingBalanceCents +
+    getUniqueTransactionsById(transactions)
+      .filter(
+        (transaction) => transaction.paid && resolveTransactionAccountId(transaction, defaultAccountId) === account.id,
+      )
+      .reduce((total, transaction) => total + getSignedAmountCents(transaction), 0)
+  );
+}
+
+export function getProjectedBalanceCentsByAccount(
+  account: FinanceAccount,
+  transactions: FinanceTransaction[],
+  defaultAccountId: string,
+) {
+  return (
+    account.openingBalanceCents +
+    getUniqueTransactionsById(transactions)
+      .filter((transaction) => resolveTransactionAccountId(transaction, defaultAccountId) === account.id)
+      .reduce((total, transaction) => total + getSignedAmountCents(transaction), 0)
+  );
+}
+
+export function getTotalCurrentBalanceCentsByAccount(
+  accounts: FinanceAccount[],
+  transactions: FinanceTransaction[],
+  defaultAccountId: string,
+) {
+  return accounts
+    .filter((account) => !account.archived)
+    .reduce((total, account) => total + getCurrentBalanceCentsByAccount(account, transactions, defaultAccountId), 0);
+}
+
+export function getAccountBalanceSummaries(
+  accounts: FinanceAccount[],
+  transactions: FinanceTransaction[],
+  defaultAccount: FinanceAccount,
+): AccountBalanceSummary[] {
+  const activeAccounts = accounts.filter((account) => !account.archived);
+  const visibleAccounts = activeAccounts.length > 0 ? activeAccounts : [defaultAccount];
+  const summaries = visibleAccounts.map((account) => ({
+    account,
+    currentBalanceCents: getCurrentBalanceCentsByAccount(account, transactions, defaultAccount.id),
+    movementCount: getUniqueTransactionsById(transactions).filter(
+      (transaction) => resolveTransactionAccountId(transaction, defaultAccount.id) === account.id,
+    ).length,
+    projectedBalanceCents: getProjectedBalanceCentsByAccount(account, transactions, defaultAccount.id),
+    share: 0,
+  }));
+  const totalPositiveBalanceCents = summaries.reduce(
+    (total, summary) => total + Math.max(0, summary.currentBalanceCents),
+    0,
+  );
+
+  return summaries.map((summary) => ({
+    ...summary,
+    share:
+      totalPositiveBalanceCents > 0
+        ? Math.round((Math.max(0, summary.currentBalanceCents) / totalPositiveBalanceCents) * 100)
+        : 0,
+  }));
+}
+
+export function getAccountActivityByMonth(
+  transactions: FinanceTransaction[],
+  monthDate: Date,
+  monthCount = 12,
+): AccountActivityMonth[] {
+  const monthStart = startOfMonth(monthDate);
+
+  return Array.from({ length: monthCount }, (_, index) => {
+    const date = new Date(monthStart.getFullYear(), monthStart.getMonth() - (monthCount - 1 - index), 1);
+    const monthTransactions = getMonthTransactions(transactions, date);
+    const paidTransactions = monthTransactions.filter((transaction) => transaction.paid);
+
+    return {
+      date: date.toISOString(),
+      movementCents: paidTransactions.reduce((total, transaction) => total + Math.abs(transaction.amountCents), 0),
+      movementCount: paidTransactions.length,
+    };
+  });
 }
 
 export function getCashHealthScore(transactions: FinanceTransaction[], today: Date) {

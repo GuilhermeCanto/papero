@@ -2,7 +2,7 @@
 
 Thanks for your interest in improving Papero.
 
-Papero is an early-stage, local-first finance dashboard for small businesses, solo founders, agencies and developers. The current app works from browser `localStorage`; Prisma/PostgreSQL infrastructure exists, but the finance UI is not connected to database mode yet.
+Papero is an early-stage finance dashboard for small businesses, solo founders, agencies and developers. The current finance UI works from browser `localStorage`; Prisma/PostgreSQL and Better Auth infrastructure exist, but finance records are not connected to database mode yet.
 
 ## Getting Started
 
@@ -37,7 +37,7 @@ Fresh production builds may require network access because `next/font/google` fe
 
 ## Optional Database Setup
 
-Database setup is optional for now. The active finance UI still uses browser `localStorage`.
+Database setup is optional unless your change touches auth, Prisma, migrations or future database-mode finance work. The active finance UI still uses browser `localStorage`.
 
 Contributors working on database features can use either local Docker PostgreSQL or a hosted PostgreSQL provider such as Supabase, Render, Neon or Railway.
 
@@ -51,9 +51,26 @@ npm run db:migrate
 npm run db:seed
 ```
 
-To use hosted PostgreSQL, copy `.env.example` to `.env`, replace `DATABASE_URL` with the provider connection string, then run the same Prisma commands without Docker.
+To use hosted PostgreSQL, copy `.env.example` to `.env.local`, replace `DATABASE_URL` with the provider connection string, then run the same Prisma commands without Docker. Some hosted providers require SSL options such as `sslmode=require`.
 
-If Docker or PostgreSQL is not available, database commands will fail. That should not block work on the current local-first MVP unless your change specifically touches database infrastructure. Keep `localStorage` mode working until database mode fully replaces it or becomes selectable. Database changes should use the centralized Prisma client in `src/server/db/prisma.ts`.
+For database auth testing, set:
+
+```env
+NEXT_PUBLIC_PAPERO_DATA_MODE="database"
+PAPERO_DATA_MODE="database"
+BETTER_AUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+Generate `BETTER_AUTH_SECRET` with:
+
+```bash
+openssl rand -base64 32
+```
+
+In `database` mode, dashboard routes require login and `/auth/v2/register` creates or ensures the user, company/workspace and OWNER membership. In `local` and `demo` modes, dashboard routes must remain open without auth.
+
+If Docker or PostgreSQL is not available, database commands will fail. That should not block work on the current local-first MVP unless your change specifically touches auth or database infrastructure. Keep `localStorage` mode working until database mode fully replaces it or becomes selectable. Database changes should use the centralized Prisma client in `src/server/db/prisma.ts`.
 
 ## Contribution Guidelines
 

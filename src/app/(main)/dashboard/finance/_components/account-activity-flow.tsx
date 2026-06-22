@@ -7,7 +7,7 @@ import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } f
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const pipelineChartValues = [34, 38, 31, 47, 42, 51, 44, 40, 58, 46, 43, 49] as const;
+import type { AccountActivityMonth } from "./finance-calculations";
 
 const axisMonthFormatter = new Intl.DateTimeFormat("en-US", { month: "short" });
 const tooltipMonthFormatter = new Intl.DateTimeFormat("en-US", { month: "short", year: "2-digit" });
@@ -50,26 +50,33 @@ const defaultAccountActivityFlowCopy: AccountActivityFlowCopy = {
   progressTotalLabel: "qualified",
 };
 
-function getRollingMonthData(values: readonly number[]) {
-  return values.map((qualified, index) => {
+function getEmptyRollingMonthData(monthCount: number) {
+  return Array.from({ length: monthCount }, (_, index) => {
     const date = new Date();
-    date.setMonth(date.getMonth() - (values.length - 1 - index));
+    date.setMonth(date.getMonth() - (monthCount - 1 - index));
 
     return {
       date: date.toISOString(),
-      qualified,
+      movementCount: 0,
     };
   });
 }
 
-export function AccountActivityFlow({ copy = defaultAccountActivityFlowCopy }: { copy?: AccountActivityFlowCopy }) {
-  const pipelineChartData = getRollingMonthData(pipelineChartValues);
-  const totalQualified = pipelineChartData.reduce((sum, item) => sum + item.qualified, 0);
+export function AccountActivityFlow({
+  activityData,
+  copy = defaultAccountActivityFlowCopy,
+}: {
+  activityData?: AccountActivityMonth[];
+  copy?: AccountActivityFlowCopy;
+}) {
+  const pipelineChartData = activityData?.length ? activityData : getEmptyRollingMonthData(12);
+  const totalQualified = pipelineChartData.reduce((sum, item) => sum + item.movementCount, 0);
   const discoveryCallsBooked = copy.progressValue;
-  const discoveryProgress = Math.round((discoveryCallsBooked / totalQualified) * 100);
+  const discoveryProgress =
+    totalQualified > 0 ? Math.min(100, Math.round((discoveryCallsBooked / totalQualified) * 100)) : 0;
   const progressDescription = copy.progressDescription.replace("{progress}", String(discoveryProgress));
   const pipelineChartConfig = {
-    qualified: {
+    movementCount: {
       label: copy.chartLabel,
       color: "var(--chart-2)",
     },
@@ -137,7 +144,7 @@ export function AccountActivityFlow({ copy = defaultAccountActivityFlowCopy }: {
                   }
                 />
                 <Bar
-                  dataKey="qualified"
+                  dataKey="movementCount"
                   fill="url(#crm-qualified-pattern)"
                   radius={[8, 8, 0, 0]}
                   stroke="var(--color-qualified)"

@@ -7,14 +7,64 @@ datasource db {
 }
 
 model User {
+  id            String   @id @default(cuid())
+  name          String?
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  accounts    Account[]
+  memberships CompanyMember[]
+  sessions    Session[]
+}
+
+model Session {
   id        String   @id @default(cuid())
-  name      String?
-  email     String   @unique
-  image     String?
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  memberships CompanyMember[]
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Verification {
+  id         String    @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@index([identifier])
 }
 
 model Company {
@@ -86,13 +136,16 @@ model Contact {
 }
 
 model BankAccount {
-  id                  String   @id @default(cuid())
+  id                  String          @id @default(cuid())
   companyId           String
   name                String
   bankName            String?
-  initialBalanceCents Int      @default(0)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  type                BankAccountType @default(CHECKING)
+  currency            String          @default("BRL")
+  initialBalanceCents Int             @default(0)
+  archived            Boolean         @default(false)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
 
   company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   transactions Transaction[]
@@ -152,6 +205,16 @@ enum CategoryType {
 enum ContactType {
   CUSTOMER
   SUPPLIER
+}
+
+enum BankAccountType {
+  CASH
+  CHECKING
+  CREDIT_CARD
+  INVESTMENT
+  OTHER
+  SAVINGS
+  WALLET
 }
 
 enum TransactionKind {

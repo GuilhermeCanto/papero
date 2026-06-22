@@ -6,6 +6,7 @@ import { isDemoMode } from "@/config/papero-mode";
 
 import { FINANCE_CATEGORIES_STORAGE_KEY } from "./categories-store";
 import { FINANCE_CONTACTS_STORAGE_KEY } from "./contacts-store";
+import { FINANCE_ACCOUNTS_STORAGE_KEY } from "./finance-accounts-store";
 import { loadDemoFinanceData } from "./finance-demo-data";
 import { FINANCE_TRANSACTIONS_STORAGE_KEY } from "./finance-transactions-store";
 
@@ -25,6 +26,7 @@ function isStoredCollectionEmpty(storageKey: string) {
 
 function areFinanceStoresEmpty() {
   return (
+    isStoredCollectionEmpty(FINANCE_ACCOUNTS_STORAGE_KEY) &&
     isStoredCollectionEmpty(FINANCE_CATEGORIES_STORAGE_KEY) &&
     isStoredCollectionEmpty(FINANCE_CONTACTS_STORAGE_KEY) &&
     isStoredCollectionEmpty(FINANCE_TRANSACTIONS_STORAGE_KEY)

@@ -4,6 +4,8 @@ import * as React from "react";
 
 import { useTranslations } from "next-intl";
 
+import { Button } from "@/components/ui/button";
+
 import {
   getCashFlowByDay,
   getMonthTransactions,
@@ -12,11 +14,11 @@ import {
   isExpenseTransaction,
   sumAmountCents,
 } from "../_components/finance-calculations";
-import { useFinanceTransactions } from "../_components/finance-transactions-store";
 import { FinanceTransactionsTable } from "../_components/finance-transactions-table";
 import { ExpenseBreakdown } from "../_components/transaction-flow";
 import { TransactionsOverviewCard } from "../_components/transactions-overview-card";
 import { UpcomingTransactions } from "../_components/upcoming-transactions";
+import { useFinanceTransactionsData } from "../_components/use-finance-transactions-data";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
@@ -30,7 +32,7 @@ function formatMoney(amountCents: number) {
 export default function ExpensesPage() {
   const t = useTranslations("Dashboard.financeOperationalPages.expenses");
   const today = React.useMemo(() => new Date(), []);
-  const { transactions } = useFinanceTransactions([]);
+  const { error, isDatabaseMode, isLoading, refresh, transactions } = useFinanceTransactionsData();
   const expenseTransactions = React.useMemo(() => transactions.filter(isExpenseTransaction), [transactions]);
   const monthExpenseTransactions = React.useMemo(
     () => getMonthTransactions(expenseTransactions, today),
@@ -63,6 +65,17 @@ export default function ExpensesPage() {
         <h1 className="text-3xl text-foreground leading-none tracking-tight">{t("title")}</h1>
         <p className="text-lg text-muted-foreground leading-none">{t("subtitle")}</p>
       </div>
+
+      {isDatabaseMode && (isLoading || error) ? (
+        <div className="flex items-center justify-between gap-3 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
+          <span className="text-muted-foreground">{isLoading ? t("loading") : error}</span>
+          {error ? (
+            <Button onClick={() => void refresh()} size="sm" variant="outline">
+              {t("retry")}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
         <div className="flex flex-col gap-4 xl:col-span-4">

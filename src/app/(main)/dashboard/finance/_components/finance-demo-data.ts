@@ -7,6 +7,11 @@ import {
 } from "./categories-store";
 import { FINANCE_CONTACTS_STORAGE_KEY, FINANCE_CONTACTS_UPDATE_EVENT, type FinanceContact } from "./contacts-store";
 import {
+  FINANCE_ACCOUNTS_STORAGE_KEY,
+  FINANCE_ACCOUNTS_UPDATE_EVENT,
+  type FinanceAccount,
+} from "./finance-accounts-store";
+import {
   FINANCE_TRANSACTIONS_STORAGE_KEY,
   FINANCE_TRANSACTIONS_UPDATE_EVENT,
   type FinanceTransaction,
@@ -125,9 +130,78 @@ export const demoFinanceContacts: FinanceContact[] = [
   },
 ];
 
+export const demoFinanceAccounts: FinanceAccount[] = [
+  {
+    archived: false,
+    createdAt: "2026-06-01T00:00:00.000Z",
+    currency: "BRL",
+    id: "main-account",
+    institution: "Nubank",
+    name: "Main Checking",
+    openingBalanceCents: 680000,
+    type: "checking",
+    updatedAt: "2026-06-01T00:00:00.000Z",
+  },
+  {
+    archived: false,
+    createdAt: "2026-06-01T00:00:00.000Z",
+    currency: "BRL",
+    id: "demo-account-reserve",
+    institution: "BTG",
+    name: "Reserve Account",
+    openingBalanceCents: 420000,
+    type: "savings",
+    updatedAt: "2026-06-01T00:00:00.000Z",
+  },
+  {
+    archived: false,
+    createdAt: "2026-06-01T00:00:00.000Z",
+    currency: "BRL",
+    id: "demo-account-cash",
+    name: "Cash",
+    openingBalanceCents: 85000,
+    type: "cash",
+    updatedAt: "2026-06-01T00:00:00.000Z",
+  },
+  {
+    archived: false,
+    createdAt: "2026-06-01T00:00:00.000Z",
+    currency: "BRL",
+    id: "demo-account-credit-card",
+    institution: "Inter",
+    name: "Credit Card",
+    openingBalanceCents: 0,
+    type: "credit_card",
+    updatedAt: "2026-06-01T00:00:00.000Z",
+  },
+  {
+    archived: false,
+    createdAt: "2026-06-01T00:00:00.000Z",
+    currency: "BRL",
+    id: "demo-account-investment",
+    institution: "XP",
+    name: "Investment Account",
+    openingBalanceCents: 1260000,
+    type: "investment",
+    updatedAt: "2026-06-01T00:00:00.000Z",
+  },
+  {
+    archived: false,
+    createdAt: "2026-06-01T00:00:00.000Z",
+    currency: "BRL",
+    id: "demo-account-wallet",
+    institution: "Mercado Pago",
+    name: "Digital Wallet",
+    openingBalanceCents: 210000,
+    type: "wallet",
+    updatedAt: "2026-06-01T00:00:00.000Z",
+  },
+];
+
 export function createDemoFinanceTransactions(today = new Date()): FinanceTransaction[] {
   return [
     {
+      accountId: "main-account",
       amountCents: 1280000,
       category: "Serviços",
       date: makeDate(5),
@@ -141,6 +215,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentType: "À vista",
     },
     {
+      accountId: "main-account",
       amountCents: 760000,
       category: "Assinaturas",
       date: makeDate(12),
@@ -154,6 +229,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentType: "Recorrente",
     },
     {
+      accountId: "main-account",
       amountCents: 420000,
       category: "Consultoria",
       date: formatLocalDate(addDays(today, 6)),
@@ -167,6 +243,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentType: "À vista",
     },
     {
+      accountId: "main-account",
       amountCents: 590000,
       category: "Serviços",
       date: makeDate(8, 1),
@@ -180,6 +257,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentType: "Recorrente",
     },
     {
+      accountId: "demo-account-credit-card",
       amountCents: 14900,
       category: "Software",
       date: makeDate(7),
@@ -193,6 +271,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentType: "Recorrente",
     },
     {
+      accountId: "demo-account-credit-card",
       amountCents: 19500,
       category: "Software",
       date: formatLocalDate(addDays(today, 4)),
@@ -206,6 +285,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentType: "Recorrente",
     },
     {
+      accountId: "main-account",
       amountCents: 48000,
       category: "Contabilidade",
       date: makeDate(10),
@@ -219,6 +299,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentType: "Recorrente",
     },
     {
+      accountId: "demo-account-credit-card",
       amountCents: 68000,
       category: "Marketing",
       date: formatLocalDate(addDays(today, -5)),
@@ -232,6 +313,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentType: "À vista",
     },
     {
+      accountId: "demo-account-credit-card",
       amountCents: 32000,
       category: "Viagens",
       date: makeDate(16),
@@ -245,6 +327,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentType: "Parcelado",
     },
     {
+      accountId: "main-account",
       amountCents: 220000,
       category: "Prestadores",
       date: formatLocalDate(addDays(today, 9)),
@@ -258,6 +341,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentType: "À vista",
     },
     {
+      accountId: "main-account",
       amountCents: 380000,
       category: "Folha de pagamento",
       date: makeDate(25),
@@ -271,6 +355,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentType: "Recorrente",
     },
     {
+      accountId: "main-account",
       amountCents: 74000,
       category: "Simples Nacional",
       date: formatLocalDate(addDays(today, -2)),
@@ -284,6 +369,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentType: "À vista",
     },
     {
+      accountId: "main-account",
       amountCents: 26000,
       category: "ISS",
       date: makeDate(20, 1),
@@ -297,6 +383,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentType: "À vista",
     },
     {
+      accountId: "main-account",
       amountCents: 150000,
       category: "Transferência entre contas",
       date: makeDate(18),
@@ -324,22 +411,27 @@ function uniqueById<T extends { id: string }>(items: T[]) {
 }
 
 function writeFinanceData({
+  accounts,
   categories,
   contacts,
   transactions,
 }: {
+  accounts: FinanceAccount[];
   categories: FinanceCategory[];
   contacts: FinanceContact[];
   transactions: FinanceTransaction[];
 }) {
+  const uniqueAccounts = uniqueById(accounts);
   const uniqueCategories = uniqueById(categories);
   const uniqueContacts = uniqueById(contacts);
   const uniqueTransactions = uniqueById(transactions);
 
+  window.localStorage.setItem(FINANCE_ACCOUNTS_STORAGE_KEY, JSON.stringify(uniqueAccounts));
   window.localStorage.setItem(FINANCE_CATEGORIES_STORAGE_KEY, JSON.stringify(uniqueCategories));
   window.localStorage.setItem(FINANCE_CONTACTS_STORAGE_KEY, JSON.stringify(uniqueContacts));
   window.localStorage.setItem(FINANCE_TRANSACTIONS_STORAGE_KEY, JSON.stringify(uniqueTransactions));
 
+  window.dispatchEvent(new CustomEvent(FINANCE_ACCOUNTS_UPDATE_EVENT, { detail: uniqueAccounts }));
   window.dispatchEvent(new CustomEvent(FINANCE_CATEGORIES_UPDATE_EVENT, { detail: uniqueCategories }));
   window.dispatchEvent(new CustomEvent(FINANCE_CONTACTS_UPDATE_EVENT, { detail: uniqueContacts }));
   window.dispatchEvent(new CustomEvent(FINANCE_TRANSACTIONS_UPDATE_EVENT, { detail: uniqueTransactions }));
@@ -349,6 +441,7 @@ export function loadDemoFinanceData() {
   if (typeof window === "undefined") return;
 
   writeFinanceData({
+    accounts: demoFinanceAccounts,
     categories: demoFinanceCategories,
     contacts: demoFinanceContacts,
     transactions: createDemoFinanceTransactions(),
@@ -358,10 +451,12 @@ export function loadDemoFinanceData() {
 export function clearFinanceData() {
   if (typeof window === "undefined") return;
 
+  window.localStorage.setItem(FINANCE_ACCOUNTS_STORAGE_KEY, JSON.stringify([]));
   window.localStorage.setItem(FINANCE_CATEGORIES_STORAGE_KEY, JSON.stringify([]));
   window.localStorage.setItem(FINANCE_CONTACTS_STORAGE_KEY, JSON.stringify([]));
   window.localStorage.setItem(FINANCE_TRANSACTIONS_STORAGE_KEY, JSON.stringify([]));
 
+  window.dispatchEvent(new CustomEvent(FINANCE_ACCOUNTS_UPDATE_EVENT, { detail: [] }));
   window.dispatchEvent(new CustomEvent(FINANCE_CATEGORIES_UPDATE_EVENT, { detail: [] }));
   window.dispatchEvent(new CustomEvent(FINANCE_CONTACTS_UPDATE_EVENT, { detail: [] }));
   window.dispatchEvent(new CustomEvent(FINANCE_TRANSACTIONS_UPDATE_EVENT, { detail: [] }));

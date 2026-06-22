@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { Check, ChevronDown, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,12 +12,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-import {
-  type FinanceCategory,
-  type FinanceCategoryType,
-  financeCategoryTypes,
-  useFinanceCategories,
-} from "./categories-store";
+import { type FinanceCategory, type FinanceCategoryType, financeCategoryTypes } from "./categories-store";
+import { useFinanceCategoriesData } from "./use-finance-categories-data";
 
 type CategorySelectProps = {
   currentType: FinanceCategoryType | null;
@@ -29,17 +26,21 @@ export function CategorySelect({ currentType, onChange, value }: CategorySelectP
   const tCategories = useTranslations("Dashboard.financeCategories");
   const [open, setOpen] = React.useState(false);
   const [newCategoryName, setNewCategoryName] = React.useState("");
-  const { addCategory, categories } = useFinanceCategories();
+  const { addCategory, categories, isLoading } = useFinanceCategoriesData();
 
-  const createCategory = () => {
+  const createCategory = async () => {
     if (!currentType) return;
 
-    const category = addCategory(currentType, newCategoryName);
-    if (!category) return;
+    try {
+      const category = await addCategory(currentType, newCategoryName);
+      if (!category) return;
 
-    onChange(category);
-    setNewCategoryName("");
-    setOpen(false);
+      onChange(category);
+      setNewCategoryName("");
+      setOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : tCategories("errors.create"));
+    }
   };
 
   const hasNewCategoryName = newCategoryName.trim().length > 0;
@@ -78,7 +79,7 @@ export function CategorySelect({ currentType, onChange, value }: CategorySelectP
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
-                createCategory();
+                void createCategory();
               }
             }}
             placeholder={t("newCategory")}
@@ -86,8 +87,8 @@ export function CategorySelect({ currentType, onChange, value }: CategorySelectP
           />
           <Button
             aria-label={t("newCategory")}
-            disabled={!currentType || !hasNewCategoryName}
-            onClick={createCategory}
+            disabled={!currentType || !hasNewCategoryName || isLoading}
+            onClick={() => void createCategory()}
             size="icon"
             type="button"
           >

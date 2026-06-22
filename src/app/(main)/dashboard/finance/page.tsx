@@ -10,7 +10,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { AccountActivityFlow } from "./_components/account-activity-flow";
 import { BalanceDistributionCard } from "./_components/balance-distribution-card";
+import { getDefaultFinanceAccount, getFinanceAccountsWithFallback } from "./_components/finance-accounts-store";
 import {
+  getAccountActivityByMonth,
+  getAccountBalanceSummaries,
   getCashFlowByDay,
   getDashboardFinanceMetrics,
   getForecastedEndOfMonthBalanceCents,
@@ -23,7 +26,6 @@ import {
 import { FinanceDemoAutoSeed } from "./_components/finance-demo-auto-seed";
 import { FinanceDemoDataControls } from "./_components/finance-demo-data-controls";
 import type { FinanceTransaction } from "./_components/finance-transactions-store";
-import { useFinanceTransactions } from "./_components/finance-transactions-store";
 import { FinancialCalendarPanel } from "./_components/financial-calendar-panel";
 import { HealthStatus } from "./_components/health-status";
 import { IncomeBreakdown } from "./_components/income-breakdown";
@@ -33,6 +35,8 @@ import { ShortcutsCard } from "./_components/quick-actions";
 import { ExpenseBreakdown, RecentTransactionFlow, type TransactionRecord } from "./_components/transaction-flow";
 import { TransactionsOverviewCard } from "./_components/transactions-overview-card";
 import { UpcomingTransactions } from "./_components/upcoming-transactions";
+import { useFinanceAccountsData } from "./_components/use-finance-accounts-data";
+import { useFinanceTransactionsData } from "./_components/use-finance-transactions-data";
 import { Wallet } from "./_components/wallet";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
@@ -88,7 +92,31 @@ function toTransactionRecord(transaction: FinanceTransaction): TransactionRecord
 export default function Page() {
   const t = useTranslations("Dashboard");
   const today = React.useMemo(() => new Date(), []);
-  const { transactions } = useFinanceTransactions([]);
+  const { accounts, isDatabaseMode: isDatabaseAccountsMode } = useFinanceAccountsData();
+  const {
+    error: transactionsError,
+    isDatabaseMode: isDatabaseTransactionsMode,
+    isLoading: isLoadingTransactions,
+    refresh: refreshTransactions,
+    transactions,
+  } = useFinanceTransactionsData();
+  const accountsWithFallback = React.useMemo(
+    () => (isDatabaseAccountsMode ? accounts : getFinanceAccountsWithFallback(accounts)),
+    [accounts, isDatabaseAccountsMode],
+  );
+  const defaultAccount = React.useMemo(() => getDefaultFinanceAccount(accountsWithFallback), [accountsWithFallback]);
+  const accountSummaries = React.useMemo(
+    () => getAccountBalanceSummaries(accountsWithFallback, transactions, defaultAccount),
+    [accountsWithFallback, defaultAccount, transactions],
+  );
+  const accountActivityData = React.useMemo(
+    () => getAccountActivityByMonth(transactions, today),
+    [transactions, today],
+  );
+  const paidAccountMovementCount = React.useMemo(
+    () => accountActivityData.reduce((total, item) => total + item.movementCount, 0),
+    [accountActivityData],
+  );
   const hasTransactions = transactions.length > 0;
   const metrics = React.useMemo(() => getDashboardFinanceMetrics(transactions, today), [transactions, today]);
   const cashFlowDays = React.useMemo(() => getCashFlowByDay(transactions, today), [transactions, today]);
@@ -188,6 +216,19 @@ export default function Page() {
         <p className="text-lg text-muted-foreground leading-none">{t("subtitle")}</p>
       </div>
 
+      {isDatabaseTransactionsMode && (isLoadingTransactions || transactionsError) ? (
+        <div className="flex items-center justify-between gap-3 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
+          <span className="text-muted-foreground">
+            {isLoadingTransactions ? t("financeData.loading") : transactionsError}
+          </span>
+          {transactionsError ? (
+            <Button onClick={() => void refreshTransactions()} size="sm" variant="outline">
+              {t("financeData.retry")}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+
       <Tabs defaultValue="30-days" className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <TabsList variant="line">
@@ -237,14 +278,16 @@ export default function Page() {
         </TabsContent>
 
         <TabsContent value="12-months" className="flex flex-col gap-4">
-          <div className="rounded-xl border border-dashed bg-muted/20 px-4 py-3 text-muted-foreground text-sm">
-            {t("accountsNotice")}
-          </div>
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-            <BalanceDistributionCard />
-            <Wallet />
+            <BalanceDistributionCard accounts={accountSummaries} />
+            <Wallet
+              accounts={accountSummaries}
+              sourceLabel={isDatabaseAccountsMode ? "Database" : "Local"}
+              statusDescription={isDatabaseAccountsMode ? "synced from database" : "available locally"}
+            />
           </div>
           <AccountActivityFlow
+            activityData={accountActivityData}
             copy={{
               title: t("accountsActivity.title"),
               chartLabel: t("accountsActivity.chartLabel"),
@@ -257,7 +300,7 @@ export default function Page() {
               totalUnit: t("accountsActivity.totalUnit"),
               totalDescription: t("accountsActivity.totalDescription"),
               progressTitle: t("accountsActivity.progressTitle"),
-              progressValue: 184,
+              progressValue: paidAccountMovementCount,
               progressUnit: t("accountsActivity.progressUnit"),
               progressDescription: t("accountsActivity.progressDescription", { progress: "{progress}" }),
               progressCurrentLabel: t("accountsActivity.progressCurrentLabel"),

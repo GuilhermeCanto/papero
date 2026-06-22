@@ -11,68 +11,20 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { formatCurrency } from "@/lib/utils";
 import { PRIVATE_VALUE_MASK, useDashboardPrivacyStore } from "@/stores/dashboard-privacy-store";
 
-type BalanceKey = "investment" | "main" | "reserve" | "savings";
-
-const balanceData: {
-  account: string;
-  amount: number;
-  key: BalanceKey;
-  percentage: number;
-}[] = [
-  {
-    account: "Conta principal",
-    amount: 122_540,
-    key: "main",
-    percentage: 52.2,
-  },
-  {
-    account: "Conta de reserva",
-    amount: 48_320,
-    key: "savings",
-    percentage: 20.6,
-  },
-  {
-    account: "Conta de investimentos",
-    amount: 36_780,
-    key: "investment",
-    percentage: 15.7,
-  },
-  {
-    account: "Conta de proteção",
-    amount: 27_256,
-    key: "reserve",
-    percentage: 11.5,
-  },
-];
+import type { AccountBalanceSummary } from "./finance-calculations";
 
 const chartConfig = {
   amount: {
     label: "Saldo",
   },
-  investment: {
-    color: "var(--chart-1)",
-    label: "Conta de investimentos",
-  },
-  main: {
-    color: "var(--chart-2)",
-    label: "Conta principal",
-  },
-  reserve: {
-    color: "var(--chart-3)",
-    label: "Conta de proteção",
-  },
-  savings: {
-    color: "var(--chart-4)",
-    label: "Conta de reserva",
-  },
 } satisfies ChartConfig;
 
 const currencies = {
+  BRL: {
+    label: "Saldo em real",
+  },
   EUR: {
     label: "Saldo em euro",
-  },
-  GBP: {
-    label: "Saldo em libra",
   },
   USD: {
     label: "Saldo em dólar",
@@ -81,21 +33,26 @@ const currencies = {
 
 type Currency = keyof typeof currencies;
 
-const getAccountColor = (key: BalanceKey) => {
-  const config = chartConfig[key];
+const chartColors = ["var(--chart-2)", "var(--chart-4)", "var(--chart-1)", "var(--chart-3)", "var(--chart-5)"];
 
-  return "color" in config ? config.color : undefined;
-};
-
-const chartData = balanceData.map((item) => ({
-  ...item,
-  fill: getAccountColor(item.key),
-}));
-
-export function BalanceDistributionCard() {
-  const [currency, setCurrency] = React.useState<Currency>("USD");
+export function BalanceDistributionCard({ accounts }: { accounts: AccountBalanceSummary[] }) {
+  const [currency, setCurrency] = React.useState<Currency>("BRL");
   const numbersHidden = useDashboardPrivacyStore((state) => state.numbersHidden);
-  const totalBalance = React.useMemo(() => balanceData.reduce((total, item) => total + item.amount, 0), []);
+  const chartData = React.useMemo(
+    () =>
+      accounts.map((item, index) => ({
+        account: item.account.name,
+        amount: Math.max(0, item.currentBalanceCents / 100),
+        fill: chartColors[index % chartColors.length],
+        id: item.account.id,
+        percentage: item.share,
+      })),
+    [accounts],
+  );
+  const totalBalance = React.useMemo(
+    () => accounts.reduce((total, item) => total + item.currentBalanceCents, 0) / 100,
+    [accounts],
+  );
 
   return (
     <Card>
@@ -166,7 +123,7 @@ export function BalanceDistributionCard() {
 
         <div className="flex min-w-0 flex-col gap-3">
           {chartData.map((item) => (
-            <div className="grid grid-cols-[1fr_auto] items-end gap-3" key={item.key}>
+            <div className="grid grid-cols-[1fr_auto] items-end gap-3" key={item.id}>
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-1">
                   <span aria-hidden="true" className="h-2 w-1 rounded-full" style={{ backgroundColor: item.fill }} />

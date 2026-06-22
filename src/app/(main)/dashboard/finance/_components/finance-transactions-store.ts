@@ -7,9 +7,13 @@ export type PaymentTime = "cash" | "installment" | "recurring";
 
 export type FinanceTransaction = {
   id: string;
+  accountId?: string;
   amountCents: number;
   category: string;
+  categoryId?: string;
   competenceDate?: string;
+  contactId?: string;
+  createdAt?: string;
   date: string;
   description: string;
   documentNumber?: string;
@@ -21,6 +25,8 @@ export type FinanceTransaction = {
   paymentTime: PaymentTime;
   paymentType: string;
   tags?: string;
+  transferTargetAccountId?: string;
+  updatedAt?: string;
 };
 
 export const FINANCE_TRANSACTIONS_STORAGE_KEY = "papero:finance-transactions:v1";
@@ -47,8 +53,11 @@ function isFinanceTransaction(value: unknown): value is FinanceTransaction {
   const transaction = value as Partial<FinanceTransaction>;
   return (
     typeof transaction.id === "string" &&
+    (transaction.accountId === undefined || typeof transaction.accountId === "string") &&
     typeof transaction.amountCents === "number" &&
     typeof transaction.category === "string" &&
+    (transaction.categoryId === undefined || typeof transaction.categoryId === "string") &&
+    (transaction.contactId === undefined || typeof transaction.contactId === "string") &&
     typeof transaction.date === "string" &&
     typeof transaction.description === "string" &&
     typeof transaction.from === "string" &&
@@ -56,7 +65,8 @@ function isFinanceTransaction(value: unknown): value is FinanceTransaction {
     typeof transaction.paid === "boolean" &&
     typeof transaction.paymentMode === "string" &&
     isPaymentTime(transaction.paymentTime) &&
-    typeof transaction.paymentType === "string"
+    typeof transaction.paymentType === "string" &&
+    (transaction.transferTargetAccountId === undefined || typeof transaction.transferTargetAccountId === "string")
   );
 }
 
@@ -93,6 +103,8 @@ function writeStoredTransactions(transactions: FinanceTransaction[]) {
 
   window.localStorage.setItem(FINANCE_TRANSACTIONS_STORAGE_KEY, JSON.stringify(uniqueTransactions));
   window.dispatchEvent(new CustomEvent(FINANCE_TRANSACTIONS_UPDATE_EVENT, { detail: uniqueTransactions }));
+
+  return uniqueTransactions;
 }
 
 function createTransactionId() {
@@ -136,8 +148,8 @@ export function useFinanceTransactions(initialTransactions: FinanceTransaction[]
     const currentTransactions = readStoredTransactions(initialTransactionsRef.current);
     const nextTransactions = typeof updater === "function" ? updater(currentTransactions) : updater;
 
-    writeStoredTransactions(nextTransactions);
-    setTransactionsState(nextTransactions);
+    const uniqueTransactions = writeStoredTransactions(nextTransactions);
+    setTransactionsState(uniqueTransactions);
   }, []);
 
   const addTransaction = React.useCallback(

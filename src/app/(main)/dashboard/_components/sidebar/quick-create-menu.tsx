@@ -7,9 +7,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type { FinanceContactType } from "@/app/(main)/dashboard/finance/_components/contacts-store";
-import { useFinanceContacts } from "@/app/(main)/dashboard/finance/_components/contacts-store";
 import type { TransactionKind } from "@/app/(main)/dashboard/finance/_components/finance-transactions-store";
-import { useFinanceTransactions } from "@/app/(main)/dashboard/finance/_components/finance-transactions-store";
 import { FloatingButton, FloatingButtonItem } from "@/components/floating-button/floating-button";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +23,12 @@ import { Label } from "@/components/ui/label";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+import { AccountSelect, resolveFinanceAccountId } from "../../finance/_components/account-select";
+import { useFinanceAccountsData } from "../../finance/_components/use-finance-accounts-data";
+import { useFinanceCategoriesData } from "../../finance/_components/use-finance-categories-data";
+import { useFinanceContactsData } from "../../finance/_components/use-finance-contacts-data";
+import { useFinanceTransactionsData } from "../../finance/_components/use-finance-transactions-data";
 
 type QuickCreateAction = "expense" | "income" | "supplier" | "customer";
 
@@ -43,6 +47,10 @@ function parseMoneyToCents(value: string) {
   if (!Number.isFinite(amount)) return 0;
 
   return Math.round(amount * 100);
+}
+
+function isIncomeAction(action: Exclude<QuickCreateAction, "supplier" | "customer">) {
+  return action === "income";
 }
 
 function QuickCreateOption({
@@ -88,11 +96,15 @@ function TransactionDialog({
   open: boolean;
 }) {
   const t = useTranslations("QuickCreate");
-  const { addTransaction } = useFinanceTransactions([]);
+  const { accounts } = useFinanceAccountsData();
+  const { categories } = useFinanceCategoriesData();
+  const { contacts } = useFinanceContactsData(isIncomeAction(kind) ? "customer" : "supplier");
+  const { addTransaction } = useFinanceTransactionsData();
   const [description, setDescription] = React.useState("");
   const [amount, setAmount] = React.useState("");
   const [dueDate, setDueDate] = React.useState(today);
   const [contact, setContact] = React.useState("");
+  const [accountId, setAccountId] = React.useState(() => resolveFinanceAccountId([]));
   const [notes, setNotes] = React.useState("");
   const [isSaving, setIsSaving] = React.useState(false);
 
@@ -106,32 +118,58 @@ function TransactionDialog({
     setAmount("");
     setDueDate(today);
     setContact("");
+    setAccountId(resolveFinanceAccountId(accounts));
     setNotes("");
     setIsSaving(false);
   };
 
-  const saveTransaction = () => {
+  React.useEffect(() => {
+    if (!open) return;
+    setAccountId((currentAccountId) => resolveFinanceAccountId(accounts, currentAccountId));
+  }, [accounts, open]);
+
+  const saveTransaction = async () => {
     if (isSaving) return;
     if (!description.trim()) return;
 
     setIsSaving(true);
-    addTransaction({
-      amountCents: parseMoneyToCents(amount),
-      category: isIncome ? t("defaults.incomeCategory") : t("defaults.expenseCategory"),
-      date: dueDate,
-      description,
-      from: contact,
-      kind: transactionKind,
-      notes,
-      paid: false,
-      paymentMode: "automatic",
-      paymentTime: "cash",
-      paymentType: t("defaults.singlePayment"),
-    });
 
-    toast.success(isIncome ? t("incomeDialog.success") : t("expenseDialog.success"));
-    reset();
-    onOpenChange(false);
+    try {
+      const defaultCategoryName = isIncome ? t("defaults.incomeCategory") : t("defaults.expenseCategory");
+      const category =
+        categories.find(
+          (currentCategory) =>
+            currentCategory.type === transactionKind &&
+            currentCategory.name.localeCompare(defaultCategoryName, undefined, { sensitivity: "accent" }) === 0,
+        ) ?? categories.find((currentCategory) => currentCategory.type === transactionKind);
+      const selectedContact = contacts.find(
+        (currentContact) => currentContact.name.localeCompare(contact, undefined, { sensitivity: "accent" }) === 0,
+      );
+
+      await addTransaction({
+        amountCents: parseMoneyToCents(amount),
+        accountId: resolveFinanceAccountId(accounts, accountId),
+        category: category?.name ?? defaultCategoryName,
+        categoryId: category?.id,
+        contactId: selectedContact?.id,
+        date: dueDate,
+        description,
+        from: selectedContact?.name ?? contact,
+        kind: transactionKind,
+        notes,
+        paid: false,
+        paymentMode: "automatic",
+        paymentTime: "cash",
+        paymentType: t("defaults.singlePayment"),
+      });
+
+      toast.success(isIncome ? t("incomeDialog.success") : t("expenseDialog.success"));
+      reset();
+      onOpenChange(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("errors.transaction"));
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -177,6 +215,10 @@ function TransactionDialog({
               value={contact}
             />
           </Label>
+          <div className="grid gap-1.5">
+            <Label>{t("fields.account")}</Label>
+            <AccountSelect accounts={accounts} onChange={setAccountId} triggerClassName="w-full" value={accountId} />
+          </div>
           <Label className="grid gap-1.5" htmlFor={`${kind}-notes`}>
             {t("fields.notes")}
             <Textarea id={`${kind}-notes`} onChange={(event) => setNotes(event.target.value)} value={notes} />
@@ -184,7 +226,7 @@ function TransactionDialog({
         </div>
 
         <DialogFooter>
-          <Button disabled={!description.trim() || isSaving} onClick={saveTransaction} type="button">
+          <Button disabled={!description.trim() || isSaving} onClick={() => void saveTransaction()} type="button">
             {t("actions.save")}
           </Button>
         </DialogFooter>
@@ -203,7 +245,7 @@ function ContactDialog({
   open: boolean;
 }) {
   const t = useTranslations("QuickCreate");
-  const { addContact } = useFinanceContacts();
+  const { addContact } = useFinanceContactsData(contactType);
   const [name, setName] = React.useState("");
   const [taxId, setTaxId] = React.useState("");
   const [website, setWebsite] = React.useState("");
@@ -218,20 +260,24 @@ function ContactDialog({
     setAddress("");
   };
 
-  const saveContact = () => {
-    const contact = addContact({
-      address,
-      name,
-      taxId,
-      type: contactType,
-      website,
-    });
+  const saveContact = async () => {
+    try {
+      const contact = await addContact({
+        address,
+        name,
+        taxId,
+        type: contactType,
+        website,
+      });
 
-    if (!contact) return;
+      if (!contact) return;
 
-    toast.success(isCustomer ? t("customerDialog.success") : t("supplierDialog.success"));
-    reset();
-    onOpenChange(false);
+      toast.success(isCustomer ? t("customerDialog.success") : t("supplierDialog.success"));
+      reset();
+      onOpenChange(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("errors.contact"));
+    }
   };
 
   return (
@@ -275,7 +321,7 @@ function ContactDialog({
         </div>
 
         <DialogFooter>
-          <Button disabled={!name.trim()} onClick={saveContact} type="button">
+          <Button disabled={!name.trim()} onClick={() => void saveContact()} type="button">
             {t("actions.save")}
           </Button>
         </DialogFooter>
