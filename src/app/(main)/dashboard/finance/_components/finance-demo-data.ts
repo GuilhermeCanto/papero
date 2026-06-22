@@ -395,6 +395,7 @@ export function createDemoFinanceTransactions(today = new Date()): FinanceTransa
       paymentMode: "Bank Transfer",
       paymentTime: "cash",
       paymentType: "À vista",
+      transferTargetAccountId: "demo-account-reserve",
     },
   ];
 }
