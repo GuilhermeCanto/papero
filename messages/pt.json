@@ -399,6 +399,7 @@
     "financeCategories": {
       "title": "Categorias",
       "subtitle": "Organize categorias de receitas e despesas usadas nas transações.",
+      "loading": "Carregando categorias financeiras...",
       "kpi": {
         "totalTitle": "Categorias cadastradas",
         "totalDescription": "Disponíveis nas transações.",
@@ -445,6 +446,12 @@
       "newCategoryAria": "Nova categoria para {type}",
       "newCategoryPlaceholder": "Nova categoria",
       "createCategory": "Criar categoria",
+      "actions": {
+        "retry": "Tentar novamente"
+      },
+      "errors": {
+        "create": "Não foi possível criar a categoria."
+      },
       "usage": {
         "count": "{count, plural, one {# transação} other {# transações}}"
       },

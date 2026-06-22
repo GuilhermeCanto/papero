@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { PrivacyValue } from "@/app/(main)/dashboard/_components/privacy-value";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +14,10 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-import { type FinanceCategoryType, financeCategoryTypes, useFinanceCategories } from "../_components/categories-store";
+import { type FinanceCategory, type FinanceCategoryType, financeCategoryTypes } from "../_components/categories-store";
 import { getCategoryUsage, getFinanceUsageKey, type TransactionUsage } from "../_components/finance-calculations";
 import { useFinanceTransactions } from "../_components/finance-transactions-store";
+import { useFinanceCategoriesData } from "../_components/use-finance-categories-data";
 
 function formatMoney(amountCents: number) {
   return new Intl.NumberFormat("pt-BR", {
@@ -95,22 +97,29 @@ function CategoriesKpiStrip({
 }
 
 function CategoryGroupCard({
+  addCategory,
+  categories,
   categoryUsage,
   type,
 }: {
+  addCategory: (type: FinanceCategoryType, rawName: string) => Promise<FinanceCategory | null>;
+  categories: FinanceCategory[];
   categoryUsage: Record<string, TransactionUsage>;
   type: FinanceCategoryType;
 }) {
   const t = useTranslations("Dashboard.financeCategories");
   const [name, setName] = React.useState("");
-  const { addCategory, categories } = useFinanceCategories();
   const typeCategories = categories.filter((category) => category.type === type);
   const typeKey = `types.${type}`;
 
-  const createCategory = () => {
-    const category = addCategory(type, name);
-    if (!category) return;
-    setName("");
+  const createCategory = async () => {
+    try {
+      const category = await addCategory(type, name);
+      if (!category) return;
+      setName("");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("errors.create"));
+    }
   };
 
   return (
@@ -132,13 +141,18 @@ function CategoryGroupCard({
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 event.preventDefault();
-                createCategory();
+                void createCategory();
               }
             }}
             placeholder={t("newCategoryPlaceholder")}
             value={name}
           />
-          <Button aria-label={t("createCategory")} disabled={!name.trim()} onClick={createCategory} size="icon">
+          <Button
+            aria-label={t("createCategory")}
+            disabled={!name.trim()}
+            onClick={() => void createCategory()}
+            size="icon"
+          >
             <Plus />
           </Button>
         </div>
@@ -189,10 +203,13 @@ function CategoryGroupCard({
 
 export default function CategoriesPage() {
   const t = useTranslations("Dashboard.financeCategories");
-  const { categories } = useFinanceCategories();
+  const { addCategory, categories, error, isDatabaseMode, isLoading, refresh } = useFinanceCategoriesData();
   const { transactions } = useFinanceTransactions([]);
   const totalCategories = categories.length;
-  const categoryUsage = React.useMemo(() => getCategoryUsage(transactions), [transactions]);
+  const categoryUsage = React.useMemo(
+    () => (isDatabaseMode ? {} : getCategoryUsage(transactions)),
+    [isDatabaseMode, transactions],
+  );
   const usedCategoriesCount = React.useMemo(
     () => categories.filter((category) => categoryUsage[getFinanceUsageKey(category.name)]).length,
     [categories, categoryUsage],
@@ -207,6 +224,15 @@ export default function CategoriesPage() {
         <p className="text-lg text-muted-foreground leading-none">{t("subtitle")}</p>
       </div>
 
+      {isDatabaseMode && error ? (
+        <div className="flex flex-col gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-destructive">{error}</p>
+          <Button onClick={() => void refresh()} size="sm" variant="outline">
+            {t("actions.retry")}
+          </Button>
+        </div>
+      ) : null}
+
       <CategoriesKpiStrip
         expenseCategoriesCount={expenseCategoriesCount}
         incomeCategoriesCount={incomeCategoriesCount}
@@ -214,11 +240,23 @@ export default function CategoriesPage() {
         usedCategoriesCount={usedCategoriesCount}
       />
 
-      <section className="grid gap-4 xl:grid-cols-2">
-        {financeCategoryTypes.map((type) => (
-          <CategoryGroupCard categoryUsage={categoryUsage} key={type.id} type={type.id} />
-        ))}
-      </section>
+      {isDatabaseMode && isLoading ? (
+        <div className="rounded-xl border border-dashed py-10 text-center text-muted-foreground text-sm">
+          {t("loading")}
+        </div>
+      ) : (
+        <section className="grid gap-4 xl:grid-cols-2">
+          {financeCategoryTypes.map((type) => (
+            <CategoryGroupCard
+              addCategory={addCategory}
+              categories={categories}
+              categoryUsage={categoryUsage}
+              key={type.id}
+              type={type.id}
+            />
+          ))}
+        </section>
+      )}
     </div>
   );
 }

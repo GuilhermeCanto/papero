@@ -399,6 +399,7 @@
     "financeCategories": {
       "title": "Categories",
       "subtitle": "Organize income and expense categories used in transactions.",
+      "loading": "Loading finance categories...",
       "kpi": {
         "totalTitle": "Registered categories",
         "totalDescription": "Available in transactions.",
@@ -445,6 +446,12 @@
       "newCategoryAria": "New category for {type}",
       "newCategoryPlaceholder": "New category",
       "createCategory": "Create category",
+      "actions": {
+        "retry": "Try again"
+      },
+      "errors": {
+        "create": "Could not create category."
+      },
       "usage": {
         "count": "{count, plural, one {# transaction} other {# transactions}}"
       },
