@@ -134,6 +134,7 @@
         "description": "Descrição",
         "counterpart": "Fornecedores",
         "counterpartIncome": "Clientes",
+        "targetAccount": "Conta de destino",
         "account": "Conta",
         "category": "Categoria",
         "amount": "Valor",
@@ -146,6 +147,9 @@
         "retry": "Tentar novamente",
         "selectTransaction": "Selecionar {description}",
         "markAsPaid": "Marcar {description} como pago",
+        "transferSourceRequired": "Selecione uma conta de origem para esta transferência.",
+        "transferTargetRequired": "Selecione uma conta de destino para esta transferência.",
+        "transferAccountsMustDiffer": "A conta de origem e a conta de destino devem ser diferentes.",
         "empty": "Nenhuma transação nesta categoria.",
         "selectAll": "Selecionar todas as transações"
       },
@@ -182,6 +186,7 @@
         "menu": "Ações para {description}",
         "incomeDetails": "Detalhes da receita",
         "expenseDetails": "Detalhes da despesa",
+        "transferDetails": "Detalhes da transferência",
         "amountDetails": "Detalhes do valor",
         "attachments": "Anexos",
         "duplicate": "Duplicar",
@@ -189,11 +194,22 @@
         "configureInstallments": "Configurar parcelamento",
         "delete": "Excluir"
       },
+      "createTransfer": {
+        "title": "Nova transferência",
+        "description": "Mova dinheiro entre duas contas sem alterar receitas, despesas ou resultado do mês.",
+        "defaultDescription": "Transferência entre contas",
+        "sourcePlaceholder": "Selecionar origem",
+        "targetPlaceholder": "Selecionar destino",
+        "dateAria": "Selecionar data da transferência",
+        "cancel": "Cancelar",
+        "save": "Criar transferência"
+      },
       "drawer": {
         "fields": {
           "dueDate": "Vencimento",
           "amount": "Valor",
           "account": "Conta",
+          "targetAccount": "Conta de destino",
           "competence": "Competência",
           "description": "Descrição",
           "document": "Documento",
@@ -265,6 +281,7 @@
       },
       "sample": {
         "category": "Vendas",
+        "transferCategory": "Transferência entre contas",
         "description": "Nova transação",
         "paymentMode": "Indefinido",
         "singlePayment": "Único",

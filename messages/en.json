@@ -134,6 +134,7 @@
         "description": "Description",
         "counterpart": "Suppliers",
         "counterpartIncome": "Customers",
+        "targetAccount": "Target account",
         "account": "Account",
         "category": "Category",
         "amount": "Amount",
@@ -146,6 +147,9 @@
         "retry": "Retry",
         "selectTransaction": "Select {description}",
         "markAsPaid": "Mark {description} as paid",
+        "transferSourceRequired": "Select a source account for this transfer.",
+        "transferTargetRequired": "Select a target account for this transfer.",
+        "transferAccountsMustDiffer": "Source and target accounts must be different.",
         "empty": "No transactions in this category.",
         "selectAll": "Select all transactions"
       },
@@ -182,6 +186,7 @@
         "menu": "Actions for {description}",
         "incomeDetails": "Income details",
         "expenseDetails": "Expense details",
+        "transferDetails": "Transfer details",
         "amountDetails": "Amount details",
         "attachments": "Attachments",
         "duplicate": "Duplicate",
@@ -189,11 +194,22 @@
         "configureInstallments": "Configure installments",
         "delete": "Delete"
       },
+      "createTransfer": {
+        "title": "New transfer",
+        "description": "Move money between two accounts without changing income, expenses, or monthly result.",
+        "defaultDescription": "Account transfer",
+        "sourcePlaceholder": "Select source",
+        "targetPlaceholder": "Select target",
+        "dateAria": "Select transfer date",
+        "cancel": "Cancel",
+        "save": "Create transfer"
+      },
       "drawer": {
         "fields": {
           "dueDate": "Due date",
           "amount": "Amount",
           "account": "Account",
+          "targetAccount": "Target account",
           "competence": "Competence",
           "description": "Description",
           "document": "Document",
@@ -265,6 +281,7 @@
       },
       "sample": {
         "category": "Sales",
+        "transferCategory": "Account transfer",
         "description": "New transaction",
         "paymentMode": "Unspecified",
         "singlePayment": "One-off",

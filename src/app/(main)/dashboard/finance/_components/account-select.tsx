@@ -11,11 +11,19 @@ import {
   getFinanceAccountsWithFallback,
 } from "./finance-accounts-store";
 
-export function getSelectableFinanceAccounts(accounts: FinanceAccount[], value?: string) {
-  const accountsWithFallback = getFinanceAccountsWithFallback(accounts);
+type FinanceAccountSelectionOptions = {
+  withFallback?: boolean;
+};
+
+export function getSelectableFinanceAccounts(
+  accounts: FinanceAccount[],
+  value?: string,
+  { withFallback = true }: FinanceAccountSelectionOptions = {},
+) {
+  const accountsWithFallback = withFallback ? getFinanceAccountsWithFallback(accounts) : accounts;
   const defaultAccount = getDefaultFinanceAccount(accountsWithFallback);
   const activeAccounts = accountsWithFallback.filter((account) => !account.archived);
-  const selectableActiveAccounts = activeAccounts.length > 0 ? activeAccounts : [defaultAccount];
+  const selectableActiveAccounts = activeAccounts.length > 0 ? activeAccounts : withFallback ? [defaultAccount] : [];
   const currentArchivedAccount = value
     ? accountsWithFallback.find((account) => account.archived && account.id === value)
     : undefined;
@@ -33,6 +41,20 @@ export function resolveFinanceAccountId(accounts: FinanceAccount[], value?: stri
   return selectedAccount?.id ?? defaultAccount.id ?? defaultFinanceAccount.id;
 }
 
+export function resolveSelectableFinanceAccountId(
+  accounts: FinanceAccount[],
+  value?: string,
+  options?: FinanceAccountSelectionOptions,
+) {
+  const { accounts: selectableAccounts, defaultAccount } = getSelectableFinanceAccounts(accounts, value, options);
+  const selectedAccount = selectableAccounts.find((account) => account.id === value);
+
+  if (selectedAccount) return selectedAccount.id;
+  if (options?.withFallback === false) return undefined;
+
+  return defaultAccount.id ?? defaultFinanceAccount.id;
+}
+
 export function getFinanceAccountName(accounts: FinanceAccount[], value?: string) {
   const accountsWithFallback = getFinanceAccountsWithFallback(accounts);
   const selectedAccount = accountsWithFallback.find((account) => account.id === value);
@@ -41,30 +63,45 @@ export function getFinanceAccountName(accounts: FinanceAccount[], value?: string
 }
 
 export function AccountSelect({
+  allowEmpty = false,
   accounts,
+  excludeAccountId,
   onChange,
+  placeholder,
   size = "sm",
   triggerClassName,
   value,
+  withFallback = true,
 }: {
+  allowEmpty?: boolean;
   accounts: FinanceAccount[];
+  excludeAccountId?: string;
   onChange: (accountId: string) => void;
+  placeholder?: string;
   size?: "default" | "sm";
   triggerClassName?: string;
   value?: string;
+  withFallback?: boolean;
 }) {
   const t = useTranslations("Dashboard.financeTransactions.accountSelect");
-  const { accounts: selectableAccounts } = getSelectableFinanceAccounts(accounts, value);
-  const selectedAccountId = resolveFinanceAccountId(accounts, value);
+  const { accounts: selectableAccounts } = getSelectableFinanceAccounts(accounts, value, { withFallback });
+  const visibleAccounts = excludeAccountId
+    ? selectableAccounts.filter((account) => account.id !== excludeAccountId)
+    : selectableAccounts;
+  const selectedAccountId =
+    allowEmpty && !value ? undefined : resolveSelectableFinanceAccountId(accounts, value, { withFallback });
+  const selectedVisibleAccountId = visibleAccounts.some((account) => account.id === selectedAccountId)
+    ? selectedAccountId
+    : undefined;
 
   return (
-    <Select onValueChange={onChange} value={selectedAccountId}>
+    <Select onValueChange={onChange} value={selectedVisibleAccountId}>
       <SelectTrigger className={triggerClassName} size={size}>
-        <SelectValue placeholder={t("placeholder")} />
+        <SelectValue placeholder={placeholder ?? t("placeholder")} />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          {selectableAccounts.map((account) => (
+          {visibleAccounts.map((account) => (
             <SelectItem disabled={account.archived} key={account.id} value={account.id}>
               {account.name}
               {account.archived ? ` · ${t("archived")}` : ""}

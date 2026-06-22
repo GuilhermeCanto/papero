@@ -2,27 +2,40 @@
 
 <!-- Briefly describe the purpose of this pull request. -->
 
-## What changed
+## Type Of Change
+
+- [ ] Bug fix
+- [ ] Feature
+- [ ] QA/testing
+- [ ] Documentation
+- [ ] Refactor
+- [ ] Database/auth infrastructure
+- [ ] Other
+
+## What Changed
 
 <!-- List the main changes. -->
 
-## Screenshots for UI changes
+## Affected Modes
 
-<!-- Add screenshots or screen recordings for visible UI changes. Write "Not applicable" if there are no UI changes. -->
+- [ ] local
+- [ ] demo
+- [ ] database
+- [ ] not applicable
 
-## Does this affect localStorage mode?
-
-<!-- Yes/No. If yes, explain how the current local-first flow is affected. -->
-
-## Does this affect database infrastructure?
-
-<!-- Yes/No. If yes, mention Prisma/PostgreSQL/migration/seed changes. -->
-
-## Checks run
+## Checklist
 
 - [ ] `npm run check`
 - [ ] `npm run build`
+- [ ] No `.env.local` or real secrets committed
+- [ ] No schema/migration changes unless intentional
+- [ ] Local/demo behavior preserved
+- [ ] Database behavior tested if applicable
 
-## Notes for reviewers
+## Screenshots Or Videos
+
+<!-- Add screenshots or screen recordings for visible UI changes. Write "Not applicable" if there are no UI changes. -->
+
+## Notes And Limitations
 
 <!-- Anything reviewers should pay extra attention to? -->
