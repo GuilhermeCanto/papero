@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { Check, ChevronDown, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +20,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-import { type FinanceContact, type FinanceContactType, useFinanceContacts } from "./contacts-store";
+import type { FinanceContact, FinanceContactType } from "./contacts-store";
+import { useFinanceContactsData } from "./use-finance-contacts-data";
 
 type ContactSelectProps = {
   contactType: FinanceContactType;
@@ -37,7 +39,7 @@ export function ContactSelect({ contactType, label, onChange, value }: ContactSe
   const [taxId, setTaxId] = React.useState("");
   const [address, setAddress] = React.useState("");
   const [website, setWebsite] = React.useState("");
-  const { addContact, contacts } = useFinanceContacts();
+  const { addContact, contacts, isLoading } = useFinanceContactsData(contactType);
   const visibleContacts = contacts.filter((contact) => contact.type === contactType || contact.type === undefined);
 
   const resetForm = () => {
@@ -56,20 +58,25 @@ export function ContactSelect({ contactType, label, onChange, value }: ContactSe
     setDetailsOpen(true);
   };
 
-  const createContact = () => {
-    const contact = addContact({
-      address,
-      name: companyName,
-      taxId,
-      type: contactType,
-      website,
-    });
+  const createContact = async () => {
+    try {
+      const contact = await addContact({
+        address,
+        name: companyName,
+        taxId,
+        type: contactType,
+        website,
+      });
 
-    if (!contact) return;
+      if (!contact) return;
 
-    onChange(contact);
-    resetForm();
-    setOpen(false);
+      onChange(contact);
+      resetForm();
+      setOpen(false);
+      setDetailsOpen(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("errors.create"));
+    }
   };
 
   const hasName = name.trim().length > 0;
@@ -112,7 +119,7 @@ export function ContactSelect({ contactType, label, onChange, value }: ContactSe
             />
             <Button
               aria-label={t("newContact")}
-              disabled={!hasName}
+              disabled={!hasName || isLoading}
               onClick={openContactDetails}
               size="icon"
               type="button"
@@ -185,10 +192,9 @@ export function ContactSelect({ contactType, label, onChange, value }: ContactSe
           <DialogFooter>
             <Button
               onClick={() => {
-                createContact();
-                setDetailsOpen(false);
+                void createContact();
               }}
-              disabled={!hasCompanyName}
+              disabled={!hasCompanyName || isLoading}
             >
               {t("save")}
             </Button>

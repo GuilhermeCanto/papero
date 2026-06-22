@@ -247,7 +247,10 @@
         "companyId": "CNPJ / ID fiscal",
         "site": "Site",
         "address": "Endereço",
-        "save": "Salvar contato"
+        "save": "Salvar contato",
+        "errors": {
+          "create": "Não foi possível criar o contato."
+        }
       },
       "accountSelect": {
         "placeholder": "Selecionar conta",
@@ -458,6 +461,7 @@
       "empty": "Nenhuma categoria criada ainda."
     },
     "financeContacts": {
+      "loading": "Carregando empresas...",
       "suppliers": {
         "title": "Fornecedores",
         "subtitle": "Gerencie as empresas que recebem pagamentos do seu negócio.",
@@ -505,6 +509,12 @@
         "noWebsite": "Site não informado",
         "transactions": "{count, plural, one {# transação} other {# transações}}",
         "noTransactions": "Sem transações"
+      },
+      "actions": {
+        "retry": "Tentar novamente"
+      },
+      "errors": {
+        "create": "Não foi possível salvar a empresa."
       },
       "newCompanyLabel": "Nome da nova empresa",
       "newCompanyPlaceholder": "Nova empresa",

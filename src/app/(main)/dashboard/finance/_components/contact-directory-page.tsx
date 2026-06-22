@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { Building2, Globe, IdCard, MapPin, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { PrivacyValue } from "@/app/(main)/dashboard/_components/privacy-value";
 import { Badge } from "@/components/ui/badge";
@@ -21,9 +22,10 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-import { type FinanceContact, type FinanceContactType, useFinanceContacts } from "./contacts-store";
+import type { FinanceContact, FinanceContactType } from "./contacts-store";
 import { getCustomerUsage, getFinanceUsageKey, getSupplierUsage, type TransactionUsage } from "./finance-calculations";
 import { useFinanceTransactions } from "./finance-transactions-store";
+import { useFinanceContactsData } from "./use-finance-contacts-data";
 
 type ContactDirectoryCopyKey = "customers" | "suppliers";
 
@@ -104,7 +106,7 @@ function ContactDetailsDialog({
   contactType: FinanceContactType;
   onCompanyNameChange: (value: string) => void;
   onOpenChange: (open: boolean) => void;
-  onSave: (contact: Omit<FinanceContact, "id">) => void;
+  onSave: (contact: Omit<FinanceContact, "id">) => void | Promise<void>;
   open: boolean;
 }) {
   const t = useTranslations("Dashboard.financeContacts");
@@ -160,7 +162,7 @@ function ContactDetailsDialog({
           <Button
             disabled={!companyName.trim()}
             onClick={() =>
-              onSave({
+              void onSave({
                 address,
                 name: companyName,
                 taxId,
@@ -273,12 +275,17 @@ export function ContactDirectoryPage({ contactType, copyKey }: ContactDirectoryP
   const [name, setName] = React.useState("");
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [companyName, setCompanyName] = React.useState("");
-  const { addContact, contacts } = useFinanceContacts();
+  const { addContact, contacts, error, isDatabaseMode, isLoading, refresh } = useFinanceContactsData(contactType);
   const { transactions } = useFinanceTransactions([]);
   const visibleContacts = contacts.filter((contact) => contact.type === contactType || contact.type === undefined);
   const contactUsage = React.useMemo(
-    () => (contactType === "customer" ? getCustomerUsage(transactions) : getSupplierUsage(transactions)),
-    [contactType, transactions],
+    () =>
+      isDatabaseMode
+        ? {}
+        : contactType === "customer"
+          ? getCustomerUsage(transactions)
+          : getSupplierUsage(transactions),
+    [contactType, isDatabaseMode, transactions],
   );
 
   const openContactDialog = () => {
@@ -287,13 +294,17 @@ export function ContactDirectoryPage({ contactType, copyKey }: ContactDirectoryP
     setDialogOpen(true);
   };
 
-  const saveContact = (contact: Omit<FinanceContact, "id">) => {
-    const createdContact = addContact(contact);
-    if (!createdContact) return;
+  const saveContact = async (contact: Omit<FinanceContact, "id">) => {
+    try {
+      const createdContact = await addContact(contact);
+      if (!createdContact) return;
 
-    setName("");
-    setCompanyName("");
-    setDialogOpen(false);
+      setName("");
+      setCompanyName("");
+      setDialogOpen(false);
+    } catch (saveError) {
+      toast.error(saveError instanceof Error ? saveError.message : t("errors.create"));
+    }
   };
 
   return (
@@ -302,6 +313,15 @@ export function ContactDirectoryPage({ contactType, copyKey }: ContactDirectoryP
         <h1 className="text-3xl text-foreground leading-none tracking-tight">{t(`${copyKey}.title`)}</h1>
         <p className="text-lg text-muted-foreground leading-none">{t(`${copyKey}.subtitle`)}</p>
       </div>
+
+      {isDatabaseMode && error ? (
+        <div className="flex flex-col gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-destructive">{error}</p>
+          <Button onClick={() => void refresh()} size="sm" variant="outline">
+            {t("actions.retry")}
+          </Button>
+        </div>
+      ) : null}
 
       <ContactKpiStrip contacts={visibleContacts} usage={contactUsage} />
 
@@ -331,7 +351,13 @@ export function ContactDirectoryPage({ contactType, copyKey }: ContactDirectoryP
         </CardContent>
       </Card>
 
-      <ContactList contacts={visibleContacts} copyKey={copyKey} usage={contactUsage} />
+      {isDatabaseMode && isLoading ? (
+        <div className="rounded-xl border border-dashed py-10 text-center text-muted-foreground text-sm">
+          {t("loading")}
+        </div>
+      ) : (
+        <ContactList contacts={visibleContacts} copyKey={copyKey} usage={contactUsage} />
+      )}
 
       <ContactDetailsDialog
         companyName={companyName}

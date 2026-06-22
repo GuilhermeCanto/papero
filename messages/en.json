@@ -247,7 +247,10 @@
         "companyId": "Tax ID",
         "site": "Website",
         "address": "Address",
-        "save": "Save contact"
+        "save": "Save contact",
+        "errors": {
+          "create": "Could not create contact."
+        }
       },
       "accountSelect": {
         "placeholder": "Select account",
@@ -458,6 +461,7 @@
       "empty": "No category created yet."
     },
     "financeContacts": {
+      "loading": "Loading companies...",
       "suppliers": {
         "title": "Suppliers",
         "subtitle": "Manage companies that receive payments from your business.",
@@ -505,6 +509,12 @@
         "noWebsite": "No website",
         "transactions": "{count, plural, one {# transaction} other {# transactions}}",
         "noTransactions": "No transactions"
+      },
+      "actions": {
+        "retry": "Try again"
+      },
+      "errors": {
+        "create": "Could not save company."
       },
       "newCompanyLabel": "New company name",
       "newCompanyPlaceholder": "New company",
