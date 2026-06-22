@@ -59,7 +59,7 @@ export type AccountActivityMonth = {
   movementCount: number;
 };
 
-const EXPENSE_KINDS = new Set<TransactionKind>(["fixed", "variable", "people", "taxes", "transfer"]);
+const EXPENSE_KINDS = new Set<TransactionKind>(["fixed", "variable", "people", "taxes"]);
 
 function startOfDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -85,7 +85,23 @@ function compareTransactionsByDate(a: FinanceTransaction, b: FinanceTransaction)
 }
 
 function getSignedAmountCents(transaction: FinanceTransaction) {
+  if (isTransferTransaction(transaction)) return 0;
   return isIncomeTransaction(transaction) ? transaction.amountCents : -transaction.amountCents;
+}
+
+function getAccountMovementCents(transaction: FinanceTransaction, accountId: string, defaultAccountId: string) {
+  if (isTransferTransaction(transaction)) {
+    const sourceAccountId = resolveTransactionAccountId(transaction, defaultAccountId);
+
+    if (sourceAccountId === accountId) return -transaction.amountCents;
+    if (transaction.transferTargetAccountId === accountId) return transaction.amountCents;
+
+    return 0;
+  }
+
+  if (resolveTransactionAccountId(transaction, defaultAccountId) !== accountId) return 0;
+
+  return getSignedAmountCents(transaction);
 }
 
 function getUniqueTransactionsById(transactions: FinanceTransaction[]) {
@@ -156,6 +172,10 @@ export function isIncomeTransaction(transaction: FinanceTransaction) {
 
 export function isExpenseTransaction(transaction: FinanceTransaction) {
   return EXPENSE_KINDS.has(transaction.kind);
+}
+
+export function isTransferTransaction(transaction: FinanceTransaction) {
+  return transaction.kind === "transfer";
 }
 
 export function resolveTransactionAccountId(transaction: FinanceTransaction, defaultAccountId: string) {
@@ -408,10 +428,8 @@ export function getCurrentBalanceCentsByAccount(
   return (
     account.openingBalanceCents +
     getUniqueTransactionsById(transactions)
-      .filter(
-        (transaction) => transaction.paid && resolveTransactionAccountId(transaction, defaultAccountId) === account.id,
-      )
-      .reduce((total, transaction) => total + getSignedAmountCents(transaction), 0)
+      .filter((transaction) => transaction.paid)
+      .reduce((total, transaction) => total + getAccountMovementCents(transaction, account.id, defaultAccountId), 0)
   );
 }
 
@@ -422,9 +440,10 @@ export function getProjectedBalanceCentsByAccount(
 ) {
   return (
     account.openingBalanceCents +
-    getUniqueTransactionsById(transactions)
-      .filter((transaction) => resolveTransactionAccountId(transaction, defaultAccountId) === account.id)
-      .reduce((total, transaction) => total + getSignedAmountCents(transaction), 0)
+    getUniqueTransactionsById(transactions).reduce(
+      (total, transaction) => total + getAccountMovementCents(transaction, account.id, defaultAccountId),
+      0,
+    )
   );
 }
 
@@ -449,7 +468,7 @@ export function getAccountBalanceSummaries(
     account,
     currentBalanceCents: getCurrentBalanceCentsByAccount(account, transactions, defaultAccount.id),
     movementCount: getUniqueTransactionsById(transactions).filter(
-      (transaction) => resolveTransactionAccountId(transaction, defaultAccount.id) === account.id,
+      (transaction) => getAccountMovementCents(transaction, account.id, defaultAccount.id) !== 0,
     ).length,
     projectedBalanceCents: getProjectedBalanceCentsByAccount(account, transactions, defaultAccount.id),
     share: 0,

@@ -2,7 +2,7 @@
 
 Thanks for your interest in improving Papero.
 
-Papero is an early-stage finance dashboard for small businesses, solo founders, agencies and developers. The current finance UI works from browser `localStorage`; Prisma/PostgreSQL and Better Auth infrastructure exist, but finance records are not connected to database mode yet.
+Papero is an early-stage finance dashboard for small businesses, solo founders, agencies and developers. It supports `local`, `demo` and `database` modes. Local/demo use browser `localStorage`; database mode uses Better Auth, Prisma and PostgreSQL for core finance records.
 
 ## Getting Started
 
@@ -24,6 +24,26 @@ Open:
 http://localhost:3000/dashboard/finance
 ```
 
+### Run Local Mode
+
+Use local mode for quick UI and product work without auth or a database:
+
+```env
+NEXT_PUBLIC_PAPERO_DATA_MODE="local"
+PAPERO_DATA_MODE="local"
+```
+
+### Run Demo Mode
+
+Use demo mode to auto-load fictional browser-local finance data on the first empty visit:
+
+```env
+NEXT_PUBLIC_PAPERO_DATA_MODE="demo"
+PAPERO_DATA_MODE="demo"
+```
+
+Restart the dev server after changing mode variables.
+
 ## Checks
 
 Before opening a pull request, run:
@@ -37,7 +57,7 @@ Fresh production builds may require network access because `next/font/google` fe
 
 ## Optional Database Setup
 
-Database setup is optional unless your change touches auth, Prisma, migrations or future database-mode finance work. The active finance UI still uses browser `localStorage`.
+Database setup is optional unless your change touches auth, Prisma, migrations or database-mode finance work.
 
 Contributors working on database features can use either local Docker PostgreSQL or a hosted PostgreSQL provider such as Supabase, Render, Neon or Railway.
 
@@ -70,7 +90,7 @@ openssl rand -base64 32
 
 In `database` mode, dashboard routes require login and `/auth/v2/register` creates or ensures the user, company/workspace and OWNER membership. In `local` and `demo` modes, dashboard routes must remain open without auth.
 
-If Docker or PostgreSQL is not available, database commands will fail. That should not block work on the current local-first MVP unless your change specifically touches auth or database infrastructure. Keep `localStorage` mode working until database mode fully replaces it or becomes selectable. Database changes should use the centralized Prisma client in `src/server/db/prisma.ts`.
+If Docker or PostgreSQL is not available, database commands will fail. That should not block work on local/demo changes. Keep `localStorage` mode working. Database changes should use the centralized Prisma client in `src/server/db/prisma.ts`.
 
 ## Contribution Guidelines
 
@@ -81,6 +101,29 @@ If Docker or PostgreSQL is not available, database commands will fail. That shou
 - Avoid editing `src/components/ui` unless there is a strong reason.
 - Run `npm run check` after meaningful changes.
 - Use clear commit messages.
+
+## Choosing An Issue
+
+Good first contributions usually involve:
+
+- QA reports for local/demo/database modes
+- small documentation fixes
+- narrow UI bugs
+- copy/i18n cleanup
+- focused finance workflow fixes
+
+If an issue touches auth, Prisma, migrations or cross-mode data consistency, mention your intended approach before opening a large pull request.
+
+Suggested labels for maintainers:
+
+- `good first issue`
+- `bug`
+- `qa`
+- `database-mode`
+- `local-mode`
+- `demo-mode`
+- `documentation`
+- `help wanted`
 
 ## Branching and Pull Requests
 
@@ -103,6 +146,26 @@ npm run build
 Database setup is optional unless the pull request touches database infrastructure.
 
 Branch protection rules are configured in GitHub repository settings, not in the codebase. The project intends to protect `main` and `develop` before accepting outside contributions.
+
+Suggested branch names:
+
+```text
+fix/short-bug-name
+feature/short-feature-name
+docs/short-docs-name
+qa/short-test-area
+```
+
+## Reporting QA Findings
+
+Use the QA report issue template when testing a branch or release. Include:
+
+- mode tested: `local`, `demo` or `database`
+- browser and operating system
+- what worked
+- what failed
+- screenshots, logs or console errors when useful
+- whether `npm run check` or `npm run build` failed
 
 ## Finance Rules
 
@@ -139,6 +202,7 @@ Papero was originally built from an MIT-licensed dashboard template. Keep attrib
 When opening a pull request:
 
 - Explain what changed and why.
-- Mention whether the change affects localStorage mode, database infrastructure or both.
+- Mention whether the change affects `local`, `demo`, `database` or multiple modes.
 - Include screenshots for visible UI changes.
 - Mention any checks you ran.
+- Confirm `.env.local` and real secrets were not committed.

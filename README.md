@@ -6,16 +6,16 @@ Screenshot coming soon.
 
 ## Status
 
-Papero is currently a local-first MVP.
+Papero is currently an open-source MVP with local, demo and database modes.
 
-- Active finance data is stored in browser `localStorage`.
-- Prisma/PostgreSQL infrastructure is prepared.
+- Local/demo finance data is stored in browser `localStorage`; database mode persists core finance records through PostgreSQL/Prisma.
+- Prisma/PostgreSQL infrastructure is prepared and finance domains are being connected by mode.
 - Better Auth email/password login and registration are implemented for database mode.
 - Database-mode registration creates or ensures a default company/workspace and OWNER membership.
-- Finance records in the UI are not connected to Prisma yet.
+- Database-backed accounts, categories, contacts and transactions are available.
 - Papero is not production-ready accounting software yet.
 
-The current goal is to keep Papero useful as a polished local-first finance workspace while the database-backed finance layer is connected in phases.
+The current goal is to keep Papero useful as a polished finance workspace while hardening database mode, QA coverage and open-source contribution workflows.
 
 ## What Works Today
 
@@ -26,9 +26,9 @@ Papero currently works as a polished local-first finance MVP.
 - Local data can be lost if browser data is cleared, a different browser or device is used, private browsing is used, or Papero's clear local data control is clicked.
 - You can create and edit transactions, incomes, expenses, categories, customers and suppliers.
 - Demo data can be loaded, reset and cleared from the app.
-- Database auth is available in `database` mode, but finance records still use browser `localStorage`.
+- Database mode can persist accounts, categories, contacts and transactions through PostgreSQL/Prisma.
 
-For serious daily use, database mode is planned and recommended once it is fully connected to the product UI.
+For serious daily use, database mode is the recommended direction, but Papero should still be treated as an early MVP.
 
 ## Data Modes
 
@@ -36,7 +36,7 @@ Papero supports three data modes:
 
 - `local`: no database or login required. Finance data is stored in browser `localStorage`. This is good for quick local use, UI work and development.
 - `demo`: no database or login required. Finance data is stored in browser `localStorage` and fictional demo data is auto-loaded on the first empty visit.
-- `database`: PostgreSQL and Better Auth are required. Dashboard routes are protected, login/register are enabled, and auth creates or ensures `User`, `Account`, `Session`, `Company` and `CompanyMember` records. Finance UI data is still localStorage-backed for now.
+- `database`: PostgreSQL and Better Auth are required. Dashboard routes are protected, login/register are enabled, auth creates or ensures `User`, `Account`, `Session`, `Company` and `CompanyMember` records, and core finance records are persisted through Prisma/PostgreSQL.
 
 Set both mode variables to the same value in local development:
 
@@ -130,7 +130,7 @@ For demo mode, set both mode variables to `demo`, restart the dev server, then o
 
 Database infrastructure is included for contributors and database-backed finance work.
 
-Running migrations prepares a PostgreSQL database and enables Better Auth for `database` mode. It does not automatically switch finance records from `localStorage` to PostgreSQL yet.
+Running migrations prepares a PostgreSQL database and enables Better Auth for `database` mode.
 
 The same Prisma setup works with local Docker PostgreSQL, Supabase, Render, Neon, Railway or another hosted PostgreSQL provider as long as `DATABASE_URL` is valid.
 
@@ -252,14 +252,24 @@ Fresh production builds may require network access because `next/font/google` fe
 
 ## Current Limitation
 
-Auth/database foundation exists, but finance persistence is not database-backed yet. Transactions, categories, contacts, accounts and dashboard calculations still read from localStorage stores.
+Papero is still an early MVP. Transfers now support source and target accounts and are treated as account movements in balances, but advanced transfer workflows may still need product and QA polish. Recurring and installment workflows exist but may also need refinement. Database mode requires external PostgreSQL setup.
 
-The next development phase is connecting finance domains to Prisma by mode, starting with accounts.
+Local/demo modes remain browser-local by design.
+
+## Contributing
+
+Papero welcomes QA reports, bug reports, feature requests and pull requests.
+
+- Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.
+- Use GitHub issue templates for bugs, feature requests and QA reports.
+- Run `npm run check` and `npm run build` before submitting code changes.
+- Never commit `.env.local`, real database URLs or secrets.
 
 ## Roadmap
 
-- Connect finance pages to database mode
 - Import localStorage data into the database
+- Advanced account-to-account transfer workflows
+- Polish recurrence and installment workflows
 - Reports
 - Attachments and receipts
 - Hosted deployment documentation

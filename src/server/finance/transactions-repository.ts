@@ -62,6 +62,7 @@ type TransactionWithRelations = Transaction & {
   bankAccount: { id: string; name: string } | null;
   category: { id: string; name: string } | null;
   contact: { id: string; name: string } | null;
+  transferTargetBankAccount: { id: string; name: string } | null;
 };
 
 export class FinanceTransactionValidationError extends Error {
@@ -348,6 +349,7 @@ function toFinanceTransaction(transaction: TransactionWithRelations): FinanceTra
     paymentTime,
     paymentType: paymentTypeFromPaymentTime(paymentTime),
     tags: transaction.tags.join(", "),
+    transferTargetAccountId: transaction.transferTargetBankAccountId ?? undefined,
     updatedAt: toIsoDateString(transaction.updatedAt),
   };
 }
@@ -404,18 +406,40 @@ async function validateRelations(companyId: string, input: FinanceTransactionInp
   const categoryId = sanitizeOptionalId(input.categoryId, "Category ID");
   const contactId = sanitizeOptionalId(input.contactId, "Contact ID");
   const bankAccountId = sanitizeOptionalId(input.accountId, "Account ID");
+  const transferTargetBankAccountId = sanitizeOptionalId(input.transferTargetAccountId, "Transfer target account ID");
 
   await Promise.all([
     categoryId ? validateCategory(companyId, categoryId) : Promise.resolve(),
     contactId ? validateContact(companyId, contactId) : Promise.resolve(),
     bankAccountId ? validateBankAccount(companyId, bankAccountId) : Promise.resolve(),
+    transferTargetBankAccountId ? validateBankAccount(companyId, transferTargetBankAccountId) : Promise.resolve(),
   ]);
 
   return {
     bankAccountId,
     categoryId,
     contactId,
+    transferTargetBankAccountId,
   };
+}
+
+function validateTransferRelations(
+  kind: FinanceTransactionKind | undefined,
+  relations: Awaited<ReturnType<typeof validateRelations>>,
+) {
+  if (kind !== "transfer") return;
+
+  if (!relations.bankAccountId) {
+    throw new FinanceTransactionValidationError("Source account is required for transfers.");
+  }
+
+  if (!relations.transferTargetBankAccountId) {
+    throw new FinanceTransactionValidationError("Target account is required for transfers.");
+  }
+
+  if (relations.bankAccountId === relations.transferTargetBankAccountId) {
+    throw new FinanceTransactionValidationError("Transfer source and target accounts must be different.");
+  }
 }
 
 function getTransactionInclude() {
@@ -433,6 +457,12 @@ function getTransactionInclude() {
       },
     },
     contact: {
+      select: {
+        id: true,
+        name: true,
+      },
+    },
+    transferTargetBankAccount: {
       select: {
         id: true,
         name: true,
@@ -479,6 +509,7 @@ export async function createFinanceTransaction(companyId: string, input: Finance
   const paymentTime = sanitizePaymentTime(input.paymentTime);
   const paymentMode = sanitizePaymentForm(input.paymentMode);
   const relations = await validateRelations(companyId, input);
+  validateTransferRelations(kind, relations);
 
   const transaction = await prisma.transaction.create({
     data: {
@@ -499,6 +530,7 @@ export async function createFinanceTransaction(companyId: string, input: Finance
       paymentTime: localToPrismaPaymentTime[paymentTime],
       recurrenceGroupId: sanitizeString(input.recurrenceGroupId, "Recurrence group ID", false),
       tags: sanitizeTags(input.tags),
+      transferTargetBankAccountId: kind === "transfer" ? relations.transferTargetBankAccountId : undefined,
     },
     include: getTransactionInclude(),
   });
@@ -509,7 +541,10 @@ export async function createFinanceTransaction(companyId: string, input: Finance
 export async function updateFinanceTransaction(companyId: string, id: string, input: FinanceTransactionInput) {
   const currentTransaction = await prisma.transaction.findFirst({
     select: {
+      bankAccountId: true,
       id: true,
+      kind: true,
+      transferTargetBankAccountId: true,
     },
     where: {
       companyId,
@@ -553,11 +588,38 @@ export async function updateFinanceTransaction(companyId: string, id: string, in
   }
   if (input.tags !== undefined) data.tags = sanitizeTags(input.tags);
 
-  if (input.categoryId !== undefined || input.contactId !== undefined || input.accountId !== undefined) {
+  const nextKind =
+    input.kind !== undefined ? sanitizeKind(input.kind, false) : prismaToLocalKind[currentTransaction.kind];
+
+  if (
+    input.categoryId !== undefined ||
+    input.contactId !== undefined ||
+    input.accountId !== undefined ||
+    input.transferTargetAccountId !== undefined ||
+    input.kind !== undefined
+  ) {
     const relations = await validateRelations(companyId, input);
+    const nextRelations = {
+      ...relations,
+      bankAccountId:
+        input.accountId !== undefined ? relations.bankAccountId : (currentTransaction.bankAccountId ?? undefined),
+      transferTargetBankAccountId:
+        input.transferTargetAccountId !== undefined
+          ? relations.transferTargetBankAccountId
+          : (currentTransaction.transferTargetBankAccountId ?? undefined),
+    };
+    validateTransferRelations(nextKind, nextRelations);
+
     if (input.categoryId !== undefined) data.categoryId = relations.categoryId ?? null;
     if (input.contactId !== undefined) data.contactId = relations.contactId ?? null;
     if (input.accountId !== undefined) data.bankAccountId = relations.bankAccountId ?? null;
+    if (input.transferTargetAccountId !== undefined) {
+      data.transferTargetBankAccountId =
+        nextKind === "transfer" ? (relations.transferTargetBankAccountId ?? null) : null;
+    }
+    if (input.kind !== undefined && nextKind !== "transfer") {
+      data.transferTargetBankAccountId = null;
+    }
   }
 
   const transaction = await prisma.transaction.update({

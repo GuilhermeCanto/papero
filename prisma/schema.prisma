@@ -147,8 +147,9 @@ model BankAccount {
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
 
-  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
+  company              Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  transactionsAsSource Transaction[] @relation("TransactionSourceAccount")
+  transactionsAsTarget Transaction[] @relation("TransactionTargetAccount")
 
   @@index([companyId])
 }
@@ -158,7 +159,8 @@ model Transaction {
   companyId       String
   categoryId      String?
   contactId       String?
-  bankAccountId   String?
+  bankAccountId               String?
+  transferTargetBankAccountId String?
   kind            TransactionKind
   description     String
   amountCents     Int
@@ -175,16 +177,18 @@ model Transaction {
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
 
-  bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id], onDelete: SetNull)
-  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  company     Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  contact     Contact?     @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  bankAccount               BankAccount? @relation("TransactionSourceAccount", fields: [bankAccountId], references: [id], onDelete: SetNull)
+  transferTargetBankAccount BankAccount? @relation("TransactionTargetAccount", fields: [transferTargetBankAccountId], references: [id], onDelete: SetNull)
+  category                  Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  company                   Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contact                   Contact?     @relation(fields: [contactId], references: [id], onDelete: SetNull)
 
   @@index([companyId, date])
   @@index([companyId, kind])
   @@index([companyId, paid])
   @@index([companyId, contactId])
   @@index([companyId, categoryId])
+  @@index([companyId, transferTargetBankAccountId])
 }
 
 enum CompanyRole {
