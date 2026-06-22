@@ -117,7 +117,7 @@ function AccountSwitcherMenu({
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled={!isAuthenticated} onClick={onSignOut}>
+        <DropdownMenuItem disabled={isAuthenticated && !onSignOut} onClick={onSignOut}>
           <LogOut />
           {accountMenu("logOut")}
         </DropdownMenuItem>

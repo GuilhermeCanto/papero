@@ -7,7 +7,7 @@ const COOKIE_NAME = "NEXT_LOCALE";
 
 export async function getUserLocale() {
   const cookieStore = await cookies();
-  return cookieStore.get(COOKIE_NAME)?.value || "en";
+  return cookieStore.get(COOKIE_NAME)?.value || "pt";
 }
 
 export async function setUserLocale(locale: string) {

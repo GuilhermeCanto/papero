@@ -68,8 +68,10 @@
     },
     "health": {
       "title": "Cash Health",
-      "status": "78% healthy",
+      "status": "{score}% healthy",
+      "emptyStatus": "Not enough data",
       "chartLabel": "Healthy",
+      "emptyChartLabel": "No data",
       "inflows": "Inflows",
       "outflows": "Outflows",
       "balance": "Balance"
