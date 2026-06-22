@@ -9,6 +9,7 @@ Papero is an early-stage finance dashboard for small businesses, solo founders, 
 Install dependencies:
 
 ```bash
+nvm use
 npm install
 ```
 

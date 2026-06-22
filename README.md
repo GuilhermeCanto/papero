@@ -96,6 +96,7 @@ Public demo deployments can set `NEXT_PUBLIC_PAPERO_DATA_MODE="demo"` to automat
 Install dependencies:
 
 ```bash
+nvm use
 npm install
 ```
 
