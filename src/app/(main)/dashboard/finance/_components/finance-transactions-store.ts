@@ -10,7 +10,10 @@ export type FinanceTransaction = {
   accountId?: string;
   amountCents: number;
   category: string;
+  categoryId?: string;
   competenceDate?: string;
+  contactId?: string;
+  createdAt?: string;
   date: string;
   description: string;
   documentNumber?: string;
@@ -23,6 +26,7 @@ export type FinanceTransaction = {
   paymentType: string;
   tags?: string;
   transferTargetAccountId?: string;
+  updatedAt?: string;
 };
 
 export const FINANCE_TRANSACTIONS_STORAGE_KEY = "papero:finance-transactions:v1";
@@ -52,6 +56,8 @@ function isFinanceTransaction(value: unknown): value is FinanceTransaction {
     (transaction.accountId === undefined || typeof transaction.accountId === "string") &&
     typeof transaction.amountCents === "number" &&
     typeof transaction.category === "string" &&
+    (transaction.categoryId === undefined || typeof transaction.categoryId === "string") &&
+    (transaction.contactId === undefined || typeof transaction.contactId === "string") &&
     typeof transaction.date === "string" &&
     typeof transaction.description === "string" &&
     typeof transaction.from === "string" &&

@@ -11,6 +11,10 @@
       "accounts": "Contas",
       "transactions": "Transações"
     },
+    "financeData": {
+      "loading": "Carregando dados financeiros...",
+      "retry": "Tentar novamente"
+    },
     "kpis": {
       "netWorth": "Saldo atual",
       "netWorthValue": "R$ 28.420,00",
@@ -137,6 +141,9 @@
         "paymentForm": "Forma de Pagamento",
         "paid": "Pago?",
         "actions": "Editar",
+        "error": "Não foi possível atualizar a transação.",
+        "loading": "Carregando transações...",
+        "retry": "Tentar novamente",
         "selectTransaction": "Selecionar {description}",
         "markAsPaid": "Marcar {description} como pago",
         "empty": "Nenhuma transação nesta categoria.",
@@ -527,7 +534,9 @@
         "upcomingTitle": "Próximos recebimentos",
         "upcomingSummary": "{count, plural, one {# recebimento previsto} other {# recebimentos previstos}} este mês",
         "upcomingHighlight": "Próximo recebimento: ",
-        "upcomingEmpty": "Nenhum recebimento próximo."
+        "upcomingEmpty": "Nenhum recebimento próximo.",
+        "loading": "Carregando transações de recebimento...",
+        "retry": "Tentar novamente"
       },
       "expenses": {
         "title": "Despesas",
@@ -535,7 +544,9 @@
         "upcomingTitle": "Próximas despesas",
         "upcomingSummary": "{count, plural, one {# conta próxima} other {# contas próximas}} este mês",
         "upcomingHighlight": "Próxima conta: ",
-        "upcomingEmpty": "Nenhuma despesa próxima."
+        "upcomingEmpty": "Nenhuma despesa próxima.",
+        "loading": "Carregando transações de despesa...",
+        "retry": "Tentar novamente"
       }
     }
   },
@@ -639,6 +650,10 @@
       "expenseCategory": "Despesas variáveis",
       "incomeCategory": "Vendas",
       "singlePayment": "À vista"
+    },
+    "errors": {
+      "contact": "Não foi possível salvar a empresa.",
+      "transaction": "Não foi possível salvar a transação."
     }
   },
   "Navigation": {

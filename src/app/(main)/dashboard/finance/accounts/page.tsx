@@ -42,7 +42,6 @@ import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-import { getOpeningBalanceAccountSummaries } from "../_components/finance-account-summaries";
 import {
   type FinanceAccount,
   type FinanceAccountType,
@@ -50,8 +49,8 @@ import {
   getFinanceAccountsWithFallback,
 } from "../_components/finance-accounts-store";
 import { getAccountBalanceSummaries } from "../_components/finance-calculations";
-import { useFinanceTransactions } from "../_components/finance-transactions-store";
 import { useFinanceAccountsData } from "../_components/use-finance-accounts-data";
+import { useFinanceTransactionsData } from "../_components/use-finance-transactions-data";
 
 const accountTypes: FinanceAccountType[] = [
   "checking",
@@ -252,7 +251,7 @@ export default function FinanceAccountsPage() {
   const t = useTranslations("Dashboard.financeAccounts");
   const { accounts, archiveAccount, createAccount, error, isDatabaseMode, isLoading, refresh, updateAccount } =
     useFinanceAccountsData();
-  const { transactions } = useFinanceTransactions([]);
+  const { transactions } = useFinanceTransactionsData();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editingAccount, setEditingAccount] = React.useState<FinanceAccount | undefined>();
   const [isSaving, setIsSaving] = React.useState(false);
@@ -262,11 +261,8 @@ export default function FinanceAccountsPage() {
   );
   const defaultAccount = React.useMemo(() => getDefaultFinanceAccount(accountsWithFallback), [accountsWithFallback]);
   const accountSummaries = React.useMemo(
-    () =>
-      isDatabaseMode
-        ? getOpeningBalanceAccountSummaries(accountsWithFallback)
-        : getAccountBalanceSummaries(accountsWithFallback, transactions, defaultAccount),
-    [accountsWithFallback, defaultAccount, isDatabaseMode, transactions],
+    () => getAccountBalanceSummaries(accountsWithFallback, transactions, defaultAccount),
+    [accountsWithFallback, defaultAccount, transactions],
   );
   const activeAccountsCount = accounts.filter((account) => !account.archived).length;
   const archivedAccountsCount = accounts.filter((account) => account.archived).length;

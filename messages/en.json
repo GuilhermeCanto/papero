@@ -11,6 +11,10 @@
       "accounts": "Accounts",
       "transactions": "Transactions"
     },
+    "financeData": {
+      "loading": "Loading finance data...",
+      "retry": "Retry"
+    },
     "kpis": {
       "netWorth": "Current balance",
       "netWorthValue": "R$ 28.420,00",
@@ -137,6 +141,9 @@
         "paymentForm": "Payment Form",
         "paid": "Paid?",
         "actions": "Edit",
+        "error": "Could not update transaction.",
+        "loading": "Loading transactions...",
+        "retry": "Retry",
         "selectTransaction": "Select {description}",
         "markAsPaid": "Mark {description} as paid",
         "empty": "No transactions in this category.",
@@ -527,7 +534,9 @@
         "upcomingTitle": "Upcoming incomes",
         "upcomingSummary": "{count, plural, one {# expected receipt} other {# expected receipts}} this month",
         "upcomingHighlight": "Next expected receipt: ",
-        "upcomingEmpty": "No upcoming incomes."
+        "upcomingEmpty": "No upcoming incomes.",
+        "loading": "Loading income transactions...",
+        "retry": "Retry"
       },
       "expenses": {
         "title": "Expenses",
@@ -535,7 +544,9 @@
         "upcomingTitle": "Upcoming expenses",
         "upcomingSummary": "{count, plural, one {# upcoming bill} other {# upcoming bills}} this month",
         "upcomingHighlight": "Next bill: ",
-        "upcomingEmpty": "No upcoming expenses."
+        "upcomingEmpty": "No upcoming expenses.",
+        "loading": "Loading expense transactions...",
+        "retry": "Retry"
       }
     }
   },
@@ -639,6 +650,10 @@
       "expenseCategory": "Variable expenses",
       "incomeCategory": "Sales",
       "singlePayment": "Cash"
+    },
+    "errors": {
+      "contact": "Could not save company.",
+      "transaction": "Could not save transaction."
     }
   },
   "Navigation": {
