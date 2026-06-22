@@ -508,6 +508,12 @@ export function getAccountActivityByMonth(
 }
 
 export function getCashHealthScore(transactions: FinanceTransaction[], today: Date) {
+  const meaningfulTransactions = getUniqueTransactionsById(transactions).filter(
+    (transaction) => isIncomeTransaction(transaction) || isExpenseTransaction(transaction),
+  );
+
+  if (meaningfulTransactions.length === 0) return 0;
+
   const currentBalanceCents = getCurrentBalanceCents(transactions);
   const monthResultCents = getMonthlyResultCents(transactions, today);
   const overdueTransactions = getOverdueTransactions(transactions, today);
@@ -521,6 +527,7 @@ export function getCashHealthScore(transactions: FinanceTransaction[], today: Da
   score += currentBalanceCents > 0 ? 15 : -15;
   score += overdueAmountCents === 0 ? 15 : -Math.min(25, Math.ceil(overdueAmountCents / 10_000));
   score += upcomingIncomesAmountCents >= upcomingBillsAmountCents ? 10 : -10;
+  score += currentBalanceCents > 0 && upcomingBillsAmountCents > currentBalanceCents * 0.5 ? -10 : 0;
 
   return Math.max(0, Math.min(100, score));
 }

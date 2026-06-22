@@ -70,10 +70,10 @@ export const PREFERENCE_DEFAULTS: PreferenceValueMap = {
   theme_mode: "light",
   theme_preset: "default",
   font: "geist",
-  content_layout: "centered",
+  content_layout: "full-width",
   avatar_location: "navbar",
-  navbar_style: "navbar",
-  sidebar_variant: "inset",
+  navbar_style: "floating",
+  sidebar_variant: "floating",
   sidebar_collapsible: "icon",
 };
 

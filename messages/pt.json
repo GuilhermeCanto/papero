@@ -68,8 +68,10 @@
     },
     "health": {
       "title": "Saúde do caixa",
-      "status": "78% saudável",
+      "status": "{score}% saudável",
+      "emptyStatus": "Sem dados suficientes",
       "chartLabel": "Saudável",
+      "emptyChartLabel": "Sem dados",
       "inflows": "Entradas",
       "outflows": "Saídas",
       "balance": "Saldo"

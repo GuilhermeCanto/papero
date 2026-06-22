@@ -7,7 +7,6 @@ import { Label, Pie, PieChart } from "recharts";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 
-const healthPercent = 78;
 const gaugeSegmentCount = 42;
 const gaugeSegments = Array.from({ length: gaugeSegmentCount }, (_, index) => {
   const progress = index / (gaugeSegmentCount - 1);
@@ -40,10 +39,10 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function HealthStatus({ score = healthPercent }: { score?: number }) {
+export function HealthStatus({ hasData = false, score = 0 }: { hasData?: boolean; score?: number }) {
   const t = useTranslations("Dashboard.health");
   const visibleScore = Math.max(0, Math.min(100, Math.round(score)));
-  const statusLabel = t("status").replace(/\d+%/, `${visibleScore}%`);
+  const statusLabel = hasData ? t("status", { score: visibleScore }) : t("emptyStatus");
   return (
     <Card className="h-full">
       <CardHeader>
@@ -82,10 +81,10 @@ export function HealthStatus({ score = healthPercent }: { score?: number }) {
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 18}
                         >
-                          {visibleScore}%
+                          {hasData ? `${visibleScore}%` : "0%"}
                         </tspan>
                         <tspan className="fill-muted-foreground text-xs" x={viewBox.cx} y={(viewBox.cy || 0) + 34}>
-                          {t("chartLabel")}
+                          {hasData ? t("chartLabel") : t("emptyChartLabel")}
                         </tspan>
                       </text>
                     );

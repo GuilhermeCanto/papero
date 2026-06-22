@@ -117,7 +117,9 @@ export default function Page() {
     () => accountActivityData.reduce((total, item) => total + item.movementCount, 0),
     [accountActivityData],
   );
-  const hasTransactions = transactions.length > 0;
+  const hasMeaningfulHealthData = transactions.some(
+    (transaction) => isIncomeTransaction(transaction) || isExpenseTransaction(transaction),
+  );
   const metrics = React.useMemo(() => getDashboardFinanceMetrics(transactions, today), [transactions, today]);
   const cashFlowDays = React.useMemo(() => getCashFlowByDay(transactions, today), [transactions, today]);
   const cashFlowBars = React.useMemo(() => {
@@ -268,10 +270,10 @@ export default function Page() {
                 </div>
                 <div className="grid grid-cols-1 gap-4 xl:col-span-2">
                   <ShortcutsCard />
-                  <HealthStatus score={hasTransactions ? metrics.cashHealthScore : 0} />
+                  <HealthStatus hasData={hasMeaningfulHealthData} score={metrics.cashHealthScore} />
                 </div>
               </div>
-              <FinancialCalendarPanel />
+              <FinancialCalendarPanel transactions={transactions} />
             </div>
           </div>
           <FinanceDemoDataControls />
