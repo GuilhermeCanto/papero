@@ -252,6 +252,90 @@ function AmountInputCell({
   );
 }
 
+function DeferredTextInput({
+  ariaLabel,
+  className,
+  onCommit,
+  placeholder,
+  value,
+}: {
+  ariaLabel?: string;
+  className?: string;
+  onCommit: (value: string) => void;
+  placeholder?: string;
+  value: string;
+}) {
+  const [draft, setDraft] = React.useState(value);
+
+  React.useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  const commitDraft = () => {
+    if (draft !== value) onCommit(draft);
+  };
+
+  return (
+    <Input
+      aria-label={ariaLabel}
+      className={className}
+      onBlur={commitDraft}
+      onChange={(event) => setDraft(event.target.value)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") {
+          event.currentTarget.blur();
+        }
+
+        if (event.key === "Escape") {
+          setDraft(value);
+          event.currentTarget.blur();
+        }
+      }}
+      placeholder={placeholder}
+      value={draft}
+    />
+  );
+}
+
+function DeferredTextarea({
+  onCommit,
+  placeholder,
+  value,
+}: {
+  onCommit: (value: string) => void;
+  placeholder?: string;
+  value: string;
+}) {
+  const [draft, setDraft] = React.useState(value);
+
+  React.useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  const commitDraft = () => {
+    if (draft !== value) onCommit(draft);
+  };
+
+  return (
+    <Textarea
+      onBlur={commitDraft}
+      onChange={(event) => setDraft(event.target.value)}
+      onKeyDown={(event) => {
+        if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+          event.currentTarget.blur();
+        }
+
+        if (event.key === "Escape") {
+          setDraft(value);
+          event.currentTarget.blur();
+        }
+      }}
+      placeholder={placeholder}
+      value={draft}
+    />
+  );
+}
+
 function TransactionActionsMenu({
   onDelete,
   onDuplicate,
@@ -454,41 +538,33 @@ function TransactionDetailsDrawer({
             ) : null}
             <div className="grid gap-1.5">
               <span className="font-medium text-sm">{t("drawer.fields.description")}</span>
-              <Input
+              <DeferredTextInput
                 value={transaction.description}
-                onChange={(event) => {
-                  void onUpdate(transaction.id, { description: event.target.value });
-                }}
+                onCommit={(description) => void onUpdate(transaction.id, { description })}
               />
             </div>
             <div className="grid gap-1.5">
               <span className="font-medium text-sm">{t("drawer.fields.document")}</span>
-              <Input
+              <DeferredTextInput
                 placeholder={t("drawer.placeholders.document")}
                 value={transaction.documentNumber ?? ""}
-                onChange={(event) => {
-                  void onUpdate(transaction.id, { documentNumber: event.target.value });
-                }}
+                onCommit={(documentNumber) => void onUpdate(transaction.id, { documentNumber })}
               />
             </div>
             <div className="grid gap-1.5">
               <span className="font-medium text-sm">{t("drawer.fields.tags")}</span>
-              <Input
+              <DeferredTextInput
                 placeholder={t("drawer.placeholders.tags")}
                 value={transaction.tags ?? ""}
-                onChange={(event) => {
-                  void onUpdate(transaction.id, { tags: event.target.value });
-                }}
+                onCommit={(tags) => void onUpdate(transaction.id, { tags })}
               />
             </div>
             <div className="grid gap-1.5 md:col-span-3">
               <span className="font-medium text-sm">{t("drawer.fields.additionalInfo")}</span>
-              <Textarea
+              <DeferredTextarea
                 placeholder={t("drawer.placeholders.additionalInfo")}
                 value={transaction.notes ?? ""}
-                onChange={(event) => {
-                  void onUpdate(transaction.id, { notes: event.target.value });
-                }}
+                onCommit={(notes) => void onUpdate(transaction.id, { notes })}
               />
             </div>
           </div>
@@ -1323,12 +1399,10 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
                       </TableCell>
                       <TableCell className="min-w-0">
                         <div className="flex flex-col gap-0.5">
-                          <Input
+                          <DeferredTextInput
                             aria-label={t("drawer.aria.editDescription", { id: transaction.id })}
                             className="h-7 border-transparent bg-transparent px-0 font-medium shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:px-2"
-                            onChange={(event) =>
-                              void updateTransaction(transaction.id, { description: event.target.value })
-                            }
+                            onCommit={(description) => void updateTransaction(transaction.id, { description })}
                             value={transaction.description}
                           />
                           <div className="truncate text-muted-foreground text-xs">

@@ -140,10 +140,10 @@ export function useFinanceTransactionsData(): FinanceTransactionsData {
         throw new Error("The finance transaction response was invalid.");
       }
 
-      await refresh();
+      setDatabaseTransactions((current) => [nextTransaction, ...current]);
       return nextTransaction;
     },
-    [isDatabaseMode, localTransactions.addTransaction, refresh],
+    [isDatabaseMode, localTransactions.addTransaction],
   );
 
   const updateTransaction = React.useCallback(
@@ -166,6 +166,21 @@ export function useFinanceTransactionsData(): FinanceTransactionsData {
       }
 
       setError(null);
+      const previousTransactions = databaseTransactions;
+      let optimisticTransaction: FinanceTransaction | undefined;
+
+      setDatabaseTransactions((current) =>
+        current.map((transaction) => {
+          if (transaction.id !== id) return transaction;
+
+          optimisticTransaction = {
+            ...transaction,
+            ...patch,
+          };
+          return optimisticTransaction;
+        }),
+      );
+
       const response = await fetch(`/api/finance/transactions/${id}`, {
         body: JSON.stringify(patch),
         headers: {
@@ -177,14 +192,22 @@ export function useFinanceTransactionsData(): FinanceTransactionsData {
       if (!response.ok) {
         const message = await getApiErrorMessage(response, "Could not update finance transaction.");
         setError(message);
+        setDatabaseTransactions(previousTransactions);
         throw new Error(message);
       }
 
       const body = (await response.json()) as FinanceTransactionApiResponse;
-      await refresh();
-      return body.transaction;
+      const updatedTransaction = body.transaction;
+      if (isFinanceTransaction(updatedTransaction)) {
+        setDatabaseTransactions((current) =>
+          current.map((transaction) => (transaction.id === id ? updatedTransaction : transaction)),
+        );
+        return updatedTransaction;
+      }
+
+      return optimisticTransaction;
     },
-    [isDatabaseMode, localTransactions.setTransactions, refresh],
+    [databaseTransactions, isDatabaseMode, localTransactions.setTransactions],
   );
 
   const deleteTransaction = React.useCallback(
@@ -195,6 +218,9 @@ export function useFinanceTransactionsData(): FinanceTransactionsData {
       }
 
       setError(null);
+      const previousTransactions = databaseTransactions;
+      setDatabaseTransactions((current) => current.filter((transaction) => transaction.id !== id));
+
       const response = await fetch(`/api/finance/transactions/${id}`, {
         method: "DELETE",
       });
@@ -202,12 +228,11 @@ export function useFinanceTransactionsData(): FinanceTransactionsData {
       if (!response.ok) {
         const message = await getApiErrorMessage(response, "Could not delete finance transaction.");
         setError(message);
+        setDatabaseTransactions(previousTransactions);
         throw new Error(message);
       }
-
-      await refresh();
     },
-    [isDatabaseMode, localTransactions.setTransactions, refresh],
+    [databaseTransactions, isDatabaseMode, localTransactions.setTransactions],
   );
 
   return {
