@@ -1,7 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { auth } from "@/server/auth/auth";
-
 type PaperoServerDataMode = "local" | "demo" | "database";
 
 const validPaperoServerDataModes = new Set<PaperoServerDataMode>(["local", "demo", "database"]);
@@ -74,6 +72,7 @@ export async function proxy(request: NextRequest) {
     return continueWithoutAuth(mode);
   }
 
+  const { auth } = await import("@/server/auth/auth");
   const session = await auth.api.getSession({
     headers: request.headers,
   });

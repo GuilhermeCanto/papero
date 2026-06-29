@@ -191,6 +191,15 @@ function sanitizeAmountCents(value: unknown, required: boolean) {
     throw new FinanceTransactionValidationError("Amount must be an integer amount in cents.");
   }
 
+  // Future refund/correction support may allow scoped negative values by transaction kind.
+  if (value < 0) {
+    throw new FinanceTransactionValidationError("Amount cannot be negative.");
+  }
+
+  if (value > 2_000_000_000) {
+    throw new FinanceTransactionValidationError("Amount is above the supported limit.");
+  }
+
   return value;
 }
 
@@ -622,13 +631,29 @@ export async function updateFinanceTransaction(companyId: string, id: string, in
     }
   }
 
-  const transaction = await prisma.transaction.update({
+  const updateResult = await prisma.transaction.updateMany({
     data,
-    include: getTransactionInclude(),
     where: {
+      companyId,
       id,
     },
   });
+
+  if (updateResult.count !== 1) {
+    throw new FinanceTransactionNotFoundError();
+  }
+
+  const transaction = await prisma.transaction.findFirst({
+    include: getTransactionInclude(),
+    where: {
+      companyId,
+      id,
+    },
+  });
+
+  if (!transaction) {
+    throw new FinanceTransactionNotFoundError();
+  }
 
   return toFinanceTransaction(transaction);
 }
@@ -648,9 +673,14 @@ export async function deleteFinanceTransaction(companyId: string, id: string) {
     throw new FinanceTransactionNotFoundError();
   }
 
-  await prisma.transaction.delete({
+  const deleteResult = await prisma.transaction.deleteMany({
     where: {
+      companyId,
       id,
     },
   });
+
+  if (deleteResult.count !== 1) {
+    throw new FinanceTransactionNotFoundError();
+  }
 }
