@@ -16,6 +16,9 @@ export async function setValueToCookie(
   cookieStore.set(key, value, {
     path: options.path ?? "/",
     maxAge: options.maxAge ?? 60 * 60 * 24 * 7, // default: 7 days
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
   });
 }
 
