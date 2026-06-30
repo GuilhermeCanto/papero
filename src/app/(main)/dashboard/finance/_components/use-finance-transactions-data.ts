@@ -4,7 +4,12 @@ import * as React from "react";
 
 import { isDatabaseMode as resolveIsDatabaseMode } from "@/config/papero-mode";
 
-import { type FinanceTransaction, type TransactionKind, useFinanceTransactions } from "./finance-transactions-store";
+import {
+  FINANCE_TRANSACTIONS_UPDATE_EVENT,
+  type FinanceTransaction,
+  type TransactionKind,
+  useFinanceTransactions,
+} from "./finance-transactions-store";
 
 type CreateFinanceTransactionInput = Omit<FinanceTransaction, "createdAt" | "id" | "updatedAt">;
 type UpdateFinanceTransactionInput = Partial<Omit<FinanceTransaction, "createdAt" | "id" | "updatedAt">>;
@@ -73,6 +78,12 @@ function normalizeApiTransactions(transactions: unknown) {
   return Array.isArray(transactions) ? transactions.filter(isFinanceTransaction) : [];
 }
 
+function notifyFinanceTransactionsUpdated(transactions: FinanceTransaction[]) {
+  if (typeof window === "undefined") return;
+
+  window.dispatchEvent(new CustomEvent(FINANCE_TRANSACTIONS_UPDATE_EVENT, { detail: transactions }));
+}
+
 export function useFinanceTransactionsData(): FinanceTransactionsData {
   const localTransactions = useFinanceTransactions([]);
   const isDatabaseMode = resolveIsDatabaseMode();
@@ -98,7 +109,9 @@ export function useFinanceTransactionsData(): FinanceTransactionsData {
       }
 
       const body = (await response.json()) as FinanceTransactionsApiResponse;
-      setDatabaseTransactions(normalizeApiTransactions(body.transactions));
+      const nextTransactions = normalizeApiTransactions(body.transactions);
+      setDatabaseTransactions(nextTransactions);
+      notifyFinanceTransactionsUpdated(nextTransactions);
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Could not load finance transactions.");
       setDatabaseTransactions([]);
@@ -112,6 +125,23 @@ export function useFinanceTransactionsData(): FinanceTransactionsData {
       void refresh();
     }
   }, [isDatabaseMode, refresh]);
+
+  React.useEffect(() => {
+    if (!isDatabaseMode || typeof window === "undefined") return;
+
+    const handleCustomUpdate = (event: Event) => {
+      const nextTransactions = (event as CustomEvent<FinanceTransaction[]>).detail;
+      if (Array.isArray(nextTransactions)) {
+        setDatabaseTransactions(normalizeApiTransactions(nextTransactions));
+      }
+    };
+
+    window.addEventListener(FINANCE_TRANSACTIONS_UPDATE_EVENT, handleCustomUpdate);
+
+    return () => {
+      window.removeEventListener(FINANCE_TRANSACTIONS_UPDATE_EVENT, handleCustomUpdate);
+    };
+  }, [isDatabaseMode]);
 
   const addTransaction = React.useCallback(
     async (transaction: CreateFinanceTransactionInput) => {
@@ -140,7 +170,11 @@ export function useFinanceTransactionsData(): FinanceTransactionsData {
         throw new Error("The finance transaction response was invalid.");
       }
 
-      setDatabaseTransactions((current) => [nextTransaction, ...current]);
+      setDatabaseTransactions((current) => {
+        const nextTransactions = [nextTransaction, ...current];
+        notifyFinanceTransactionsUpdated(nextTransactions);
+        return nextTransactions;
+      });
       return nextTransaction;
     },
     [isDatabaseMode, localTransactions.addTransaction],
@@ -199,9 +233,13 @@ export function useFinanceTransactionsData(): FinanceTransactionsData {
       const body = (await response.json()) as FinanceTransactionApiResponse;
       const updatedTransaction = body.transaction;
       if (isFinanceTransaction(updatedTransaction)) {
-        setDatabaseTransactions((current) =>
-          current.map((transaction) => (transaction.id === id ? updatedTransaction : transaction)),
-        );
+        setDatabaseTransactions((current) => {
+          const nextTransactions = current.map((transaction) =>
+            transaction.id === id ? updatedTransaction : transaction,
+          );
+          notifyFinanceTransactionsUpdated(nextTransactions);
+          return nextTransactions;
+        });
         return updatedTransaction;
       }
 
@@ -229,8 +267,11 @@ export function useFinanceTransactionsData(): FinanceTransactionsData {
         const message = await getApiErrorMessage(response, "Could not delete finance transaction.");
         setError(message);
         setDatabaseTransactions(previousTransactions);
+        notifyFinanceTransactionsUpdated(previousTransactions);
         throw new Error(message);
       }
+
+      notifyFinanceTransactionsUpdated(databaseTransactions.filter((transaction) => transaction.id !== id));
     },
     [databaseTransactions, isDatabaseMode, localTransactions.setTransactions],
   );

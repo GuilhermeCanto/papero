@@ -284,7 +284,7 @@ export default function Page() {
               <FinancialCalendarPanel transactions={transactions} />
             </div>
           </div>
-          <FinanceDemoDataControls />
+          {demoMode ? <FinanceDemoDataControls /> : null}
         </TabsContent>
 
         <TabsContent value="12-months" className="flex flex-col gap-4">
