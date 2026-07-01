@@ -373,6 +373,7 @@
         "account": "Account",
         "institution": "Institution",
         "type": "Type",
+        "cashFlowRole": "Role",
         "currency": "Currency",
         "openingBalance": "Opening balance",
         "currentBalance": "Current balance",
@@ -391,6 +392,10 @@
         "other": "Other",
         "savings": "Savings",
         "wallet": "Wallet"
+      },
+      "cashFlowRoles": {
+        "operating": "Operating Account",
+        "reserve": "Reserve Account"
       },
       "status": {
         "active": "Active",
@@ -412,6 +417,8 @@
         "name": "Account name",
         "institution": "Institution",
         "type": "Type",
+        "cashFlowRole": "Account role",
+        "cashFlowRoleDescription": "Choose whether this account is used for daily cash flow or kept as a reserve.",
         "currency": "Currency",
         "openingBalance": "Opening balance",
         "archived": "Archived",

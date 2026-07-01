@@ -141,6 +141,7 @@ model BankAccount {
   name                String
   bankName            String?
   type                BankAccountType @default(CHECKING)
+  cashFlowRole        BankAccountCashFlowRole @default(OPERATING)
   currency            String          @default("BRL")
   initialBalanceCents Int             @default(0)
   archived            Boolean         @default(false)
@@ -219,6 +220,11 @@ enum BankAccountType {
   OTHER
   SAVINGS
   WALLET
+}
+
+enum BankAccountCashFlowRole {
+  OPERATING
+  RESERVE
 }
 
 enum TransactionKind {

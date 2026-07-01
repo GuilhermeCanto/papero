@@ -3,9 +3,11 @@ import type { BankAccount } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
 
 export type FinanceAccountType = "cash" | "checking" | "credit_card" | "investment" | "other" | "savings" | "wallet";
+export type FinanceAccountCashFlowRole = "operating" | "reserve";
 
 export type FinanceAccountRecord = {
   archived: boolean;
+  cashFlowRole: FinanceAccountCashFlowRole;
   createdAt: string;
   currency: string;
   id: string;
@@ -18,6 +20,7 @@ export type FinanceAccountRecord = {
 
 export type FinanceAccountInput = {
   archived?: unknown;
+  cashFlowRole?: unknown;
   currency?: unknown;
   institution?: unknown;
   name?: unknown;
@@ -59,6 +62,16 @@ const prismaToLocalType = {
   WALLET: "wallet",
 } as const satisfies Record<BankAccount["type"], FinanceAccountType>;
 
+const localToPrismaCashFlowRole = {
+  operating: "OPERATING",
+  reserve: "RESERVE",
+} as const satisfies Record<FinanceAccountCashFlowRole, BankAccount["cashFlowRole"]>;
+
+const prismaToLocalCashFlowRole = {
+  OPERATING: "operating",
+  RESERVE: "reserve",
+} as const satisfies Record<BankAccount["cashFlowRole"], FinanceAccountCashFlowRole>;
+
 function isFinanceAccountType(value: unknown): value is FinanceAccountType {
   return (
     value === "cash" ||
@@ -69,6 +82,10 @@ function isFinanceAccountType(value: unknown): value is FinanceAccountType {
     value === "savings" ||
     value === "wallet"
   );
+}
+
+function isFinanceAccountCashFlowRole(value: unknown): value is FinanceAccountCashFlowRole {
+  return value === "operating" || value === "reserve";
 }
 
 function sanitizeOptionalString(value: unknown) {
@@ -122,6 +139,15 @@ function sanitizeAccountType(value: unknown) {
   return value;
 }
 
+function sanitizeCashFlowRole(value: unknown) {
+  if (value === undefined || value === null || value === "") return "operating";
+  if (!isFinanceAccountCashFlowRole(value)) {
+    throw new FinanceAccountValidationError("Account cash flow role is not supported.");
+  }
+
+  return value;
+}
+
 function sanitizeName(value: unknown, required: boolean) {
   if (value === undefined || value === null) {
     if (required) throw new FinanceAccountValidationError("Account name is required.");
@@ -143,6 +169,7 @@ function sanitizeName(value: unknown, required: boolean) {
 function toFinanceAccount(account: BankAccount): FinanceAccountRecord {
   return {
     archived: account.archived,
+    cashFlowRole: prismaToLocalCashFlowRole[account.cashFlowRole],
     createdAt: account.createdAt.toISOString(),
     currency: account.currency,
     id: account.id,
@@ -170,6 +197,7 @@ export async function listFinanceAccounts(companyId: string) {
 export async function createFinanceAccount(companyId: string, input: FinanceAccountInput) {
   const name = sanitizeName(input.name, true);
   const type = sanitizeAccountType(input.type);
+  const cashFlowRole = sanitizeCashFlowRole(input.cashFlowRole);
 
   const account = await prisma.bankAccount.create({
     data: {
@@ -179,6 +207,7 @@ export async function createFinanceAccount(companyId: string, input: FinanceAcco
       currency: sanitizeCurrency(input.currency),
       initialBalanceCents: sanitizeOpeningBalanceCents(input.openingBalanceCents),
       name: name ?? "",
+      cashFlowRole: localToPrismaCashFlowRole[cashFlowRole],
       type: localToPrismaType[type],
     },
   });
@@ -214,6 +243,9 @@ export async function updateFinanceAccount(companyId: string, id: string, input:
   }
   if (input.type !== undefined) {
     data.type = localToPrismaType[sanitizeAccountType(input.type)];
+  }
+  if (input.cashFlowRole !== undefined) {
+    data.cashFlowRole = localToPrismaCashFlowRole[sanitizeCashFlowRole(input.cashFlowRole)];
   }
   if (archived !== undefined) data.archived = archived;
 

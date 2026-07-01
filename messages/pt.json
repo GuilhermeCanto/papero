@@ -373,6 +373,7 @@
         "account": "Conta",
         "institution": "Instituição",
         "type": "Tipo",
+        "cashFlowRole": "Uso no caixa",
         "currency": "Moeda",
         "openingBalance": "Saldo inicial",
         "currentBalance": "Saldo atual",
@@ -391,6 +392,10 @@
         "other": "Outra",
         "savings": "Poupança",
         "wallet": "Carteira"
+      },
+      "cashFlowRoles": {
+        "operating": "Conta operacional",
+        "reserve": "Conta reserva"
       },
       "status": {
         "active": "Ativa",
@@ -412,6 +417,8 @@
         "name": "Nome da conta",
         "institution": "Instituição",
         "type": "Tipo",
+        "cashFlowRole": "Uso da conta",
+        "cashFlowRoleDescription": "Escolha se esta conta é usada no fluxo de caixa diário ou mantida como reserva.",
         "currency": "Moeda",
         "openingBalance": "Saldo inicial",
         "archived": "Arquivada",
