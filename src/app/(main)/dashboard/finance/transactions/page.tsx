@@ -2,6 +2,8 @@
 
 import * as React from "react";
 
+import { useSearchParams } from "next/navigation";
+
 import { useLocale, useTranslations } from "next-intl";
 
 import { PrivacyValue } from "@/app/(main)/dashboard/_components/privacy-value";
@@ -149,9 +151,13 @@ function TransactionsKpiStrip({
 
 export default function TransactionsPage() {
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const t = useTranslations("Dashboard.financeTransactions");
   const today = React.useMemo(() => new Date(), []);
   const { transactions } = useFinanceTransactions([]);
+  const tableMode =
+    searchParams.get("type") === "income" ? "incomes" : searchParams.get("type") === "expense" ? "expenses" : "all";
+  const editTransactionId = searchParams.get("edit") ?? undefined;
   const metrics = React.useMemo(() => getDashboardFinanceMetrics(transactions, today), [transactions, today]);
   const monthLabel = React.useMemo(
     () =>
@@ -179,7 +185,7 @@ export default function TransactionsPage() {
         projectedResultCents={metrics.currentMonthResultCents}
       />
 
-      <FinanceTransactionsTable />
+      <FinanceTransactionsTable editTransactionId={editTransactionId} mode={tableMode} />
     </div>
   );
 }

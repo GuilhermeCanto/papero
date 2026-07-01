@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { Download, RotateCw, Settings2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -117,13 +118,21 @@ function getTransactionStatus(transaction: FinanceTransaction) {
   return "Agendado";
 }
 
+function getTransactionTypeHref(kind: FinanceTransaction["kind"]) {
+  return kind === "income" ? "income" : "expense";
+}
+
 function toTransactionRecord(transaction: FinanceTransaction): TransactionRecord {
+  const type = getTransactionTypeHref(transaction.kind);
+
   return {
     amountCents: transaction.amountCents,
     category: transaction.category,
     contact: transaction.from || transaction.description,
     dueDate: formatShortDate(transaction.date),
+    editHref: `/dashboard/finance/transactions?type=${type}&edit=${encodeURIComponent(transaction.id)}`,
     id: transaction.id,
+    paid: transaction.paid,
     status: getTransactionStatus(transaction),
   };
 }
@@ -139,7 +148,9 @@ export default function Page() {
     isLoading: isLoadingTransactions,
     refresh: refreshTransactions,
     transactions,
+    updateTransaction,
   } = useFinanceTransactionsData();
+  const [isRecentTransactionMutating, setIsRecentTransactionMutating] = React.useState(false);
   const accountsWithFallback = React.useMemo(
     () => (isDatabaseAccountsMode ? accounts : getFinanceAccountsWithFallback(accounts)),
     [accounts, isDatabaseAccountsMode],
@@ -148,6 +159,10 @@ export default function Page() {
   const accountSummaries = React.useMemo(
     () => getAccountBalanceSummaries(accountsWithFallback, transactions, defaultAccount),
     [accountsWithFallback, defaultAccount, transactions],
+  );
+  const activeAccountSummariesCount = React.useMemo(
+    () => accountSummaries.filter((summary) => !summary.account.archived).length,
+    [accountSummaries],
   );
   const currentBalanceCents = React.useMemo(
     () => accountSummaries.reduce((total, summary) => total + summary.currentBalanceCents, 0),
@@ -301,6 +316,20 @@ export default function Page() {
       })),
     [currentMonthExpenseTransactions],
   );
+  const toggleRecentTransactionPaid = React.useCallback(
+    async (id: string, paid: boolean) => {
+      setIsRecentTransactionMutating(true);
+
+      try {
+        await updateTransaction(id, { paid });
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : t("financeTransactions.table.error"));
+      } finally {
+        setIsRecentTransactionMutating(false);
+      }
+    },
+    [t, updateTransaction],
+  );
 
   return (
     <div className="flex flex-col gap-4 pt-10 md:pt-12 lg:pt-14">
@@ -384,8 +413,16 @@ export default function Page() {
             <BalanceDistributionCard accounts={accountSummaries} />
             <Wallet
               accounts={accountSummaries}
-              sourceLabel={isDatabaseAccountsMode ? "Database" : "Local"}
-              statusDescription={isDatabaseAccountsMode ? "synced from database" : "available locally"}
+              activeAccountsLabel={t("accountsWidget.activeAccounts")}
+              sourceLabel={
+                isDatabaseAccountsMode ? t("accountsWidget.sources.database") : t("accountsWidget.sources.local")
+              }
+              statusLine={
+                isDatabaseAccountsMode
+                  ? t("accountsWidget.syncedFromDatabase", { count: activeAccountSummariesCount })
+                  : t("accountsWidget.availableLocally", { count: activeAccountSummariesCount })
+              }
+              title={t("accountsWidget.title")}
             />
           </div>
           <AccountActivityFlow
@@ -418,7 +455,10 @@ export default function Page() {
               <RecentTransactionFlow
                 title={t("financeBreakdown.recentIncomeTitle")}
                 description={t("financeBreakdown.recentIncomeDescription")}
+                isMutating={isRecentTransactionMutating}
+                onTogglePaid={(id, paid) => void toggleRecentTransactionPaid(id, paid)}
                 records={recentIncomeRecords}
+                viewAllHref="/dashboard/finance/transactions?type=income"
               />
             </div>
             <div className="flex flex-col gap-4">
@@ -426,7 +466,10 @@ export default function Page() {
               <RecentTransactionFlow
                 title={t("financeBreakdown.recentExpenseTitle")}
                 description={t("financeBreakdown.recentExpenseDescription")}
+                isMutating={isRecentTransactionMutating}
+                onTogglePaid={(id, paid) => void toggleRecentTransactionPaid(id, paid)}
                 records={recentExpenseRecords}
+                viewAllHref="/dashboard/finance/transactions?type=expense"
               />
             </div>
           </div>
