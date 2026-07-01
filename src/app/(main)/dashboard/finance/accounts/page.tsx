@@ -44,6 +44,7 @@ import { cn } from "@/lib/utils";
 
 import {
   type FinanceAccount,
+  type FinanceAccountCashFlowRole,
   type FinanceAccountType,
   getDefaultFinanceAccount,
   getFinanceAccountsWithFallback,
@@ -61,10 +62,12 @@ const accountTypes: FinanceAccountType[] = [
   "investment",
   "other",
 ];
+const accountRoles: FinanceAccountCashFlowRole[] = ["operating", "reserve"];
 const currencyOptions = ["BRL", "USD", "EUR"] as const;
 
 type AccountFormState = {
   archived: boolean;
+  cashFlowRole: FinanceAccountCashFlowRole;
   currency: string;
   institution: string;
   name: string;
@@ -101,6 +104,7 @@ function parseMoneyToCents(value: string) {
 function getInitialFormState(account?: FinanceAccount): AccountFormState {
   return {
     archived: account?.archived ?? false,
+    cashFlowRole: account?.cashFlowRole ?? "operating",
     currency: account?.currency ?? "BRL",
     institution: account?.institution ?? "",
     name: account?.name ?? "",
@@ -192,6 +196,28 @@ function AccountFormDialog({
                   </SelectGroup>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label>{t("dialog.cashFlowRole")}</Label>
+              <Select
+                onValueChange={(value) => updateForm("cashFlowRole", value as FinanceAccountCashFlowRole)}
+                value={form.cashFlowRole}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {accountRoles.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {t(`cashFlowRoles.${role}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <p className="text-muted-foreground text-xs">{t("dialog.cashFlowRoleDescription")}</p>
             </div>
           </div>
 
@@ -285,6 +311,7 @@ export default function FinanceAccountsPage() {
   const saveAccount = async (form: AccountFormState) => {
     const payload = {
       archived: form.archived,
+      cashFlowRole: form.cashFlowRole,
       currency: form.currency,
       institution: form.institution.trim() || undefined,
       name: form.name.trim(),
@@ -411,6 +438,7 @@ export default function FinanceAccountsPage() {
                     <TableHead>{t("table.account")}</TableHead>
                     <TableHead>{t("table.institution")}</TableHead>
                     <TableHead>{t("table.type")}</TableHead>
+                    <TableHead>{t("table.cashFlowRole")}</TableHead>
                     <TableHead>{t("table.currency")}</TableHead>
                     <TableHead className="text-left">{t("table.openingBalance")}</TableHead>
                     <TableHead className="text-left">{t("table.currentBalance")}</TableHead>
@@ -443,6 +471,11 @@ export default function FinanceAccountsPage() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">{t(`types.${summary.account.type}`)}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={summary.account.cashFlowRole === "reserve" ? "secondary" : "outline"}>
+                            {t(`cashFlowRoles.${summary.account.cashFlowRole}`)}
+                          </Badge>
                         </TableCell>
                         <TableCell>{summary.account.currency}</TableCell>
                         <TableCell>

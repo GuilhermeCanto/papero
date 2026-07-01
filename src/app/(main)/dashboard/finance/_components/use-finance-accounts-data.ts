@@ -47,6 +47,9 @@ function isFinanceAccount(value: unknown): value is FinanceAccount {
   return (
     typeof account.id === "string" &&
     typeof account.name === "string" &&
+    (account.cashFlowRole === undefined ||
+      account.cashFlowRole === "operating" ||
+      account.cashFlowRole === "reserve") &&
     typeof account.type === "string" &&
     typeof account.currency === "string" &&
     typeof account.openingBalanceCents === "number" &&
@@ -57,7 +60,12 @@ function isFinanceAccount(value: unknown): value is FinanceAccount {
 }
 
 function normalizeApiAccounts(accounts: unknown) {
-  return Array.isArray(accounts) ? accounts.filter(isFinanceAccount) : [];
+  return Array.isArray(accounts)
+    ? accounts.filter(isFinanceAccount).map((account) => ({
+        ...account,
+        cashFlowRole: account.cashFlowRole ?? "operating",
+      }))
+    : [];
 }
 
 export function useFinanceAccountsData(): FinanceAccountsData {

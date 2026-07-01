@@ -133,6 +133,7 @@ export const demoFinanceContacts: FinanceContact[] = [
 export const demoFinanceAccounts: FinanceAccount[] = [
   {
     archived: false,
+    cashFlowRole: "operating",
     createdAt: "2026-06-01T00:00:00.000Z",
     currency: "BRL",
     id: "main-account",
@@ -144,6 +145,7 @@ export const demoFinanceAccounts: FinanceAccount[] = [
   },
   {
     archived: false,
+    cashFlowRole: "reserve",
     createdAt: "2026-06-01T00:00:00.000Z",
     currency: "BRL",
     id: "demo-account-reserve",
@@ -155,6 +157,7 @@ export const demoFinanceAccounts: FinanceAccount[] = [
   },
   {
     archived: false,
+    cashFlowRole: "operating",
     createdAt: "2026-06-01T00:00:00.000Z",
     currency: "BRL",
     id: "demo-account-cash",
@@ -165,6 +168,7 @@ export const demoFinanceAccounts: FinanceAccount[] = [
   },
   {
     archived: false,
+    cashFlowRole: "operating",
     createdAt: "2026-06-01T00:00:00.000Z",
     currency: "BRL",
     id: "demo-account-credit-card",
@@ -176,6 +180,7 @@ export const demoFinanceAccounts: FinanceAccount[] = [
   },
   {
     archived: false,
+    cashFlowRole: "reserve",
     createdAt: "2026-06-01T00:00:00.000Z",
     currency: "BRL",
     id: "demo-account-investment",
@@ -187,6 +192,7 @@ export const demoFinanceAccounts: FinanceAccount[] = [
   },
   {
     archived: false,
+    cashFlowRole: "operating",
     createdAt: "2026-06-01T00:00:00.000Z",
     currency: "BRL",
     id: "demo-account-wallet",

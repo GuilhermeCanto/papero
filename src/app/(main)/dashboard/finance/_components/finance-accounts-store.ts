@@ -3,9 +3,11 @@
 import * as React from "react";
 
 export type FinanceAccountType = "cash" | "checking" | "credit_card" | "investment" | "other" | "savings" | "wallet";
+export type FinanceAccountCashFlowRole = "operating" | "reserve";
 
 export type FinanceAccount = {
   archived: boolean;
+  cashFlowRole: FinanceAccountCashFlowRole;
   createdAt: string;
   currency: string;
   id: string;
@@ -23,6 +25,7 @@ const nowIso = "2026-06-01T00:00:00.000Z";
 
 export const defaultFinanceAccount: FinanceAccount = {
   archived: false,
+  cashFlowRole: "operating",
   createdAt: nowIso,
   currency: "BRL",
   id: "main-account",
@@ -45,6 +48,17 @@ function isFinanceAccountType(value: unknown): value is FinanceAccountType {
   );
 }
 
+function isFinanceAccountCashFlowRole(value: unknown): value is FinanceAccountCashFlowRole {
+  return value === "operating" || value === "reserve";
+}
+
+function normalizeFinanceAccount(account: FinanceAccount) {
+  return {
+    ...account,
+    cashFlowRole: isFinanceAccountCashFlowRole(account.cashFlowRole) ? account.cashFlowRole : "operating",
+  };
+}
+
 function isFinanceAccount(value: unknown): value is FinanceAccount {
   if (!value || typeof value !== "object") return false;
 
@@ -53,6 +67,7 @@ function isFinanceAccount(value: unknown): value is FinanceAccount {
     typeof account.id === "string" &&
     typeof account.name === "string" &&
     isFinanceAccountType(account.type) &&
+    (account.cashFlowRole === undefined || isFinanceAccountCashFlowRole(account.cashFlowRole)) &&
     typeof account.currency === "string" &&
     typeof account.openingBalanceCents === "number" &&
     typeof account.archived === "boolean" &&
@@ -65,7 +80,7 @@ function isFinanceAccount(value: unknown): value is FinanceAccount {
 function uniqueAccountsById(accounts: FinanceAccount[]) {
   const seenAccountIds = new Set<string>();
 
-  return accounts.filter((account) => {
+  return accounts.map(normalizeFinanceAccount).filter((account) => {
     if (seenAccountIds.has(account.id)) return false;
 
     seenAccountIds.add(account.id);

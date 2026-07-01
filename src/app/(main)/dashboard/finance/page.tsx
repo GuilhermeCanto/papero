@@ -15,6 +15,7 @@ import { getDefaultFinanceAccount, getFinanceAccountsWithFallback } from "./_com
 import {
   getAccountActivityByMonth,
   getAccountBalanceSummaries,
+  getAvailableCashCentsByAccount,
   getCashFlowByDay,
   getDashboardFinanceMetrics,
   getForecastedEndOfMonthBalanceCents,
@@ -111,6 +112,14 @@ export default function Page() {
     () => getAccountBalanceSummaries(accountsWithFallback, transactions, defaultAccount),
     [accountsWithFallback, defaultAccount, transactions],
   );
+  const currentBalanceCents = React.useMemo(
+    () => accountSummaries.reduce((total, summary) => total + summary.currentBalanceCents, 0),
+    [accountSummaries],
+  );
+  const availableCashCents = React.useMemo(
+    () => getAvailableCashCentsByAccount(accountsWithFallback, transactions, defaultAccount.id),
+    [accountsWithFallback, defaultAccount.id, transactions],
+  );
   const accountActivityData = React.useMemo(
     () => getAccountActivityByMonth(transactions, today),
     [transactions, today],
@@ -149,10 +158,10 @@ export default function Page() {
   const overviewProps = {
     availableCashBadge: formatSignedPercent(currentMonthDeltaPercent),
     availableCashDesc: `${metrics.upcomingBills.length} upcoming bills`,
-    availableCashValue: formatMoney(metrics.availableCashCents),
+    availableCashValue: formatMoney(availableCashCents),
     currentBalanceBadge: formatSignedPercent(currentMonthDeltaPercent),
     currentBalanceDesc: `${metrics.paidIncomeCents > 0 || metrics.paidExpenseCents > 0 ? "Paid activity this month" : "No paid activity this month"}`,
-    currentBalanceValue: formatMoney(metrics.currentBalanceCents),
+    currentBalanceValue: formatMoney(currentBalanceCents),
     monthlyExpenseBadge: metrics.currentMonthExpenseCents > 0 ? "Open" : "Clear",
     monthlyExpenseDesc: `${metrics.upcomingBills.length} unpaid upcoming`,
     monthlyExpenseValue: formatMoney(metrics.currentMonthExpenseCents),
