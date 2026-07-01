@@ -27,6 +27,16 @@
       "accounts": "Accounts",
       "transactions": "Transactions"
     },
+    "accountsWidget": {
+      "title": "Accounts",
+      "activeAccounts": "Active accounts",
+      "syncedFromDatabase": "{count, plural, one {# account synced from database} other {# accounts synced from database}}",
+      "availableLocally": "{count, plural, one {# account available locally} other {# accounts available locally}}",
+      "sources": {
+        "database": "Database",
+        "local": "Local"
+      }
+    },
     "financeData": {
       "loading": "Loading finance data...",
       "retry": "Retry"
@@ -328,7 +338,7 @@
         "editRecord": "Edit {id}",
         "empty": "No transactions yet."
       },
-      "recentIncomeTitle": "Recent receipts",
+      "recentIncomeTitle": "Recent incomes",
       "recentIncomeDescription": "Track receivables and customer entries that are already paid.",
       "recentExpenseTitle": "Recent expenses",
       "recentExpenseDescription": "Track bills payable and expense entries that are already paid.",

@@ -27,6 +27,16 @@
       "accounts": "Contas",
       "transactions": "Transações"
     },
+    "accountsWidget": {
+      "title": "Contas",
+      "activeAccounts": "Contas ativas",
+      "syncedFromDatabase": "{count, plural, one {# conta sincronizada do banco de dados} other {# contas sincronizadas do banco de dados}}",
+      "availableLocally": "{count, plural, one {# conta disponível localmente} other {# contas disponíveis localmente}}",
+      "sources": {
+        "database": "Banco de dados",
+        "local": "Local"
+      }
+    },
     "financeData": {
       "loading": "Carregando dados financeiros...",
       "retry": "Tentar novamente"
@@ -328,7 +338,7 @@
         "editRecord": "Editar {id}",
         "empty": "Nenhuma transação ainda."
       },
-      "recentIncomeTitle": "Recebimentos recentes",
+      "recentIncomeTitle": "Entradas recentes",
       "recentIncomeDescription": "Acompanhe recebíveis e lançamentos já pagos dos clientes ativos.",
       "recentExpenseTitle": "Despesas recentes",
       "recentExpenseDescription": "Acompanhe contas a pagar e lançamentos de despesas já pagos.",
