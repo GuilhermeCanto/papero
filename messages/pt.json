@@ -28,13 +28,11 @@
       "monthlySpendValue": "R$ 2.140,00",
       "monthlySpendDesc": "{overdue} vencidas não pagas | {upcoming} próximas não pagas",
       "monthlySpendBadge": "+6,1%",
-      "savingsRate": "Entradas mensais",
+      "savingsRate": "Entradas do mês",
       "savingsRateValue": "R$ 7.420,00",
       "savingsRateDesc": "Recebidas e previstas neste mês",
       "savingsRateBadge": "+2,4%",
-      "monthlyInflowsDesc": "Recebidas e previstas neste mês",
-      "newThisMonth": "Novo neste mês",
-      "noPreviousPeriod": "Sem período anterior"
+      "monthlyInflowsDesc": "{overdue} recebíveis vencidos | {upcoming} recebíveis próximos"
     },
     "upcoming": {
       "title": "Próximos vencimentos",

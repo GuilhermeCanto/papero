@@ -32,9 +32,7 @@
       "savingsRateValue": "R$ 7.420,00",
       "savingsRateDesc": "Received and expected this month",
       "savingsRateBadge": "+2.4%",
-      "monthlyInflowsDesc": "Received and expected this month",
-      "newThisMonth": "New this month",
-      "noPreviousPeriod": "No previous period"
+      "monthlyInflowsDesc": "{overdue} overdue receivables | {upcoming} upcoming receivables"
     },
     "upcoming": {
       "title": "Upcoming Bills",

@@ -23,6 +23,7 @@ import {
   getOverdueTransactions,
   getTopCategoriesByAmount,
   getUpcomingBills,
+  getUpcomingIncomes,
   isExpenseTransaction,
   isIncomeTransaction,
   parseFinanceDate,
@@ -55,26 +56,22 @@ function formatMoney(amountCents: number) {
 }
 
 function formatSignedPercent(value: number) {
-  return `${value >= 0 ? "+" : ""}${value}%`;
+  return `${value > 0 ? "+" : ""}${value}%`;
 }
 
 function getPreviousMonth(date: Date) {
   return new Date(date.getFullYear(), date.getMonth() - 1, 1);
 }
 
-function formatPeriodVariation(
-  currentValueCents: number,
-  previousValueCents: number,
-  t: ReturnType<typeof useTranslations>,
-) {
+function formatPeriodVariation(currentValueCents: number, previousValueCents: number) {
   const minimumMeaningfulPreviousValueCents = 100;
 
-  if (previousValueCents === 0 && currentValueCents === 0) return t("kpis.noPreviousPeriod");
+  if (previousValueCents === 0 && currentValueCents === 0) return formatSignedPercent(0);
   if (previousValueCents < minimumMeaningfulPreviousValueCents) {
-    return currentValueCents > 0 ? t("kpis.newThisMonth") : t("kpis.noPreviousPeriod");
+    return formatSignedPercent(currentValueCents >= 0 ? 100 : -100);
   }
 
-  const variation = Math.round(((currentValueCents - previousValueCents) / previousValueCents) * 100);
+  const variation = Math.round(((currentValueCents - previousValueCents) / Math.abs(previousValueCents)) * 100);
   return formatSignedPercent(variation);
 }
 
@@ -82,6 +79,14 @@ function countCurrentMonthUpcomingBills(transactions: FinanceTransaction[], toda
   const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
   return getUpcomingBills(transactions, today, Number.POSITIVE_INFINITY).filter(
+    (transaction) => transaction.parsedDate <= monthEnd,
+  ).length;
+}
+
+function countCurrentMonthUpcomingIncomes(transactions: FinanceTransaction[], today: Date) {
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+  return getUpcomingIncomes(transactions, today, Number.POSITIVE_INFINITY).filter(
     (transaction) => transaction.parsedDate <= monthEnd,
   ).length;
 }
@@ -205,6 +210,14 @@ export default function Page() {
     () => countCurrentMonthUpcomingBills(transactions, today),
     [transactions, today],
   );
+  const overdueReceivablesCount = React.useMemo(
+    () => getOverdueTransactions(transactions, today).filter(isIncomeTransaction).length,
+    [transactions, today],
+  );
+  const upcomingReceivablesCount = React.useMemo(
+    () => countCurrentMonthUpcomingIncomes(transactions, today),
+    [transactions, today],
+  );
   const cashFlowDays = React.useMemo(() => getCashFlowByDay(transactions, today), [transactions, today]);
   const cashFlowBars = React.useMemo(() => {
     const maxMovementCents = Math.max(...cashFlowDays.map((day) => day.incomeCents + day.expenseCents), 0);
@@ -225,17 +238,20 @@ export default function Page() {
     title: transaction.description,
   }));
   const overviewProps = {
-    availableCashBadge: formatPeriodVariation(currentMonthBalanceMovementCents, previousMonthBalanceMovementCents, t),
+    availableCashBadge: formatPeriodVariation(currentMonthBalanceMovementCents, previousMonthBalanceMovementCents),
     availableCashDesc: t("kpis.availableCashDesc"),
     availableCashValue: formatMoney(availableCashCents),
-    currentBalanceBadge: formatPeriodVariation(currentMonthBalanceMovementCents, previousMonthBalanceMovementCents, t),
+    currentBalanceBadge: formatPeriodVariation(currentMonthBalanceMovementCents, previousMonthBalanceMovementCents),
     currentBalanceDesc: t("kpis.netWorthDesc"),
     currentBalanceValue: formatMoney(currentBalanceCents),
-    monthlyExpenseBadge: formatPeriodVariation(currentMonthExpenseCents, previousMonthExpenseCents, t),
+    monthlyExpenseBadge: formatPeriodVariation(currentMonthExpenseCents, previousMonthExpenseCents),
     monthlyExpenseDesc: t("kpis.monthlySpendDesc", { overdue: overdueUnpaidCount, upcoming: upcomingUnpaidCount }),
     monthlyExpenseValue: formatMoney(currentMonthExpenseCents),
-    monthlyResultBadge: formatPeriodVariation(currentMonthIncomeCents, previousMonthIncomeCents, t),
-    monthlyResultDesc: t("kpis.monthlyInflowsDesc"),
+    monthlyResultBadge: formatPeriodVariation(currentMonthIncomeCents, previousMonthIncomeCents),
+    monthlyResultDesc: t("kpis.monthlyInflowsDesc", {
+      overdue: overdueReceivablesCount,
+      upcoming: upcomingReceivablesCount,
+    }),
     monthlyResultValue: formatMoney(currentMonthIncomeCents),
   };
   const upcomingProps = {
