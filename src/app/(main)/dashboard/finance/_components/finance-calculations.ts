@@ -457,6 +457,16 @@ export function getTotalCurrentBalanceCentsByAccount(
     .reduce((total, account) => total + getCurrentBalanceCentsByAccount(account, transactions, defaultAccountId), 0);
 }
 
+export function getAvailableCashCentsByAccount(
+  accounts: FinanceAccount[],
+  transactions: FinanceTransaction[],
+  defaultAccountId: string,
+) {
+  return accounts
+    .filter((account) => !account.archived && account.cashFlowRole !== "reserve")
+    .reduce((total, account) => total + getCurrentBalanceCentsByAccount(account, transactions, defaultAccountId), 0);
+}
+
 export function getAccountBalanceSummaries(
   accounts: FinanceAccount[],
   transactions: FinanceTransaction[],

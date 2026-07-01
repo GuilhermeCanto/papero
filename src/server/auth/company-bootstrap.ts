@@ -1,9 +1,11 @@
+import type { Prisma } from "@prisma/client";
+
 import { prisma } from "@/server/db/prisma";
 
 const defaultBankAccountNames = ["Main Account", "Conta Principal"];
 
-async function ensureDefaultBankAccount(companyId: string) {
-  const existingAccount = await prisma.bankAccount.findFirst({
+async function ensureDefaultMainAccount(companyId: string, client: Prisma.TransactionClient | typeof prisma = prisma) {
+  const existingMainAccount = await client.bankAccount.findFirst({
     select: {
       id: true,
     },
@@ -18,12 +20,13 @@ async function ensureDefaultBankAccount(companyId: string) {
     },
   });
 
-  if (existingAccount) {
-    return existingAccount;
+  if (existingMainAccount) {
+    return existingMainAccount;
   }
 
-  return prisma.bankAccount.create({
+  return client.bankAccount.create({
     data: {
+      cashFlowRole: "OPERATING",
       companyId,
       currency: "BRL",
       initialBalanceCents: 0,
@@ -49,7 +52,7 @@ export async function ensureDefaultCompanyForUser(user: { id: string; name?: str
   });
 
   if (existingMembership) {
-    await ensureDefaultBankAccount(existingMembership.companyId);
+    await ensureDefaultMainAccount(existingMembership.companyId);
 
     return {
       companyId: existingMembership.companyId,
@@ -72,32 +75,7 @@ export async function ensureDefaultCompanyForUser(user: { id: string; name?: str
     });
 
     if (membershipCreatedDuringRetry) {
-      const existingDefaultAccount = await tx.bankAccount.findFirst({
-        select: {
-          id: true,
-        },
-        where: {
-          companyId: membershipCreatedDuringRetry.companyId,
-          OR: defaultBankAccountNames.map((name) => ({
-            name: {
-              equals: name,
-              mode: "insensitive" as const,
-            },
-          })),
-        },
-      });
-
-      if (!existingDefaultAccount) {
-        await tx.bankAccount.create({
-          data: {
-            companyId: membershipCreatedDuringRetry.companyId,
-            currency: "BRL",
-            initialBalanceCents: 0,
-            name: "Main Account",
-            type: "CHECKING",
-          },
-        });
-      }
+      await ensureDefaultMainAccount(membershipCreatedDuringRetry.companyId, tx);
 
       return {
         companyId: membershipCreatedDuringRetry.companyId,
@@ -126,15 +104,7 @@ export async function ensureDefaultCompanyForUser(user: { id: string; name?: str
       },
     });
 
-    await tx.bankAccount.create({
-      data: {
-        companyId: company.id,
-        currency: "BRL",
-        initialBalanceCents: 0,
-        name: "Main Account",
-        type: "CHECKING",
-      },
-    });
+    await ensureDefaultMainAccount(company.id, tx);
 
     return {
       companyId: company.id,

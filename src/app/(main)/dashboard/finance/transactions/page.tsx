@@ -2,6 +2,8 @@
 
 import * as React from "react";
 
+import { useSearchParams } from "next/navigation";
+
 import { ChevronDown } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -203,10 +205,17 @@ function TransactionsKpiStrip({
 
 export default function TransactionsPage() {
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const t = useTranslations("Dashboard.financeTransactions");
   const today = React.useMemo(() => new Date(), []);
+
   const { accounts, isDatabaseMode: isDatabaseAccountsMode } = useFinanceAccountsData();
   const { transactions } = useFinanceTransactionsData();
+
+  const tableMode =
+    searchParams.get("type") === "income" ? "incomes" : searchParams.get("type") === "expense" ? "expenses" : "all";
+  const editTransactionId = searchParams.get("edit") ?? undefined;
+
   const accountsWithFallback = React.useMemo(
     () => (isDatabaseAccountsMode ? accounts : getFinanceAccountsWithFallback(accounts)),
     [accounts, isDatabaseAccountsMode],
@@ -291,7 +300,7 @@ export default function TransactionsPage() {
         selectedAccountIds={selectedAccountIds}
       />
 
-      <FinanceTransactionsTable />
+      <FinanceTransactionsTable editTransactionId={editTransactionId} mode={tableMode} />
     </div>
   );
 }

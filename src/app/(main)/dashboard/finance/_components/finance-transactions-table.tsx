@@ -999,10 +999,17 @@ function RecurrenceDialog({
   );
 }
 
-export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTransactionsTableMode }) {
+export function FinanceTransactionsTable({
+  editTransactionId,
+  mode = "all",
+}: {
+  editTransactionId?: string;
+  mode?: FinanceTransactionsTableMode;
+}) {
   const t = useTranslations("Dashboard.financeTransactions");
   const availableKindIds = React.useMemo(() => getTransactionKindsForMode(mode), [mode]);
   const [activeKind, setActiveKind] = React.useState<TransactionKind>(availableKindIds[0]);
+  const openedEditTransactionIdRef = React.useRef<string | null>(null);
   const { accounts, isDatabaseMode: isDatabaseAccountsMode, isLoading: isLoadingAccounts } = useFinanceAccountsData();
   const {
     addTransaction: createTransaction,
@@ -1035,6 +1042,17 @@ export function FinanceTransactionsTable({ mode = "all" }: { mode?: FinanceTrans
   const currentDetailsTransaction = detailsTransaction
     ? (transactions.find((transaction) => transaction.id === detailsTransaction.id) ?? detailsTransaction)
     : null;
+
+  React.useEffect(() => {
+    if (!editTransactionId || openedEditTransactionIdRef.current === editTransactionId) return;
+
+    const targetTransaction = transactions.find((transaction) => transaction.id === editTransactionId);
+    if (!targetTransaction || !availableKindIds.includes(targetTransaction.kind)) return;
+
+    setActiveKind(targetTransaction.kind);
+    setDetailsTransaction(targetTransaction);
+    openedEditTransactionIdRef.current = editTransactionId;
+  }, [availableKindIds, editTransactionId, transactions]);
 
   const runTransactionAction = React.useCallback(
     async (action: () => Promise<void>) => {

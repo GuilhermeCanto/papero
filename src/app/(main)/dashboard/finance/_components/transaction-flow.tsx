@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -16,6 +18,8 @@ export type TransactionRecord = {
   category: string;
   dueDate: string;
   amountCents: number;
+  editHref?: string;
+  paid: boolean;
   status: TransactionStatus;
 };
 
@@ -74,13 +78,19 @@ export function ExpenseBreakdown({ items }: { items?: ExpenseBreakdownItem[] }) 
 export function RecentTransactionFlow({
   description,
   emptyLabel,
+  isMutating,
+  onTogglePaid,
   records,
   title,
+  viewAllHref,
 }: {
   description: string;
   emptyLabel?: string;
+  isMutating?: boolean;
+  onTogglePaid?: (id: string, paid: boolean) => void;
   records: TransactionRecord[];
   title: string;
+  viewAllHref?: string;
 }) {
   const t = useTranslations("Dashboard.financeBreakdown");
 
@@ -90,9 +100,15 @@ export function RecentTransactionFlow({
         <CardTitle className="leading-none">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
         <CardAction>
-          <Button size="sm" variant="outline">
-            {t("viewAll")}
-          </Button>
+          {viewAllHref ? (
+            <Button asChild size="sm" variant="outline">
+              <Link href={viewAllHref}>{t("viewAll")}</Link>
+            </Button>
+          ) : (
+            <Button size="sm" variant="outline">
+              {t("viewAll")}
+            </Button>
+          )}
         </CardAction>
       </CardHeader>
       <CardContent className="px-0">
@@ -125,19 +141,35 @@ export function RecentTransactionFlow({
                   <div className="flex items-center gap-2">
                     <Switch
                       aria-label={t("overviewTable.markAsPaid", { id: record.id })}
-                      checked={record.status === "Recebido" || record.status === "Pago"}
+                      checked={record.paid}
+                      disabled={isMutating}
+                      onCheckedChange={(paid) => onTogglePaid?.(record.id, paid)}
                     />
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-8 rounded-full text-muted-foreground hover:bg-transparent focus-visible:bg-transparent"
-                  >
-                    <Pencil />
-                    <span className="sr-only">{t("overviewTable.editRecord", { id: record.id })}</span>
-                  </Button>
+                  {record.editHref ? (
+                    <Button
+                      asChild
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 rounded-full text-muted-foreground hover:bg-transparent focus-visible:bg-transparent"
+                    >
+                      <Link href={record.editHref}>
+                        <Pencil />
+                        <span className="sr-only">{t("overviewTable.editRecord", { id: record.id })}</span>
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 rounded-full text-muted-foreground hover:bg-transparent focus-visible:bg-transparent"
+                    >
+                      <Pencil />
+                      <span className="sr-only">{t("overviewTable.editRecord", { id: record.id })}</span>
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

@@ -312,6 +312,7 @@ async function main() {
   const bankAccount = await prisma.bankAccount.create({
     data: {
       bankName: "Papero",
+      cashFlowRole: "OPERATING",
       companyId: company.id,
       initialBalanceCents: 2500000,
       name: "Conta Principal",

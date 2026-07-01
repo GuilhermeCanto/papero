@@ -20,19 +20,26 @@ const accountTypeIcons: Record<FinanceAccountType, typeof Landmark> = {
 
 export function Wallet({
   accounts,
+  activeAccountsLabel = "Active accounts",
   sourceLabel = "Local",
-  statusDescription = "available locally",
+  statusLine,
+  title = "Accounts",
 }: {
+  activeAccountsLabel?: string;
   accounts: AccountBalanceSummary[];
   sourceLabel?: string;
-  statusDescription?: string;
+  statusLine?: string;
+  title?: string;
 }) {
   const visibleAccounts = accounts.filter((summary) => !summary.account.archived);
+  const accountStatusLine =
+    statusLine ??
+    `${visibleAccounts.length} ${visibleAccounts.length === 1 ? "account" : "accounts"} available locally`;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-normal">Accounts</CardTitle>
+        <CardTitle className="font-normal">{title}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-col gap-4">
@@ -67,11 +74,9 @@ export function Wallet({
         <div className="flex items-center justify-between">
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-widest">
-              Active accounts
+              {activeAccountsLabel}
             </span>
-            <span className="text-muted-foreground text-xs">
-              {visibleAccounts.length} {visibleAccounts.length === 1 ? "account" : "accounts"} {statusDescription}
-            </span>
+            <span className="text-muted-foreground text-xs">{accountStatusLine}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="size-1 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
