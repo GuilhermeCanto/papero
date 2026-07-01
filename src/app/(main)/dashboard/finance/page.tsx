@@ -31,6 +31,7 @@ import {
 } from "./_components/finance-calculations";
 import { FinanceDemoAutoSeed } from "./_components/finance-demo-auto-seed";
 import { FinanceDemoDataControls } from "./_components/finance-demo-data-controls";
+import { FinanceGreeting } from "./_components/finance-greeting";
 import type { FinanceTransaction } from "./_components/finance-transactions-store";
 import { FinancialCalendarPanel } from "./_components/financial-calendar-panel";
 import { HealthStatus } from "./_components/health-status";
@@ -305,7 +306,9 @@ export default function Page() {
     <div className="flex flex-col gap-4 pt-10 md:pt-12 lg:pt-14">
       <FinanceDemoAutoSeed />
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl text-foreground leading-none tracking-tight">{t("greeting", { name: "Guilherme" })}</h1>
+        <h1 className="text-3xl text-foreground leading-none tracking-tight">
+          <FinanceGreeting />
+        </h1>
         <p className="text-lg text-muted-foreground leading-none">{t("subtitle")}</p>
       </div>
 

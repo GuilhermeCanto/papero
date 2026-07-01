@@ -2,6 +2,22 @@
   "Dashboard": {
     "title": "Dashboard",
     "greeting": "Bom dia, {name}.",
+    "greetings": {
+      "withName": {
+        "loading": "Bom dia, {name}.",
+        "morning": "Bom dia, {name}.",
+        "afternoon": "Boa tarde, {name}.",
+        "evening": "Boa noite, {name}.",
+        "night": "Boa noite, {name}."
+      },
+      "withoutName": {
+        "loading": "Bom dia.",
+        "morning": "Bom dia.",
+        "afternoon": "Boa tarde.",
+        "evening": "Boa noite.",
+        "night": "Boa noite."
+      }
+    },
     "subtitle": "Aqui está o resumo financeiro da sua empresa.",
     "updated": "Atualizado há {time}",
     "settings": "Configurações",
