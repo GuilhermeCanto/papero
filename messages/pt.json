@@ -55,6 +55,8 @@
       "title": "Fluxo de caixa do mês",
       "currentResult": "Resultado previsto atual: R$ 7.420",
       "status": "Status: Projetado",
+      "chartInflows": "Entradas",
+      "chartOutflows": "Saídas",
       "inflow": "Entradas: R$ 18.900",
       "outflow": "Saídas: R$ 11.480",
       "forecast": "Previsto: R$ 24.300",

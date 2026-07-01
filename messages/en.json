@@ -55,6 +55,8 @@
       "title": "Monthly Cash Flow",
       "currentResult": "Current projected result: R$ 7.420",
       "status": "Status: Projected",
+      "chartInflows": "Inflows",
+      "chartOutflows": "Outflows",
       "inflow": "Inflows: R$ 18.900",
       "outflow": "Outflows: R$ 11.480",
       "forecast": "Forecast: R$ 24.300",

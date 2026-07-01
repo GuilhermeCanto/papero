@@ -18,7 +18,6 @@ import {
   getAvailableCashCentsByAccount,
   getCashFlowByDay,
   getDashboardFinanceMetrics,
-  getForecastedEndOfMonthBalanceCents,
   getMonthTransactions,
   getOverdueTransactions,
   getTopCategoriesByAmount,
@@ -220,14 +219,10 @@ export default function Page() {
   );
   const cashFlowDays = React.useMemo(() => getCashFlowByDay(transactions, today), [transactions, today]);
   const cashFlowBars = React.useMemo(() => {
-    const maxMovementCents = Math.max(...cashFlowDays.map((day) => day.incomeCents + day.expenseCents), 0);
-
     return cashFlowDays.map((day) => ({
-      minute: day.day,
-      visitors:
-        maxMovementCents > 0
-          ? Math.max(1, Math.round(((day.incomeCents + day.expenseCents) / maxMovementCents) * 20))
-          : 0,
+      day: day.day,
+      inflows: day.incomeCents,
+      outflows: day.expenseCents,
     }));
   }, [cashFlowDays]);
   const upcomingBillItems = metrics.upcomingBills.map((transaction) => ({
@@ -262,10 +257,10 @@ export default function Page() {
   };
   const cashFlowProps = {
     chartData: cashFlowBars,
-    finalBalance: formatMoney(metrics.forecastedEndOfMonthBalanceCents),
-    forecast: formatMoney(getForecastedEndOfMonthBalanceCents(transactions, today)),
-    inflow: formatMoney(metrics.currentMonthIncomeCents),
-    outflow: formatMoney(metrics.currentMonthExpenseCents),
+    finalBalance: formatMoney(availableCashCents + metrics.currentMonthResultCents),
+    forecast: formatMoney(metrics.currentMonthResultCents),
+    inflow: formatMoney(currentMonthIncomeCents),
+    outflow: formatMoney(currentMonthExpenseCents),
     result: formatMoney(metrics.currentMonthResultCents),
   };
   const recentIncomeRecords = React.useMemo(
