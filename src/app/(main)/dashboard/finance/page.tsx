@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { Download, RotateCw, Settings2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,15 +19,20 @@ import {
   getAvailableCashCentsByAccount,
   getCashFlowByDay,
   getDashboardFinanceMetrics,
-  getForecastedEndOfMonthBalanceCents,
   getMonthTransactions,
+  getOverdueTransactions,
   getTopCategoriesByAmount,
+  getUpcomingBills,
+  getUpcomingIncomes,
   isExpenseTransaction,
   isIncomeTransaction,
   parseFinanceDate,
+  sumExpenseCents,
+  sumIncomeCents,
 } from "./_components/finance-calculations";
 import { FinanceDemoAutoSeed } from "./_components/finance-demo-auto-seed";
 import { FinanceDemoDataControls } from "./_components/finance-demo-data-controls";
+import { FinanceGreeting } from "./_components/finance-greeting";
 import type { FinanceTransaction } from "./_components/finance-transactions-store";
 import { FinancialCalendarPanel } from "./_components/financial-calendar-panel";
 import { HealthStatus } from "./_components/health-status";
@@ -51,7 +57,39 @@ function formatMoney(amountCents: number) {
 }
 
 function formatSignedPercent(value: number) {
-  return `${value >= 0 ? "+" : ""}${value}%`;
+  return `${value > 0 ? "+" : ""}${value}%`;
+}
+
+function getPreviousMonth(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth() - 1, 1);
+}
+
+function formatPeriodVariation(currentValueCents: number, previousValueCents: number) {
+  const minimumMeaningfulPreviousValueCents = 100;
+
+  if (previousValueCents === 0 && currentValueCents === 0) return formatSignedPercent(0);
+  if (previousValueCents < minimumMeaningfulPreviousValueCents) {
+    return formatSignedPercent(currentValueCents >= 0 ? 100 : -100);
+  }
+
+  const variation = Math.round(((currentValueCents - previousValueCents) / Math.abs(previousValueCents)) * 100);
+  return formatSignedPercent(variation);
+}
+
+function countCurrentMonthUpcomingBills(transactions: FinanceTransaction[], today: Date) {
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+  return getUpcomingBills(transactions, today, Number.POSITIVE_INFINITY).filter(
+    (transaction) => transaction.parsedDate <= monthEnd,
+  ).length;
+}
+
+function countCurrentMonthUpcomingIncomes(transactions: FinanceTransaction[], today: Date) {
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+  return getUpcomingIncomes(transactions, today, Number.POSITIVE_INFINITY).filter(
+    (transaction) => transaction.parsedDate <= monthEnd,
+  ).length;
 }
 
 function formatShortDate(date: string) {
@@ -80,13 +118,21 @@ function getTransactionStatus(transaction: FinanceTransaction) {
   return "Agendado";
 }
 
+function getTransactionTypeHref(kind: FinanceTransaction["kind"]) {
+  return kind === "income" ? "income" : "expense";
+}
+
 function toTransactionRecord(transaction: FinanceTransaction): TransactionRecord {
+  const type = getTransactionTypeHref(transaction.kind);
+
   return {
     amountCents: transaction.amountCents,
     category: transaction.category,
     contact: transaction.from || transaction.description,
     dueDate: formatShortDate(transaction.date),
+    editHref: `/dashboard/finance/transactions?type=${type}&edit=${encodeURIComponent(transaction.id)}`,
     id: transaction.id,
+    paid: transaction.paid,
     status: getTransactionStatus(transaction),
   };
 }
@@ -102,7 +148,9 @@ export default function Page() {
     isLoading: isLoadingTransactions,
     refresh: refreshTransactions,
     transactions,
+    updateTransaction,
   } = useFinanceTransactionsData();
+  const [isRecentTransactionMutating, setIsRecentTransactionMutating] = React.useState(false);
   const accountsWithFallback = React.useMemo(
     () => (isDatabaseAccountsMode ? accounts : getFinanceAccountsWithFallback(accounts)),
     [accounts, isDatabaseAccountsMode],
@@ -111,6 +159,10 @@ export default function Page() {
   const accountSummaries = React.useMemo(
     () => getAccountBalanceSummaries(accountsWithFallback, transactions, defaultAccount),
     [accountsWithFallback, defaultAccount, transactions],
+  );
+  const activeAccountSummariesCount = React.useMemo(
+    () => accountSummaries.filter((summary) => !summary.account.archived).length,
+    [accountSummaries],
   );
   const currentBalanceCents = React.useMemo(
     () => accountSummaries.reduce((total, summary) => total + summary.currentBalanceCents, 0),
@@ -132,22 +184,63 @@ export default function Page() {
     (transaction) => isIncomeTransaction(transaction) || isExpenseTransaction(transaction),
   );
   const metrics = React.useMemo(() => getDashboardFinanceMetrics(transactions, today), [transactions, today]);
+  const previousMonth = React.useMemo(() => getPreviousMonth(today), [today]);
+  const currentMonthTransactions = React.useMemo(
+    () => getMonthTransactions(transactions, today),
+    [transactions, today],
+  );
+  const previousMonthTransactions = React.useMemo(
+    () => getMonthTransactions(transactions, previousMonth),
+    [previousMonth, transactions],
+  );
+  const currentMonthIncomeCents = React.useMemo(
+    () => sumIncomeCents(currentMonthTransactions),
+    [currentMonthTransactions],
+  );
+  const previousMonthIncomeCents = React.useMemo(
+    () => sumIncomeCents(previousMonthTransactions),
+    [previousMonthTransactions],
+  );
+  const currentMonthExpenseCents = React.useMemo(
+    () => sumExpenseCents(currentMonthTransactions),
+    [currentMonthTransactions],
+  );
+  const previousMonthExpenseCents = React.useMemo(
+    () => sumExpenseCents(previousMonthTransactions),
+    [previousMonthTransactions],
+  );
+  const currentMonthBalanceMovementCents = React.useMemo(
+    () => currentMonthIncomeCents - currentMonthExpenseCents,
+    [currentMonthExpenseCents, currentMonthIncomeCents],
+  );
+  const previousMonthBalanceMovementCents = React.useMemo(
+    () => previousMonthIncomeCents - previousMonthExpenseCents,
+    [previousMonthExpenseCents, previousMonthIncomeCents],
+  );
+  const overdueUnpaidCount = React.useMemo(
+    () => getOverdueTransactions(transactions, today).filter(isExpenseTransaction).length,
+    [transactions, today],
+  );
+  const upcomingUnpaidCount = React.useMemo(
+    () => countCurrentMonthUpcomingBills(transactions, today),
+    [transactions, today],
+  );
+  const overdueReceivablesCount = React.useMemo(
+    () => getOverdueTransactions(transactions, today).filter(isIncomeTransaction).length,
+    [transactions, today],
+  );
+  const upcomingReceivablesCount = React.useMemo(
+    () => countCurrentMonthUpcomingIncomes(transactions, today),
+    [transactions, today],
+  );
   const cashFlowDays = React.useMemo(() => getCashFlowByDay(transactions, today), [transactions, today]);
   const cashFlowBars = React.useMemo(() => {
-    const maxMovementCents = Math.max(...cashFlowDays.map((day) => day.incomeCents + day.expenseCents), 0);
-
     return cashFlowDays.map((day) => ({
-      minute: day.day,
-      visitors:
-        maxMovementCents > 0
-          ? Math.max(1, Math.round(((day.incomeCents + day.expenseCents) / maxMovementCents) * 20))
-          : 0,
+      day: day.day,
+      inflows: day.incomeCents,
+      outflows: day.expenseCents,
     }));
   }, [cashFlowDays]);
-  const currentMonthDeltaPercent =
-    metrics.currentMonthIncomeCents > 0
-      ? Math.round((metrics.currentMonthResultCents / metrics.currentMonthIncomeCents) * 100)
-      : 0;
   const upcomingBillItems = metrics.upcomingBills.map((transaction) => ({
     amount: formatMoney(transaction.amountCents),
     category: transaction.category,
@@ -156,18 +249,21 @@ export default function Page() {
     title: transaction.description,
   }));
   const overviewProps = {
-    availableCashBadge: formatSignedPercent(currentMonthDeltaPercent),
-    availableCashDesc: `${metrics.upcomingBills.length} upcoming bills`,
+    availableCashBadge: formatPeriodVariation(currentMonthBalanceMovementCents, previousMonthBalanceMovementCents),
+    availableCashDesc: t("kpis.availableCashDesc"),
     availableCashValue: formatMoney(availableCashCents),
-    currentBalanceBadge: formatSignedPercent(currentMonthDeltaPercent),
-    currentBalanceDesc: `${metrics.paidIncomeCents > 0 || metrics.paidExpenseCents > 0 ? "Paid activity this month" : "No paid activity this month"}`,
+    currentBalanceBadge: formatPeriodVariation(currentMonthBalanceMovementCents, previousMonthBalanceMovementCents),
+    currentBalanceDesc: t("kpis.netWorthDesc"),
     currentBalanceValue: formatMoney(currentBalanceCents),
-    monthlyExpenseBadge: metrics.currentMonthExpenseCents > 0 ? "Open" : "Clear",
-    monthlyExpenseDesc: `${metrics.upcomingBills.length} unpaid upcoming`,
-    monthlyExpenseValue: formatMoney(metrics.currentMonthExpenseCents),
-    monthlyResultBadge: formatSignedPercent(currentMonthDeltaPercent),
-    monthlyResultDesc: "Projected from this month",
-    monthlyResultValue: formatMoney(metrics.currentMonthResultCents),
+    monthlyExpenseBadge: formatPeriodVariation(currentMonthExpenseCents, previousMonthExpenseCents),
+    monthlyExpenseDesc: t("kpis.monthlySpendDesc", { overdue: overdueUnpaidCount, upcoming: upcomingUnpaidCount }),
+    monthlyExpenseValue: formatMoney(currentMonthExpenseCents),
+    monthlyResultBadge: formatPeriodVariation(currentMonthIncomeCents, previousMonthIncomeCents),
+    monthlyResultDesc: t("kpis.monthlyInflowsDesc", {
+      overdue: overdueReceivablesCount,
+      upcoming: upcomingReceivablesCount,
+    }),
+    monthlyResultValue: formatMoney(currentMonthIncomeCents),
   };
   const upcomingProps = {
     autopayAmount: metrics.upcomingBills[0] ? formatMoney(metrics.upcomingBills[0].amountCents) : formatMoney(0),
@@ -177,10 +273,10 @@ export default function Page() {
   };
   const cashFlowProps = {
     chartData: cashFlowBars,
-    finalBalance: formatMoney(metrics.forecastedEndOfMonthBalanceCents),
-    forecast: formatMoney(getForecastedEndOfMonthBalanceCents(transactions, today)),
-    inflow: formatMoney(metrics.currentMonthIncomeCents),
-    outflow: formatMoney(metrics.currentMonthExpenseCents),
+    finalBalance: formatMoney(availableCashCents + metrics.currentMonthResultCents),
+    forecast: formatMoney(metrics.currentMonthResultCents),
+    inflow: formatMoney(currentMonthIncomeCents),
+    outflow: formatMoney(currentMonthExpenseCents),
     result: formatMoney(metrics.currentMonthResultCents),
   };
   const recentIncomeRecords = React.useMemo(
@@ -220,12 +316,28 @@ export default function Page() {
       })),
     [currentMonthExpenseTransactions],
   );
+  const toggleRecentTransactionPaid = React.useCallback(
+    async (id: string, paid: boolean) => {
+      setIsRecentTransactionMutating(true);
+
+      try {
+        await updateTransaction(id, { paid });
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : t("financeTransactions.table.error"));
+      } finally {
+        setIsRecentTransactionMutating(false);
+      }
+    },
+    [t, updateTransaction],
+  );
 
   return (
     <div className="flex flex-col gap-4 pt-10 md:pt-12 lg:pt-14">
       <FinanceDemoAutoSeed />
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl text-foreground leading-none tracking-tight">{t("greeting", { name: "Guilherme" })}</h1>
+        <h1 className="text-3xl text-foreground leading-none tracking-tight">
+          <FinanceGreeting />
+        </h1>
         <p className="text-lg text-muted-foreground leading-none">{t("subtitle")}</p>
       </div>
 
@@ -293,7 +405,7 @@ export default function Page() {
               <FinancialCalendarPanel transactions={transactions} />
             </div>
           </div>
-          <FinanceDemoDataControls />
+          {demoMode ? <FinanceDemoDataControls /> : null}
         </TabsContent>
 
         <TabsContent value="12-months" className="flex flex-col gap-4">
@@ -301,8 +413,16 @@ export default function Page() {
             <BalanceDistributionCard accounts={accountSummaries} />
             <Wallet
               accounts={accountSummaries}
-              sourceLabel={isDatabaseAccountsMode ? "Database" : "Local"}
-              statusDescription={isDatabaseAccountsMode ? "synced from database" : "available locally"}
+              activeAccountsLabel={t("accountsWidget.activeAccounts")}
+              sourceLabel={
+                isDatabaseAccountsMode ? t("accountsWidget.sources.database") : t("accountsWidget.sources.local")
+              }
+              statusLine={
+                isDatabaseAccountsMode
+                  ? t("accountsWidget.syncedFromDatabase", { count: activeAccountSummariesCount })
+                  : t("accountsWidget.availableLocally", { count: activeAccountSummariesCount })
+              }
+              title={t("accountsWidget.title")}
             />
           </div>
           <AccountActivityFlow
@@ -335,7 +455,10 @@ export default function Page() {
               <RecentTransactionFlow
                 title={t("financeBreakdown.recentIncomeTitle")}
                 description={t("financeBreakdown.recentIncomeDescription")}
+                isMutating={isRecentTransactionMutating}
+                onTogglePaid={(id, paid) => void toggleRecentTransactionPaid(id, paid)}
                 records={recentIncomeRecords}
+                viewAllHref="/dashboard/finance/transactions?type=income"
               />
             </div>
             <div className="flex flex-col gap-4">
@@ -343,7 +466,10 @@ export default function Page() {
               <RecentTransactionFlow
                 title={t("financeBreakdown.recentExpenseTitle")}
                 description={t("financeBreakdown.recentExpenseDescription")}
+                isMutating={isRecentTransactionMutating}
+                onTogglePaid={(id, paid) => void toggleRecentTransactionPaid(id, paid)}
                 records={recentExpenseRecords}
+                viewAllHref="/dashboard/finance/transactions?type=expense"
               />
             </div>
           </div>

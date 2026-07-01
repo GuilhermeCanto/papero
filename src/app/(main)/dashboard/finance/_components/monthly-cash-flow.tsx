@@ -9,49 +9,16 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/componen
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { useDashboardPrivacyStore } from "@/stores/dashboard-privacy-store";
 
-const realtimeData = [
-  { minute: 1, visitors: 0 },
-  { minute: 2, visitors: 6 },
-  { minute: 3, visitors: 12 },
-  { minute: 4, visitors: 20 },
-  { minute: 5, visitors: 12 },
-  { minute: 6, visitors: 0 },
-  { minute: 7, visitors: 6 },
-  { minute: 8, visitors: 6 },
-  { minute: 9, visitors: 0 },
-  { minute: 10, visitors: 4 },
-  { minute: 11, visitors: 0 },
-  { minute: 12, visitors: 20 },
-  { minute: 13, visitors: 15 },
-  { minute: 14, visitors: 4 },
-  { minute: 15, visitors: 6 },
-  { minute: 16, visitors: 0 },
-  { minute: 17, visitors: 4 },
-  { minute: 18, visitors: 12 },
-  { minute: 19, visitors: 20 },
-  { minute: 20, visitors: 0 },
-  { minute: 21, visitors: 4 },
-  { minute: 22, visitors: 20 },
-  { minute: 23, visitors: 12 },
-  { minute: 24, visitors: 0 },
-  { minute: 25, visitors: 6 },
-  { minute: 26, visitors: 6 },
-  { minute: 27, visitors: 0 },
-  { minute: 28, visitors: 20 },
-  { minute: 29, visitors: 0 },
-  { minute: 30, visitors: 4 },
-];
-
-const chartConfig = {
-  visitors: {
-    color: "var(--chart-3)",
-    label: "Visitors",
-  },
-} satisfies ChartConfig;
+const realtimeData = Array.from({ length: 30 }, (_, index) => ({
+  day: index + 1,
+  inflows: 0,
+  outflows: 0,
+}));
 
 export type MonthlyCashFlowBar = {
-  minute: number;
-  visitors: number;
+  day: number;
+  inflows: number;
+  outflows: number;
 };
 
 type MonthlyCashFlowProps = {
@@ -64,17 +31,16 @@ type MonthlyCashFlowProps = {
 };
 
 function RealtimeBarShape(props: BarShapeProps) {
-  const { height, payload, width, x, y } = props;
-  const barPayload = payload as (typeof realtimeData)[number] | undefined;
+  const { fill, height, value, width, x, y } = props;
   const barHeightValue = Number(height);
   const barWidthValue = Number(width);
   const xValue = Number(x);
   const yValue = Number(y);
-  const visitors = barPayload?.visitors ?? 0;
-  const fill = "var(--color-visitors)";
-  const fillOpacity = visitors >= 18 ? 0.95 : 0.4;
-  const baselineFill = visitors === 0 ? "var(--destructive)" : fill;
-  const baselineOpacity = visitors === 0 ? 1 : fillOpacity;
+  const amount = Number(value);
+  const barFill = typeof fill === "string" ? fill : "var(--color-inflows)";
+  const fillOpacity = amount > 0 ? 0.85 : 0.35;
+  const baselineFill = amount > 0 ? barFill : "var(--primary)";
+  const baselineOpacity = amount > 0 ? fillOpacity : 0.35;
   const baselineY = yValue + barHeightValue - 2;
   const barGap = 4;
   const barHeight = Math.max(0, barHeightValue - barGap);
@@ -90,14 +56,14 @@ function RealtimeBarShape(props: BarShapeProps) {
         fill={baselineFill}
         fillOpacity={baselineOpacity}
       />
-      {visitors > 0 && barHeight > 0 ? (
+      {amount > 0 && barHeight > 0 ? (
         <rect
           x={xValue}
           y={yValue}
           width={barWidthValue}
           height={barHeight}
           rx={2}
-          fill={fill}
+          fill={barFill}
           fillOpacity={fillOpacity}
         />
       ) : null}
@@ -109,6 +75,35 @@ export function MonthlyCashFlow({ chartData, finalBalance, forecast, inflow, out
   const t = useTranslations("Dashboard.cashflow");
   const numbersHidden = useDashboardPrivacyStore((state) => state.numbersHidden);
   const visibleData = chartData ?? realtimeData;
+  const chartConfig = {
+    inflows: {
+      color: "var(--primary)",
+      label: t("chartInflows"),
+    },
+    outflows: {
+      color: "color-mix(in oklab, var(--primary) 58%, transparent)",
+      label: t("chartOutflows"),
+    },
+  } satisfies ChartConfig;
+  const formatTooltipValue = (value: unknown) => {
+    const amountCents = typeof value === "number" ? value : Number(value);
+    if (!Number.isFinite(amountCents)) return String(value);
+
+    return new Intl.NumberFormat("pt-BR", {
+      currency: "BRL",
+      style: "currency",
+    }).format(amountCents / 100);
+  };
+  const formatTooltipRow = (value: unknown, name: unknown) => {
+    const label = name === "outflows" ? t("chartOutflows") : t("chartInflows");
+
+    return (
+      <>
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-medium font-mono text-foreground tabular-nums">{formatTooltipValue(value)}</span>
+      </>
+    );
+  };
 
   return (
     <Card className="h-full">
@@ -121,11 +116,11 @@ export function MonthlyCashFlow({ chartData, finalBalance, forecast, inflow, out
 
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-end">
-          <div className="flex items-baseline gap-1">
+          <div className="flex items-baseline gap-3">
             <span className="text-2xl tabular-nums leading-none tracking-tight">
               <PrivacyValue>{result ?? t("currentResult").split(": ")[1]}</PrivacyValue>
             </span>
-            <span className="max-w-28 text-muted-foreground text-sm leading-tight">
+            <span className="whitespace-nowrap text-muted-foreground text-sm leading-none">
               {t("currentResult").split(": ")[0]}
             </span>
           </div>
@@ -137,10 +132,14 @@ export function MonthlyCashFlow({ chartData, finalBalance, forecast, inflow, out
         ) : (
           <ChartContainer config={chartConfig} className="h-36 w-full">
             <BarChart data={visibleData} margin={{ bottom: 0, left: 0, right: 0, top: 0 }} barCategoryGap={3}>
-              <XAxis dataKey="minute" hide />
-              <YAxis hide domain={[0, 22]} />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-              <Bar dataKey="visitors" fill="var(--color-visitors)" shape={RealtimeBarShape} />
+              <XAxis dataKey="day" hide />
+              <YAxis hide />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent formatter={(value, name) => formatTooltipRow(value, name)} hideLabel />}
+              />
+              <Bar dataKey="inflows" fill="var(--color-inflows)" shape={RealtimeBarShape} />
+              <Bar dataKey="outflows" fill="var(--color-outflows)" shape={RealtimeBarShape} />
             </BarChart>
           </ChartContainer>
         )}

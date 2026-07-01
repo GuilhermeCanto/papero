@@ -2,6 +2,22 @@
   "Dashboard": {
     "title": "Dashboard",
     "greeting": "Good morning, {name}.",
+    "greetings": {
+      "withName": {
+        "loading": "Good morning, {name}.",
+        "morning": "Good morning, {name}.",
+        "afternoon": "Good afternoon, {name}.",
+        "evening": "Good evening, {name}.",
+        "night": "Good night, {name}."
+      },
+      "withoutName": {
+        "loading": "Good morning.",
+        "morning": "Good morning.",
+        "afternoon": "Good afternoon.",
+        "evening": "Good evening.",
+        "night": "Good night."
+      }
+    },
     "subtitle": "Here is your company's financial summary.",
     "updated": "Updated {time} ago",
     "settings": "Settings",
@@ -11,6 +27,16 @@
       "accounts": "Accounts",
       "transactions": "Transactions"
     },
+    "accountsWidget": {
+      "title": "Accounts",
+      "activeAccounts": "Active accounts",
+      "syncedFromDatabase": "{count, plural, one {# account synced from database} other {# accounts synced from database}}",
+      "availableLocally": "{count, plural, one {# account available locally} other {# accounts available locally}}",
+      "sources": {
+        "database": "Database",
+        "local": "Local"
+      }
+    },
     "financeData": {
       "loading": "Loading finance data...",
       "retry": "Retry"
@@ -18,20 +44,21 @@
     "kpis": {
       "netWorth": "Current balance",
       "netWorthValue": "R$ 28.420,00",
-      "netWorthDesc": "+ R$ 4.200 vs last month",
+      "netWorthDesc": "Total across all active accounts",
       "netWorthBadge": "+8.4%",
       "availableCash": "Available cash",
       "availableCashValue": "R$ 12.800,00",
-      "availableCashDesc": "R$ 410 above your 30-day average",
+      "availableCashDesc": "Available in operating accounts",
       "availableCashBadge": "+3.2%",
       "monthlySpend": "Monthly outflow",
       "monthlySpendValue": "R$ 2.140,00",
-      "monthlySpendDesc": "R$ 124 more than last month",
+      "monthlySpendDesc": "{overdue} unpaid overdue | {upcoming} unpaid upcoming",
       "monthlySpendBadge": "+6.1%",
-      "savingsRate": "Monthly result",
+      "savingsRate": "Monthly inflows",
       "savingsRateValue": "R$ 7.420,00",
-      "savingsRateDesc": "28% margin this month",
-      "savingsRateBadge": "+2.4%"
+      "savingsRateDesc": "Received and expected this month",
+      "savingsRateBadge": "+2.4%",
+      "monthlyInflowsDesc": "{overdue} overdue receivables | {upcoming} upcoming receivables"
     },
     "upcoming": {
       "title": "Upcoming Bills",
@@ -54,6 +81,8 @@
       "title": "Monthly Cash Flow",
       "currentResult": "Current projected result: R$ 7.420",
       "status": "Status: Projected",
+      "chartInflows": "Inflows",
+      "chartOutflows": "Outflows",
       "inflow": "Inflows: R$ 18.900",
       "outflow": "Outflows: R$ 11.480",
       "forecast": "Forecast: R$ 24.300",
@@ -309,7 +338,7 @@
         "editRecord": "Edit {id}",
         "empty": "No transactions yet."
       },
-      "recentIncomeTitle": "Recent receipts",
+      "recentIncomeTitle": "Recent incomes",
       "recentIncomeDescription": "Track receivables and customer entries that are already paid.",
       "recentExpenseTitle": "Recent expenses",
       "recentExpenseDescription": "Track bills payable and expense entries that are already paid.",

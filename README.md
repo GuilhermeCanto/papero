@@ -58,6 +58,14 @@ Papero currently works as a polished local-first finance MVP.
 
 For serious daily use, database mode is the recommended direction, but Papero should still be treated as an early MVP.
 
+### Finance Dashboard Behavior
+
+- Accounts can be classified as Operating or Reserve.
+- Current Balance includes all active accounts, including Operating and Reserve accounts.
+- Available Cash includes only active Operating accounts.
+- Reserve accounts are excluded from operational cash flow and monthly cash flow projections.
+- The dashboard also summarizes monthly inflows, outflows, forecast, recent incomes and recent expenses with English and Portuguese UI.
+
 ## Data Modes
 
 Papero supports three data modes:

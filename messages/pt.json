@@ -2,6 +2,22 @@
   "Dashboard": {
     "title": "Dashboard",
     "greeting": "Bom dia, {name}.",
+    "greetings": {
+      "withName": {
+        "loading": "Bom dia, {name}.",
+        "morning": "Bom dia, {name}.",
+        "afternoon": "Boa tarde, {name}.",
+        "evening": "Boa noite, {name}.",
+        "night": "Boa noite, {name}."
+      },
+      "withoutName": {
+        "loading": "Bom dia.",
+        "morning": "Bom dia.",
+        "afternoon": "Boa tarde.",
+        "evening": "Boa noite.",
+        "night": "Boa noite."
+      }
+    },
     "subtitle": "Aqui está o resumo financeiro da sua empresa.",
     "updated": "Atualizado há {time}",
     "settings": "Configurações",
@@ -11,6 +27,16 @@
       "accounts": "Contas",
       "transactions": "Transações"
     },
+    "accountsWidget": {
+      "title": "Contas",
+      "activeAccounts": "Contas ativas",
+      "syncedFromDatabase": "{count, plural, one {# conta sincronizada do banco de dados} other {# contas sincronizadas do banco de dados}}",
+      "availableLocally": "{count, plural, one {# conta disponível localmente} other {# contas disponíveis localmente}}",
+      "sources": {
+        "database": "Banco de dados",
+        "local": "Local"
+      }
+    },
     "financeData": {
       "loading": "Carregando dados financeiros...",
       "retry": "Tentar novamente"
@@ -18,20 +44,21 @@
     "kpis": {
       "netWorth": "Saldo atual",
       "netWorthValue": "R$ 28.420,00",
-      "netWorthDesc": "+ R$ 4.200 em relação ao mês passado",
+      "netWorthDesc": "Total em todas as contas ativas",
       "netWorthBadge": "+8,4%",
       "availableCash": "Caixa disponível",
       "availableCashValue": "R$ 12.800,00",
-      "availableCashDesc": "R$ 410 acima da média dos últimos 30 dias",
+      "availableCashDesc": "Disponível em contas operacionais",
       "availableCashBadge": "+3,2%",
       "monthlySpend": "Saídas do mês",
       "monthlySpendValue": "R$ 2.140,00",
-      "monthlySpendDesc": "R$ 124 a mais que o mês passado",
+      "monthlySpendDesc": "{overdue} vencidas não pagas | {upcoming} próximas não pagas",
       "monthlySpendBadge": "+6,1%",
-      "savingsRate": "Resultado do mês",
+      "savingsRate": "Entradas do mês",
       "savingsRateValue": "R$ 7.420,00",
-      "savingsRateDesc": "Margem de 28% no mês",
-      "savingsRateBadge": "+2,4%"
+      "savingsRateDesc": "Recebidas e previstas neste mês",
+      "savingsRateBadge": "+2,4%",
+      "monthlyInflowsDesc": "{overdue} recebíveis vencidos | {upcoming} recebíveis próximos"
     },
     "upcoming": {
       "title": "Próximos vencimentos",
@@ -54,6 +81,8 @@
       "title": "Fluxo de caixa do mês",
       "currentResult": "Resultado previsto atual: R$ 7.420",
       "status": "Status: Projetado",
+      "chartInflows": "Entradas",
+      "chartOutflows": "Saídas",
       "inflow": "Entradas: R$ 18.900",
       "outflow": "Saídas: R$ 11.480",
       "forecast": "Previsto: R$ 24.300",
@@ -309,7 +338,7 @@
         "editRecord": "Editar {id}",
         "empty": "Nenhuma transação ainda."
       },
-      "recentIncomeTitle": "Recebimentos recentes",
+      "recentIncomeTitle": "Entradas recentes",
       "recentIncomeDescription": "Acompanhe recebíveis e lançamentos já pagos dos clientes ativos.",
       "recentExpenseTitle": "Despesas recentes",
       "recentExpenseDescription": "Acompanhe contas a pagar e lançamentos de despesas já pagos.",
