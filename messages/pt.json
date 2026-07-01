@@ -135,7 +135,9 @@
       "subtitle": "Acompanhe entradas, saídas e previsões do mês.",
       "kpi": {
         "account": "Conta principal",
+        "allAccounts": "Todas as contas",
         "accountSubtitle": "Saldo atual",
+        "multipleAccounts": "Múltiplas contas",
         "projected": "Resultado previsto",
         "projectedSubtitle": "{month}",
         "income": "Recebimentos",
@@ -149,7 +151,8 @@
         "projectedBadge": "Projetado",
         "incomeBadge": "Entrada",
         "expenseBadge": "Saída",
-        "flow": "Participação no fluxo"
+        "flow": "Participação no fluxo",
+        "selectAccounts": "Selecionar contas"
       },
       "table": {
         "title": "Transações do mês",

@@ -9,7 +9,8 @@ function writeClientCookie(serializedCookie: string) {
 
 export function setClientCookie(key: string, value: string, days = 7) {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
-  writeClientCookie(`${key}=${value}; expires=${expires}; path=/`);
+  const secure = location.protocol === "https:" ? "; Secure" : "";
+  writeClientCookie(`${key}=${value}; expires=${expires}; path=/; SameSite=Lax${secure}`);
 }
 
 export function getClientCookie(key: string) {
@@ -20,5 +21,6 @@ export function getClientCookie(key: string) {
 }
 
 export function deleteClientCookie(key: string) {
-  writeClientCookie(`${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`);
+  const secure = location.protocol === "https:" ? "; Secure" : "";
+  writeClientCookie(`${key}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax${secure}`);
 }

@@ -249,12 +249,28 @@ export async function updateFinanceAccount(companyId: string, id: string, input:
   }
   if (archived !== undefined) data.archived = archived;
 
-  const account = await prisma.bankAccount.update({
+  const updateResult = await prisma.bankAccount.updateMany({
     data,
     where: {
+      companyId,
       id,
     },
   });
+
+  if (updateResult.count !== 1) {
+    throw new FinanceAccountNotFoundError();
+  }
+
+  const account = await prisma.bankAccount.findFirst({
+    where: {
+      companyId,
+      id,
+    },
+  });
+
+  if (!account) {
+    throw new FinanceAccountNotFoundError();
+  }
 
   return toFinanceAccount(account);
 }

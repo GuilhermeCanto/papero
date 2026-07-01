@@ -1,4 +1,4 @@
-import { auth } from "@/server/auth/auth";
+import { isDatabaseMode } from "@/config/papero-mode";
 import { ensureDefaultCompanyForUser } from "@/server/auth/company-bootstrap";
 import { prisma } from "@/server/db/prisma";
 
@@ -23,6 +23,11 @@ export type ActiveCompanyContext = {
 };
 
 export async function getActiveCompanyContext(headers: Headers): Promise<ActiveCompanyContext> {
+  if (!isDatabaseMode()) {
+    throw new UnauthorizedError();
+  }
+
+  const { auth } = await import("@/server/auth/auth");
   const session = await auth.api.getSession({ headers });
 
   if (!session?.user) {

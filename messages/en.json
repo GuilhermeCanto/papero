@@ -135,7 +135,9 @@
       "subtitle": "Track income, expenses, and monthly projections.",
       "kpi": {
         "account": "Main account",
+        "allAccounts": "All Accounts",
         "accountSubtitle": "Current balance",
+        "multipleAccounts": "Multiple Accounts",
         "projected": "Projected result",
         "projectedSubtitle": "{month}",
         "income": "Incomes",
@@ -149,7 +151,8 @@
         "projectedBadge": "Projected",
         "incomeBadge": "Entry",
         "expenseBadge": "Exit",
-        "flow": "Flow share"
+        "flow": "Flow share",
+        "selectAccounts": "Select accounts"
       },
       "table": {
         "title": "Month transactions",

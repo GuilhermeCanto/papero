@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -9,7 +9,7 @@ import { Bell } from "lucide-react";
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { users } from "@/data/users";
+import { isDatabaseMode } from "@/config/papero-mode";
 import { AVATAR_LOCATION_VALUES, SIDEBAR_COLLAPSIBLE_VALUES, SIDEBAR_VARIANT_VALUES } from "@/lib/preferences/layout";
 import { cn } from "@/lib/utils";
 import { getPreference } from "@/server/server-actions";
@@ -20,14 +20,53 @@ import { AccountSwitcher } from "./_components/sidebar/account-switcher";
 import { LayoutControls } from "./_components/sidebar/layout-controls";
 import { SearchDialog } from "./_components/sidebar/search-dialog";
 
+type DashboardShellUser = {
+  avatar: string;
+  email: string;
+  id: string;
+  name: string;
+  role: string;
+};
+
+const dashboardFallbackUser: DashboardShellUser = {
+  avatar: "",
+  email: "",
+  id: "dashboard-user",
+  name: "User",
+  role: "owner",
+};
+
+async function getDashboardShellUsers(): Promise<DashboardShellUser[]> {
+  if (!isDatabaseMode()) {
+    return [dashboardFallbackUser];
+  }
+
+  const { auth } = await import("@/server/auth/auth");
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  const sessionUser = session?.user;
+
+  return [
+    {
+      avatar: sessionUser?.image ?? "",
+      email: sessionUser?.email ?? "",
+      id: sessionUser?.id ?? dashboardFallbackUser.id,
+      name: sessionUser?.name || sessionUser?.email || dashboardFallbackUser.name,
+      role: "owner",
+    },
+  ];
+}
+
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
   const sidebarState = cookieStore.get("sidebar_state")?.value;
   const defaultOpen = sidebarState ? sidebarState === "true" : false;
-  const [variant, collapsible, avatarLocation] = await Promise.all([
+  const [variant, collapsible, avatarLocation, dashboardUsers] = await Promise.all([
     getPreference("sidebar_variant", SIDEBAR_VARIANT_VALUES, "inset"),
     getPreference("sidebar_collapsible", SIDEBAR_COLLAPSIBLE_VALUES, "icon"),
     getPreference("avatar_location", AVATAR_LOCATION_VALUES, "navbar"),
+    getDashboardShellUsers(),
   ]);
 
   return (
@@ -87,7 +126,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             <Button size="icon" aria-label="Notifications">
               <Bell />
             </Button>
-            <AccountSwitcher users={users} avatarLocation={avatarLocation} />
+            <AccountSwitcher users={dashboardUsers} avatarLocation={avatarLocation} />
           </div>
         </header>
         {/* Pages can set data-content-padding="false" to render full-bleed app layouts. */}

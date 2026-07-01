@@ -2,6 +2,8 @@ import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/server/db/prisma";
 
+const defaultBankAccountNames = ["Main Account", "Conta Principal"];
+
 async function ensureDefaultMainAccount(companyId: string, client: Prisma.TransactionClient | typeof prisma = prisma) {
   const existingMainAccount = await client.bankAccount.findFirst({
     select: {
@@ -9,15 +11,20 @@ async function ensureDefaultMainAccount(companyId: string, client: Prisma.Transa
     },
     where: {
       companyId,
-      name: {
-        in: ["Main Account", "Conta Principal"],
-      },
+      OR: defaultBankAccountNames.map((name) => ({
+        name: {
+          equals: name,
+          mode: "insensitive" as const,
+        },
+      })),
     },
   });
 
-  if (existingMainAccount) return;
+  if (existingMainAccount) {
+    return existingMainAccount;
+  }
 
-  await client.bankAccount.create({
+  return client.bankAccount.create({
     data: {
       cashFlowRole: "OPERATING",
       companyId,
@@ -25,6 +32,9 @@ async function ensureDefaultMainAccount(companyId: string, client: Prisma.Transa
       initialBalanceCents: 0,
       name: "Main Account",
       type: "CHECKING",
+    },
+    select: {
+      id: true,
     },
   });
 }

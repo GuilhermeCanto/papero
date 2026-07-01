@@ -1,5 +1,29 @@
-import { toNextJsHandler } from "better-auth/next-js";
+import { NextResponse } from "next/server";
 
-import { auth } from "@/server/auth/auth";
+import { isDatabaseMode } from "@/config/papero-mode";
 
-export const { GET, POST } = toNextJsHandler(auth);
+function authDisabledResponse() {
+  return NextResponse.json({ error: "Authentication is disabled in this Papero data mode." }, { status: 404 });
+}
+
+async function handleAuthRequest(request: Request, method: "GET" | "POST") {
+  if (!isDatabaseMode()) {
+    return authDisabledResponse();
+  }
+
+  const [{ toNextJsHandler }, { auth }] = await Promise.all([
+    import("better-auth/next-js"),
+    import("@/server/auth/auth"),
+  ]);
+  const handlers = toNextJsHandler(auth);
+
+  return handlers[method](request);
+}
+
+export function GET(request: Request) {
+  return handleAuthRequest(request, "GET");
+}
+
+export function POST(request: Request) {
+  return handleAuthRequest(request, "POST");
+}

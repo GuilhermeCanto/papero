@@ -125,6 +125,8 @@ In demo mode, fictional data is seeded into each visitor's browser `localStorage
 
 Papero runs `prisma generate` during install so clean Vercel builds have Prisma Client types available. This generation step does not connect to a database and does not make database variables required for demo mode.
 
+Better Auth and PostgreSQL variables are only required in `database` mode. Public demo deployments should not set placeholder auth secrets just to satisfy a build; auth routes are disabled in `local` and `demo` mode, and server code should only import Better Auth after confirming database mode.
+
 Use `database` mode separately when you want PostgreSQL persistence and real auth.
 
 ## Tech Stack

@@ -183,12 +183,28 @@ export async function updateFinanceContact(companyId: string, id: string, input:
   if (input.address !== undefined) data.address = sanitizeOptionalString(input.address, "Address") ?? null;
   if (input.website !== undefined) data.website = sanitizeOptionalString(input.website, "Website") ?? null;
 
-  const contact = await prisma.contact.update({
+  const updateResult = await prisma.contact.updateMany({
     data,
     where: {
+      companyId,
       id,
     },
   });
+
+  if (updateResult.count !== 1) {
+    throw new FinanceContactNotFoundError();
+  }
+
+  const contact = await prisma.contact.findFirst({
+    where: {
+      companyId,
+      id,
+    },
+  });
+
+  if (!contact) {
+    throw new FinanceContactNotFoundError();
+  }
 
   return toFinanceContact(contact);
 }

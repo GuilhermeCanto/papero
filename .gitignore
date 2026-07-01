@@ -39,3 +39,7 @@ PAPERO_CONTEXT.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.security-audit/
+SECURITY_AUDIT.md
+.security-audit/
+SECURITY_AUDIT.md

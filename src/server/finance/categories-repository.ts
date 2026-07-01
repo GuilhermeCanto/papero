@@ -172,12 +172,28 @@ export async function updateFinanceCategory(companyId: string, id: string, input
   if (type !== undefined) data.type = localToPrismaType[type];
 
   try {
-    const category = await prisma.category.update({
+    const updateResult = await prisma.category.updateMany({
       data,
       where: {
+        companyId,
         id,
       },
     });
+
+    if (updateResult.count !== 1) {
+      throw new FinanceCategoryNotFoundError();
+    }
+
+    const category = await prisma.category.findFirst({
+      where: {
+        companyId,
+        id,
+      },
+    });
+
+    if (!category) {
+      throw new FinanceCategoryNotFoundError();
+    }
 
     return toFinanceCategory(category);
   } catch (error) {
