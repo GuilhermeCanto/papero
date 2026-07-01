@@ -20,10 +20,14 @@ import {
   getDashboardFinanceMetrics,
   getForecastedEndOfMonthBalanceCents,
   getMonthTransactions,
+  getOverdueTransactions,
   getTopCategoriesByAmount,
+  getUpcomingBills,
   isExpenseTransaction,
   isIncomeTransaction,
   parseFinanceDate,
+  sumExpenseCents,
+  sumIncomeCents,
 } from "./_components/finance-calculations";
 import { FinanceDemoAutoSeed } from "./_components/finance-demo-auto-seed";
 import { FinanceDemoDataControls } from "./_components/finance-demo-data-controls";
@@ -52,6 +56,34 @@ function formatMoney(amountCents: number) {
 
 function formatSignedPercent(value: number) {
   return `${value >= 0 ? "+" : ""}${value}%`;
+}
+
+function getPreviousMonth(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth() - 1, 1);
+}
+
+function formatPeriodVariation(
+  currentValueCents: number,
+  previousValueCents: number,
+  t: ReturnType<typeof useTranslations>,
+) {
+  const minimumMeaningfulPreviousValueCents = 100;
+
+  if (previousValueCents === 0 && currentValueCents === 0) return t("kpis.noPreviousPeriod");
+  if (previousValueCents < minimumMeaningfulPreviousValueCents) {
+    return currentValueCents > 0 ? t("kpis.newThisMonth") : t("kpis.noPreviousPeriod");
+  }
+
+  const variation = Math.round(((currentValueCents - previousValueCents) / previousValueCents) * 100);
+  return formatSignedPercent(variation);
+}
+
+function countCurrentMonthUpcomingBills(transactions: FinanceTransaction[], today: Date) {
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+  return getUpcomingBills(transactions, today, Number.POSITIVE_INFINITY).filter(
+    (transaction) => transaction.parsedDate <= monthEnd,
+  ).length;
 }
 
 function formatShortDate(date: string) {
@@ -132,6 +164,47 @@ export default function Page() {
     (transaction) => isIncomeTransaction(transaction) || isExpenseTransaction(transaction),
   );
   const metrics = React.useMemo(() => getDashboardFinanceMetrics(transactions, today), [transactions, today]);
+  const previousMonth = React.useMemo(() => getPreviousMonth(today), [today]);
+  const currentMonthTransactions = React.useMemo(
+    () => getMonthTransactions(transactions, today),
+    [transactions, today],
+  );
+  const previousMonthTransactions = React.useMemo(
+    () => getMonthTransactions(transactions, previousMonth),
+    [previousMonth, transactions],
+  );
+  const currentMonthIncomeCents = React.useMemo(
+    () => sumIncomeCents(currentMonthTransactions),
+    [currentMonthTransactions],
+  );
+  const previousMonthIncomeCents = React.useMemo(
+    () => sumIncomeCents(previousMonthTransactions),
+    [previousMonthTransactions],
+  );
+  const currentMonthExpenseCents = React.useMemo(
+    () => sumExpenseCents(currentMonthTransactions),
+    [currentMonthTransactions],
+  );
+  const previousMonthExpenseCents = React.useMemo(
+    () => sumExpenseCents(previousMonthTransactions),
+    [previousMonthTransactions],
+  );
+  const currentMonthBalanceMovementCents = React.useMemo(
+    () => currentMonthIncomeCents - currentMonthExpenseCents,
+    [currentMonthExpenseCents, currentMonthIncomeCents],
+  );
+  const previousMonthBalanceMovementCents = React.useMemo(
+    () => previousMonthIncomeCents - previousMonthExpenseCents,
+    [previousMonthExpenseCents, previousMonthIncomeCents],
+  );
+  const overdueUnpaidCount = React.useMemo(
+    () => getOverdueTransactions(transactions, today).filter(isExpenseTransaction).length,
+    [transactions, today],
+  );
+  const upcomingUnpaidCount = React.useMemo(
+    () => countCurrentMonthUpcomingBills(transactions, today),
+    [transactions, today],
+  );
   const cashFlowDays = React.useMemo(() => getCashFlowByDay(transactions, today), [transactions, today]);
   const cashFlowBars = React.useMemo(() => {
     const maxMovementCents = Math.max(...cashFlowDays.map((day) => day.incomeCents + day.expenseCents), 0);
@@ -144,10 +217,6 @@ export default function Page() {
           : 0,
     }));
   }, [cashFlowDays]);
-  const currentMonthDeltaPercent =
-    metrics.currentMonthIncomeCents > 0
-      ? Math.round((metrics.currentMonthResultCents / metrics.currentMonthIncomeCents) * 100)
-      : 0;
   const upcomingBillItems = metrics.upcomingBills.map((transaction) => ({
     amount: formatMoney(transaction.amountCents),
     category: transaction.category,
@@ -156,18 +225,18 @@ export default function Page() {
     title: transaction.description,
   }));
   const overviewProps = {
-    availableCashBadge: formatSignedPercent(currentMonthDeltaPercent),
-    availableCashDesc: `${metrics.upcomingBills.length} upcoming bills`,
+    availableCashBadge: formatPeriodVariation(currentMonthBalanceMovementCents, previousMonthBalanceMovementCents, t),
+    availableCashDesc: t("kpis.availableCashDesc"),
     availableCashValue: formatMoney(availableCashCents),
-    currentBalanceBadge: formatSignedPercent(currentMonthDeltaPercent),
-    currentBalanceDesc: `${metrics.paidIncomeCents > 0 || metrics.paidExpenseCents > 0 ? "Paid activity this month" : "No paid activity this month"}`,
+    currentBalanceBadge: formatPeriodVariation(currentMonthBalanceMovementCents, previousMonthBalanceMovementCents, t),
+    currentBalanceDesc: t("kpis.netWorthDesc"),
     currentBalanceValue: formatMoney(currentBalanceCents),
-    monthlyExpenseBadge: metrics.currentMonthExpenseCents > 0 ? "Open" : "Clear",
-    monthlyExpenseDesc: `${metrics.upcomingBills.length} unpaid upcoming`,
-    monthlyExpenseValue: formatMoney(metrics.currentMonthExpenseCents),
-    monthlyResultBadge: formatSignedPercent(currentMonthDeltaPercent),
-    monthlyResultDesc: "Projected from this month",
-    monthlyResultValue: formatMoney(metrics.currentMonthResultCents),
+    monthlyExpenseBadge: formatPeriodVariation(currentMonthExpenseCents, previousMonthExpenseCents, t),
+    monthlyExpenseDesc: t("kpis.monthlySpendDesc", { overdue: overdueUnpaidCount, upcoming: upcomingUnpaidCount }),
+    monthlyExpenseValue: formatMoney(currentMonthExpenseCents),
+    monthlyResultBadge: formatPeriodVariation(currentMonthIncomeCents, previousMonthIncomeCents, t),
+    monthlyResultDesc: t("kpis.monthlyInflowsDesc"),
+    monthlyResultValue: formatMoney(currentMonthIncomeCents),
   };
   const upcomingProps = {
     autopayAmount: metrics.upcomingBills[0] ? formatMoney(metrics.upcomingBills[0].amountCents) : formatMoney(0),
@@ -293,7 +362,7 @@ export default function Page() {
               <FinancialCalendarPanel transactions={transactions} />
             </div>
           </div>
-          <FinanceDemoDataControls />
+          {demoMode ? <FinanceDemoDataControls /> : null}
         </TabsContent>
 
         <TabsContent value="12-months" className="flex flex-col gap-4">
