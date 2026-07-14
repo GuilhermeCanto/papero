@@ -5,6 +5,7 @@ import * as React from "react";
 import {
   ArrowUpDown,
   CalendarIcon,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Copy,
@@ -18,7 +19,7 @@ import {
   Trash2,
   WalletCards,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -133,9 +134,26 @@ function formatBrazilianDate(date: Date) {
 }
 
 function addMonths(date: Date, months: number) {
-  const nextDate = new Date(date);
-  nextDate.setMonth(nextDate.getMonth() + months);
-  return nextDate;
+  return new Date(date.getFullYear(), date.getMonth() + months, date.getDate());
+}
+
+function getMonthStart(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function isSameCalendarMonth(date: Date, monthDate: Date) {
+  return date.getFullYear() === monthDate.getFullYear() && date.getMonth() === monthDate.getMonth();
+}
+
+function isTransactionInMonth(transaction: Transaction, monthDate: Date) {
+  return isSameCalendarMonth(parseBrazilianDate(transaction.date), monthDate);
+}
+
+function getDefaultDateForMonth(monthDate: Date) {
+  const today = new Date();
+  if (isSameCalendarMonth(today, monthDate)) return formatBrazilianDate(today);
+
+  return formatBrazilianDate(getMonthStart(monthDate));
 }
 
 function splitAmountIntoInstallments(amountCents: number, installmentCount: number) {
@@ -249,6 +267,86 @@ function AmountInputCell({
       }}
       value={value}
     />
+  );
+}
+
+function MonthSelector({
+  locale,
+  onChange,
+  selectedMonth,
+}: {
+  locale: string;
+  onChange: (month: Date) => void;
+  selectedMonth: Date;
+}) {
+  const t = useTranslations("Dashboard.financeTransactions");
+  const [open, setOpen] = React.useState(false);
+  const [pickerYear, setPickerYear] = React.useState(selectedMonth.getFullYear());
+  const monthLabel = React.useMemo(
+    () => new Intl.DateTimeFormat(locale, { month: "short", year: "numeric" }).format(selectedMonth),
+    [locale, selectedMonth],
+  );
+
+  React.useEffect(() => {
+    if (open) setPickerYear(selectedMonth.getFullYear());
+  }, [open, selectedMonth]);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button className="min-w-32 justify-between gap-2 capitalize" size="sm" type="button" variant="outline">
+          {monthLabel}
+          <ChevronDown className="size-3.5 text-muted-foreground" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-72 p-3">
+        <div className="mb-3 flex items-center justify-between">
+          <Button
+            aria-label={t("table.previousYear")}
+            onClick={() => setPickerYear((year) => year - 1)}
+            size="icon-sm"
+            type="button"
+            variant="ghost"
+          >
+            <ChevronLeft />
+          </Button>
+          <div className="font-medium text-sm tabular-nums">{pickerYear}</div>
+          <Button
+            aria-label={t("table.nextYear")}
+            onClick={() => setPickerYear((year) => year + 1)}
+            size="icon-sm"
+            type="button"
+            variant="ghost"
+          >
+            <ChevronRight />
+          </Button>
+        </div>
+        <div className="grid grid-cols-3 gap-1.5">
+          {Array.from({ length: 12 }, (_, monthIndex) => {
+            const monthDate = new Date(pickerYear, monthIndex, 1);
+            const monthKey = `${monthDate.getFullYear()}-${monthDate.getMonth()}`;
+            const isSelected = isSameCalendarMonth(monthDate, selectedMonth);
+            const label = new Intl.DateTimeFormat(locale, { month: "short" }).format(monthDate);
+
+            return (
+              <Button
+                className="capitalize"
+                key={monthKey}
+                onClick={() => {
+                  onChange(monthDate);
+                  setOpen(false);
+                }}
+                size="sm"
+                type="button"
+                variant={isSelected ? "default" : "ghost"}
+              >
+                {label}
+              </Button>
+            );
+          })}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -656,12 +754,14 @@ function PaymentFormSelect({ onChange, value }: { onChange: (value: string) => v
 function TransferCreateDialog({
   accounts,
   allowAccountFallback,
+  initialMonth,
   onCreate,
   onOpenChange,
   open,
 }: {
   accounts: FinanceAccount[];
   allowAccountFallback: boolean;
+  initialMonth: Date;
   onCreate: (transaction: Omit<Transaction, "createdAt" | "id" | "updatedAt">) => Promise<void> | void;
   onOpenChange: (open: boolean) => void;
   open: boolean;
@@ -685,12 +785,12 @@ function TransferCreateDialog({
       : undefined;
 
     setAmount("0,00");
-    setDate(formatBrazilianDate(new Date()));
+    setDate(getDefaultDateForMonth(initialMonth));
     setPaid(false);
     setSourceAccountId(sourceAccount);
     setTargetAccountId(targetAccount);
     setValidationMessage(null);
-  }, [accounts, allowAccountFallback, open]);
+  }, [accounts, allowAccountFallback, initialMonth, open]);
 
   const saveTransfer = async () => {
     if (!sourceAccountId) {
@@ -1006,6 +1106,7 @@ export function FinanceTransactionsTable({
   editTransactionId?: string;
   mode?: FinanceTransactionsTableMode;
 }) {
+  const locale = useLocale();
   const t = useTranslations("Dashboard.financeTransactions");
   const availableKindIds = React.useMemo(() => getTransactionKindsForMode(mode), [mode]);
   const [activeKind, setActiveKind] = React.useState<TransactionKind>(availableKindIds[0]);
@@ -1028,9 +1129,12 @@ export function FinanceTransactionsTable({
   const [attachmentsTransaction, setAttachmentsTransaction] = React.useState<Transaction | null>(null);
   const [transferCreateOpen, setTransferCreateOpen] = React.useState(false);
   const [isMutating, setIsMutating] = React.useState(false);
+  const [selectedMonth, setSelectedMonth] = React.useState(() => getMonthStart(new Date()));
 
   const transactionKinds = availableKindIds.map((id) => ({ id, label: t(`kinds.${id}`) }));
-  const filteredTransactions = transactions.filter((transaction) => transaction.kind === activeKind);
+  const filteredTransactions = transactions.filter(
+    (transaction) => transaction.kind === activeKind && isTransactionInMonth(transaction, selectedMonth),
+  );
   const transactionCount = filteredTransactions.length;
   const contactColumnLabel =
     activeKind === "income"
@@ -1050,6 +1154,7 @@ export function FinanceTransactionsTable({
     if (!targetTransaction || !availableKindIds.includes(targetTransaction.kind)) return;
 
     setActiveKind(targetTransaction.kind);
+    setSelectedMonth(getMonthStart(parseBrazilianDate(targetTransaction.date)));
     setDetailsTransaction(targetTransaction);
     openedEditTransactionIdRef.current = editTransactionId;
   }, [availableKindIds, editTransactionId, transactions]);
@@ -1085,7 +1190,7 @@ export function FinanceTransactionsTable({
         amountCents: 0,
         category: t("sample.category"),
         accountId,
-        date: "18/06/2026",
+        date: getDefaultDateForMonth(selectedMonth),
         description: t("table.add"),
         from: "",
         kind: activeKind,
@@ -1317,17 +1422,32 @@ export function FinanceTransactionsTable({
                 disabled={isDatabaseMode && (isLoading || isLoadingAccounts || isMutating)}
                 onClick={() => void addTransaction()}
                 size="sm"
+                type="button"
               >
                 <Plus />
                 {t("table.add")}
               </Button>
-              <Button aria-label={t("table.previous")} size="icon-sm" variant="outline">
+              <Button
+                aria-label={t("table.previous")}
+                onClick={() => setSelectedMonth((month) => getMonthStart(addMonths(month, -1)))}
+                size="icon-sm"
+                type="button"
+                variant="outline"
+              >
                 <ChevronLeft />
               </Button>
-              <Button className="min-w-28" size="sm" variant="outline">
-                {t("table.month")}
-              </Button>
-              <Button aria-label={t("table.next")} size="icon-sm" variant="outline">
+              <MonthSelector
+                locale={locale}
+                onChange={(month) => setSelectedMonth(getMonthStart(month))}
+                selectedMonth={selectedMonth}
+              />
+              <Button
+                aria-label={t("table.next")}
+                onClick={() => setSelectedMonth((month) => getMonthStart(addMonths(month, 1)))}
+                size="icon-sm"
+                type="button"
+                variant="outline"
+              >
                 <ChevronRight />
               </Button>
             </div>
@@ -1552,6 +1672,7 @@ export function FinanceTransactionsTable({
       <TransferCreateDialog
         accounts={accounts}
         allowAccountFallback={!isDatabaseAccountsMode}
+        initialMonth={selectedMonth}
         onCreate={createTransferTransaction}
         onOpenChange={setTransferCreateOpen}
         open={transferCreateOpen}
