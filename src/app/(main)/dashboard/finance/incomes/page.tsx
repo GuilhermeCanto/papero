@@ -32,13 +32,17 @@ function formatMoney(amountCents: number) {
 export default function IncomesPage() {
   const t = useTranslations("Dashboard.financeOperationalPages.incomes");
   const today = React.useMemo(() => new Date(), []);
+  const [selectedMonth, setSelectedMonth] = React.useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const { error, isDatabaseMode, isLoading, refresh, transactions } = useFinanceTransactionsData();
   const incomeTransactions = React.useMemo(() => transactions.filter(isIncomeTransaction), [transactions]);
   const monthIncomeTransactions = React.useMemo(
-    () => getMonthTransactions(incomeTransactions, today),
-    [incomeTransactions, today],
+    () => getMonthTransactions(incomeTransactions, selectedMonth),
+    [incomeTransactions, selectedMonth],
   );
-  const cashFlowDays = React.useMemo(() => getCashFlowByDay(incomeTransactions, today), [incomeTransactions, today]);
+  const cashFlowDays = React.useMemo(
+    () => getCashFlowByDay(incomeTransactions, selectedMonth),
+    [incomeTransactions, selectedMonth],
+  );
   const upcomingIncomes = React.useMemo(() => getUpcomingIncomes(transactions, today, 3), [transactions, today]);
   const breakdownItems = React.useMemo(
     () =>
@@ -94,7 +98,7 @@ export default function IncomesPage() {
         </div>
       </div>
 
-      <FinanceTransactionsTable mode="incomes" />
+      <FinanceTransactionsTable mode="incomes" onSelectedMonthChange={setSelectedMonth} selectedMonth={selectedMonth} />
     </div>
   );
 }
