@@ -1168,7 +1168,7 @@ export function FinanceTransactionsTable({
     if (!targetTransaction || !availableKindIds.includes(targetTransaction.kind)) return;
 
     setActiveKind(targetTransaction.kind);
-    setSelectedMonth(parseBrazilianDate(targetTransaction.date));
+    setSelectedMonth(getMonthStart(parseBrazilianDate(targetTransaction.date)));
     setDetailsTransaction(targetTransaction);
     openedEditTransactionIdRef.current = editTransactionId;
   }, [availableKindIds, editTransactionId, setSelectedMonth, transactions]);
