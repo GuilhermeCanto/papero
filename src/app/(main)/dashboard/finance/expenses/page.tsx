@@ -32,13 +32,17 @@ function formatMoney(amountCents: number) {
 export default function ExpensesPage() {
   const t = useTranslations("Dashboard.financeOperationalPages.expenses");
   const today = React.useMemo(() => new Date(), []);
+  const [selectedMonth, setSelectedMonth] = React.useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const { error, isDatabaseMode, isLoading, refresh, transactions } = useFinanceTransactionsData();
   const expenseTransactions = React.useMemo(() => transactions.filter(isExpenseTransaction), [transactions]);
   const monthExpenseTransactions = React.useMemo(
-    () => getMonthTransactions(expenseTransactions, today),
-    [expenseTransactions, today],
+    () => getMonthTransactions(expenseTransactions, selectedMonth),
+    [expenseTransactions, selectedMonth],
   );
-  const cashFlowDays = React.useMemo(() => getCashFlowByDay(expenseTransactions, today), [expenseTransactions, today]);
+  const cashFlowDays = React.useMemo(
+    () => getCashFlowByDay(expenseTransactions, selectedMonth),
+    [expenseTransactions, selectedMonth],
+  );
   const upcomingBills = React.useMemo(() => getUpcomingBills(transactions, today, 3), [transactions, today]);
   const breakdownItems = React.useMemo(
     () =>
@@ -95,7 +99,11 @@ export default function ExpensesPage() {
         </div>
       </div>
 
-      <FinanceTransactionsTable mode="expenses" />
+      <FinanceTransactionsTable
+        mode="expenses"
+        onSelectedMonthChange={setSelectedMonth}
+        selectedMonth={selectedMonth}
+      />
     </div>
   );
 }
