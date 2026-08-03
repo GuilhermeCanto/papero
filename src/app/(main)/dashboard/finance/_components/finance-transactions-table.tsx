@@ -1102,9 +1102,13 @@ function RecurrenceDialog({
 export function FinanceTransactionsTable({
   editTransactionId,
   mode = "all",
+  onSelectedMonthChange,
+  selectedMonth: controlledSelectedMonth,
 }: {
   editTransactionId?: string;
   mode?: FinanceTransactionsTableMode;
+  onSelectedMonthChange?: (month: Date) => void;
+  selectedMonth?: Date;
 }) {
   const locale = useLocale();
   const t = useTranslations("Dashboard.financeTransactions");
@@ -1129,7 +1133,17 @@ export function FinanceTransactionsTable({
   const [attachmentsTransaction, setAttachmentsTransaction] = React.useState<Transaction | null>(null);
   const [transferCreateOpen, setTransferCreateOpen] = React.useState(false);
   const [isMutating, setIsMutating] = React.useState(false);
-  const [selectedMonth, setSelectedMonth] = React.useState(() => getMonthStart(new Date()));
+  const [internalSelectedMonth, setInternalSelectedMonth] = React.useState(() => getMonthStart(new Date()));
+  const selectedMonth = controlledSelectedMonth ? getMonthStart(controlledSelectedMonth) : internalSelectedMonth;
+
+  const setSelectedMonth = React.useCallback(
+    (month: Date) => {
+      const normalizedMonth = getMonthStart(month);
+      setInternalSelectedMonth(normalizedMonth);
+      onSelectedMonthChange?.(normalizedMonth);
+    },
+    [onSelectedMonthChange],
+  );
 
   const transactionKinds = availableKindIds.map((id) => ({ id, label: t(`kinds.${id}`) }));
   const filteredTransactions = transactions.filter(
@@ -1154,10 +1168,10 @@ export function FinanceTransactionsTable({
     if (!targetTransaction || !availableKindIds.includes(targetTransaction.kind)) return;
 
     setActiveKind(targetTransaction.kind);
-    setSelectedMonth(getMonthStart(parseBrazilianDate(targetTransaction.date)));
+    setSelectedMonth(parseBrazilianDate(targetTransaction.date));
     setDetailsTransaction(targetTransaction);
     openedEditTransactionIdRef.current = editTransactionId;
-  }, [availableKindIds, editTransactionId, transactions]);
+  }, [availableKindIds, editTransactionId, setSelectedMonth, transactions]);
 
   const runTransactionAction = React.useCallback(
     async (action: () => Promise<void>) => {
@@ -1429,21 +1443,17 @@ export function FinanceTransactionsTable({
               </Button>
               <Button
                 aria-label={t("table.previous")}
-                onClick={() => setSelectedMonth((month) => getMonthStart(addMonths(month, -1)))}
+                onClick={() => setSelectedMonth(addMonths(selectedMonth, -1))}
                 size="icon-sm"
                 type="button"
                 variant="outline"
               >
                 <ChevronLeft />
               </Button>
-              <MonthSelector
-                locale={locale}
-                onChange={(month) => setSelectedMonth(getMonthStart(month))}
-                selectedMonth={selectedMonth}
-              />
+              <MonthSelector locale={locale} onChange={setSelectedMonth} selectedMonth={selectedMonth} />
               <Button
                 aria-label={t("table.next")}
-                onClick={() => setSelectedMonth((month) => getMonthStart(addMonths(month, 1)))}
+                onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))}
                 size="icon-sm"
                 type="button"
                 variant="outline"

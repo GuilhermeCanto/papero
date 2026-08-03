@@ -207,7 +207,10 @@ export default function TransactionsPage() {
   const locale = useLocale();
   const searchParams = useSearchParams();
   const t = useTranslations("Dashboard.financeTransactions");
-  const today = React.useMemo(() => new Date(), []);
+  const [selectedMonth, setSelectedMonth] = React.useState(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  });
 
   const { accounts, isDatabaseMode: isDatabaseAccountsMode } = useFinanceAccountsData();
   const { transactions } = useFinanceTransactionsData();
@@ -269,14 +272,17 @@ export default function TransactionsPage() {
       return [...currentSelection, accountId];
     });
   }, []);
-  const metrics = React.useMemo(() => getDashboardFinanceMetrics(transactions, today), [transactions, today]);
+  const metrics = React.useMemo(
+    () => getDashboardFinanceMetrics(transactions, selectedMonth),
+    [selectedMonth, transactions],
+  );
   const monthLabel = React.useMemo(
     () =>
       new Intl.DateTimeFormat(locale, {
         month: "short",
         year: "numeric",
-      }).format(today),
-    [locale, today],
+      }).format(selectedMonth),
+    [locale, selectedMonth],
   );
 
   return (
@@ -300,7 +306,12 @@ export default function TransactionsPage() {
         selectedAccountIds={selectedAccountIds}
       />
 
-      <FinanceTransactionsTable editTransactionId={editTransactionId} mode={tableMode} />
+      <FinanceTransactionsTable
+        editTransactionId={editTransactionId}
+        mode={tableMode}
+        onSelectedMonthChange={setSelectedMonth}
+        selectedMonth={selectedMonth}
+      />
     </div>
   );
 }
