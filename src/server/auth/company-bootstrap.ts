@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
+import { ensureDefaultCompanyBilling } from "@/server/billing/billing-repository";
 import { prisma } from "@/server/db/prisma";
 
 const defaultBankAccountNames = ["Main Account", "Conta Principal"];
@@ -52,7 +53,10 @@ export async function ensureDefaultCompanyForUser(user: { id: string; name?: str
   });
 
   if (existingMembership) {
-    await ensureDefaultMainAccount(existingMembership.companyId);
+    await Promise.all([
+      ensureDefaultMainAccount(existingMembership.companyId),
+      ensureDefaultCompanyBilling(existingMembership.companyId),
+    ]);
 
     return {
       companyId: existingMembership.companyId,
@@ -76,6 +80,7 @@ export async function ensureDefaultCompanyForUser(user: { id: string; name?: str
 
     if (membershipCreatedDuringRetry) {
       await ensureDefaultMainAccount(membershipCreatedDuringRetry.companyId, tx);
+      await ensureDefaultCompanyBilling(membershipCreatedDuringRetry.companyId, tx);
 
       return {
         companyId: membershipCreatedDuringRetry.companyId,
@@ -105,6 +110,7 @@ export async function ensureDefaultCompanyForUser(user: { id: string; name?: str
     });
 
     await ensureDefaultMainAccount(company.id, tx);
+    await ensureDefaultCompanyBilling(company.id, tx);
 
     return {
       companyId: company.id,
