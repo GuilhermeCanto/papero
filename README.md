@@ -243,6 +243,7 @@ For database auth testing, set these values in `.env.local`:
 DATABASE_URL="postgresql://..."
 BETTER_AUTH_SECRET="replace-with-a-strong-secret"
 BETTER_AUTH_URL="http://localhost:3000"
+BETTER_AUTH_TRUSTED_ORIGINS="http://localhost:3000"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NEXT_PUBLIC_PAPERO_DATA_MODE="database"
 PAPERO_DATA_MODE="database"
@@ -255,6 +256,20 @@ openssl rand -base64 32
 ```
 
 `NEXT_PUBLIC_PAPERO_DATA_MODE` controls client behavior. `PAPERO_DATA_MODE` controls server/proxy behavior. They should usually match.
+
+For a production database deployment with custom and Vercel domains, use the custom domain as the canonical URL and list every exact login origin:
+
+```env
+BETTER_AUTH_URL="https://web.papero.app"
+NEXT_PUBLIC_APP_URL="https://web.papero.app"
+BETTER_AUTH_TRUSTED_ORIGINS="https://web.papero.app,https://papero-gtse.vercel.app,https://your-other-production-domain.vercel.app"
+NEXT_PUBLIC_PAPERO_DATA_MODE="database"
+PAPERO_DATA_MODE="database"
+```
+
+Authentication requests use the domain currently open in the browser, while Better Auth validates that domain against `BETTER_AUTH_TRUSTED_ORIGINS`. Use exact production origins rather than a broad `*.vercel.app` wildcard. Session cookies remain scoped to the host where login occurred, so signing in on one domain does not automatically sign in the other domains.
+
+The public demo only needs the two mode variables set to `demo`; it does not need database or Better Auth environment variables.
 
 ### Database Mode Validation
 
