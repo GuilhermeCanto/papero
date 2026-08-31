@@ -2,6 +2,6 @@
 
 import { createAuthClient } from "better-auth/react";
 
-export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_APP_URL,
-});
+// Keep browser auth requests same-origin so custom and Vercel domains receive
+// their own host-scoped session cookie.
+export const authClient = createAuthClient();
