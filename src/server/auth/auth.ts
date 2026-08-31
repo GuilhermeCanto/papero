@@ -22,8 +22,24 @@ if (!authBaseUrl) {
   throw new Error("BETTER_AUTH_URL must be set to the app's public URL.");
 }
 
+function getOrigin(value: string | undefined) {
+  if (!value) return null;
+
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === "http:" || url.protocol === "https:" ? url.origin : null;
+  } catch {
+    return null;
+  }
+}
+
+const configuredTrustedOrigins = process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",") ?? [];
 const trustedOrigins = Array.from(
-  new Set([authBaseUrl, process.env.NEXT_PUBLIC_APP_URL].filter((origin): origin is string => Boolean(origin))),
+  new Set(
+    [authBaseUrl, process.env.NEXT_PUBLIC_APP_URL, ...configuredTrustedOrigins]
+      .map(getOrigin)
+      .filter((origin): origin is string => Boolean(origin)),
+  ),
 );
 
 export const auth = betterAuth({
