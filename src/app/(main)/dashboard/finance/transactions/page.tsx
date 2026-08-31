@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { useSearchParams } from "next/navigation";
 
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { PrivacyValue } from "@/app/(main)/dashboard/_components/privacy-value";
@@ -20,7 +20,11 @@ import {
 import { Progress } from "@/components/ui/progress";
 
 import { getDefaultFinanceAccount, getFinanceAccountsWithFallback } from "../_components/finance-accounts-store";
-import { getAccountBalanceSummaries, getDashboardFinanceMetrics } from "../_components/finance-calculations";
+import {
+  getAccountBalanceSummaries,
+  getDashboardFinanceMetrics,
+  getMonthlyResultCents,
+} from "../_components/finance-calculations";
 import { FinanceTransactionsTable } from "../_components/finance-transactions-table";
 import { useFinanceAccountsData } from "../_components/use-finance-accounts-data";
 import { useFinanceTransactionsData } from "../_components/use-finance-transactions-data";
@@ -32,6 +36,31 @@ const moneyFormatter = new Intl.NumberFormat("pt-BR", {
 
 function formatMoney(amountCents: number) {
   return moneyFormatter.format(amountCents / 100);
+}
+
+function getProjectedResultVariation(currentResultCents: number, previousResultCents: number) {
+  const direction =
+    currentResultCents > previousResultCents
+      ? "improved"
+      : currentResultCents < previousResultCents
+        ? "worse"
+        : "neutral";
+
+  if (previousResultCents === 0) {
+    return {
+      direction,
+      percentage: currentResultCents > 0 ? 100 : currentResultCents < 0 ? -100 : 0,
+    } as const;
+  }
+
+  return {
+    direction,
+    percentage: Math.round(((currentResultCents - previousResultCents) / Math.abs(previousResultCents)) * 100),
+  } as const;
+}
+
+function formatSignedPercentage(value: number) {
+  return `${value > 0 ? "+" : ""}${value}%`;
 }
 
 function getPrimaryAccountId(accounts: { archived: boolean; id: string; name: string }[]) {
@@ -54,6 +83,8 @@ function TransactionsKpiStrip({
   incomeProjectedCents,
   monthLabel,
   onToggleAccount,
+  projectedEndOfMonthBalanceCents,
+  projectedResultVariation,
   projectedResultCents,
   selectedAccountIds,
 }: {
@@ -66,6 +97,8 @@ function TransactionsKpiStrip({
   incomeProjectedCents: number;
   monthLabel: string;
   onToggleAccount: (accountId: string) => void;
+  projectedEndOfMonthBalanceCents: number;
+  projectedResultVariation: ReturnType<typeof getProjectedResultVariation>;
   projectedResultCents: number;
   selectedAccountIds: string[];
 }) {
@@ -78,6 +111,18 @@ function TransactionsKpiStrip({
     expenseProjectedCents > 0
       ? Math.min(100, Math.max(0, Math.round((expensePaidCents / expenseProjectedCents) * 100)))
       : 0;
+  const ProjectedResultVariationIcon =
+    projectedResultVariation.direction === "improved"
+      ? TrendingUp
+      : projectedResultVariation.direction === "worse"
+        ? TrendingDown
+        : Minus;
+  const projectedResultVariationColor =
+    projectedResultVariation.direction === "improved"
+      ? "text-green-700 dark:text-green-300"
+      : projectedResultVariation.direction === "worse"
+        ? "text-destructive"
+        : "text-muted-foreground";
 
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -113,12 +158,19 @@ function TransactionsKpiStrip({
                 </DropdownMenu>
               ) : null}
             </CardHeader>
-            <CardContent className="flex items-end justify-between">
-              <div className="flex flex-col gap-1">
-                <div className="text-3xl leading-none tracking-tight">
-                  <PrivacyValue>{formatMoney(currentBalanceCents)}</PrivacyValue>
+            <CardContent className="flex flex-1 flex-col gap-5">
+              <div className="flex items-end justify-between gap-4">
+                <div className="flex flex-col gap-1">
+                  <div className="text-3xl leading-none tracking-tight">
+                    <PrivacyValue>{formatMoney(currentBalanceCents)}</PrivacyValue>
+                  </div>
+                  <p className="text-muted-foreground text-xs">{t("kpi.projectedSubtitle", { month: monthLabel })}</p>
                 </div>
-                <p className="text-muted-foreground text-xs">{t("kpi.accountSubtitle")}</p>
+                <Badge variant="outline">{t("kpi.accountSubtitle")}</Badge>
+              </div>
+              <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 font-medium text-muted-foreground text-sm">
+                <span>{t("kpi.projectedEndOfMonthBalance")}</span>
+                <PrivacyValue>{formatMoney(projectedEndOfMonthBalanceCents)}</PrivacyValue>
               </div>
             </CardContent>
           </Card>
@@ -127,14 +179,24 @@ function TransactionsKpiStrip({
             <CardHeader>
               <CardTitle className="font-normal">{t("kpi.projected")}</CardTitle>
             </CardHeader>
-            <CardContent className="flex items-end justify-between">
-              <div className="flex flex-col gap-1">
-                <div className="text-3xl leading-none tracking-tight">
-                  <PrivacyValue>{formatMoney(projectedResultCents)}</PrivacyValue>
+            <CardContent className="flex flex-1 flex-col gap-5">
+              <div className="flex items-end justify-between gap-4">
+                <div className="flex flex-col gap-1">
+                  <div className="text-3xl leading-none tracking-tight">
+                    <PrivacyValue>{formatMoney(projectedResultCents)}</PrivacyValue>
+                  </div>
+                  <p className="text-muted-foreground text-xs">{t("kpi.projectedSubtitle", { month: monthLabel })}</p>
                 </div>
-                <p className="text-muted-foreground text-xs">{t("kpi.projectedSubtitle", { month: monthLabel })}</p>
+                <Badge variant="outline">{t("kpi.projectedBadge")}</Badge>
               </div>
-              <Badge variant="outline">{t("kpi.projectedBadge")}</Badge>
+              <div className={`mt-auto flex items-center gap-2 font-medium text-sm ${projectedResultVariationColor}`}>
+                <ProjectedResultVariationIcon className="size-4 shrink-0" />
+                <span>
+                  {t("kpi.projectedVariation", {
+                    value: formatSignedPercentage(projectedResultVariation.percentage),
+                  })}
+                </span>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -276,6 +338,12 @@ export default function TransactionsPage() {
     () => getDashboardFinanceMetrics(transactions, selectedMonth),
     [selectedMonth, transactions],
   );
+  const projectedResultVariation = React.useMemo(() => {
+    const previousMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1);
+    const previousMonthResultCents = getMonthlyResultCents(transactions, previousMonth);
+
+    return getProjectedResultVariation(metrics.currentMonthResultCents, previousMonthResultCents);
+  }, [metrics.currentMonthResultCents, selectedMonth, transactions]);
   const monthLabel = React.useMemo(
     () =>
       new Intl.DateTimeFormat(locale, {
@@ -302,6 +370,8 @@ export default function TransactionsPage() {
         incomeProjectedCents={metrics.currentMonthIncomeCents}
         monthLabel={monthLabel}
         onToggleAccount={handleToggleAccount}
+        projectedEndOfMonthBalanceCents={selectedCurrentBalanceCents + metrics.currentMonthResultCents}
+        projectedResultVariation={projectedResultVariation}
         projectedResultCents={metrics.currentMonthResultCents}
         selectedAccountIds={selectedAccountIds}
       />
