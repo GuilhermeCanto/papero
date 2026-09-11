@@ -2,26 +2,21 @@ import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/server/db/prisma";
 
-const defaultBankAccountNames = ["Main Account", "Conta Principal"];
+async function ensureInitialBankAccount(companyId: string, client: Prisma.TransactionClient) {
+  await client.$queryRaw`SELECT "id" FROM "Company" WHERE "id" = ${companyId} FOR UPDATE`;
 
-async function ensureDefaultMainAccount(companyId: string, client: Prisma.TransactionClient | typeof prisma = prisma) {
-  const existingMainAccount = await client.bankAccount.findFirst({
+  const existingAccount = await client.bankAccount.findFirst({
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     select: {
       id: true,
     },
     where: {
       companyId,
-      OR: defaultBankAccountNames.map((name) => ({
-        name: {
-          equals: name,
-          mode: "insensitive" as const,
-        },
-      })),
     },
   });
 
-  if (existingMainAccount) {
-    return existingMainAccount;
+  if (existingAccount) {
+    return existingAccount;
   }
 
   return client.bankAccount.create({
@@ -40,31 +35,14 @@ async function ensureDefaultMainAccount(companyId: string, client: Prisma.Transa
 }
 
 export async function ensureDefaultCompanyForUser(user: { id: string; name?: string | null }) {
-  const existingMembership = await prisma.companyMember.findFirst({
-    select: {
-      companyId: true,
-      id: true,
-      role: true,
-    },
-    where: {
-      userId: user.id,
-    },
-  });
-
-  if (existingMembership) {
-    await ensureDefaultMainAccount(existingMembership.companyId);
-
-    return {
-      companyId: existingMembership.companyId,
-      created: false,
-      membershipId: existingMembership.id,
-    };
-  }
-
   const companyName = user.name?.trim() ? `${user.name.trim()}'s workspace` : "My workspace";
 
   const result = await prisma.$transaction(async (tx) => {
-    const membershipCreatedDuringRetry = await tx.companyMember.findFirst({
+    // Serializes retries for the same user so bootstrap cannot create duplicate workspaces.
+    await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${user.id} FOR UPDATE`;
+
+    const existingMembership = await tx.companyMember.findFirst({
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
       select: {
         companyId: true,
         id: true,
@@ -74,13 +52,13 @@ export async function ensureDefaultCompanyForUser(user: { id: string; name?: str
       },
     });
 
-    if (membershipCreatedDuringRetry) {
-      await ensureDefaultMainAccount(membershipCreatedDuringRetry.companyId, tx);
+    if (existingMembership) {
+      await ensureInitialBankAccount(existingMembership.companyId, tx);
 
       return {
-        companyId: membershipCreatedDuringRetry.companyId,
+        companyId: existingMembership.companyId,
         created: false,
-        membershipId: membershipCreatedDuringRetry.id,
+        membershipId: existingMembership.id,
       };
     }
 
@@ -104,7 +82,7 @@ export async function ensureDefaultCompanyForUser(user: { id: string; name?: str
       },
     });
 
-    await ensureDefaultMainAccount(company.id, tx);
+    await ensureInitialBankAccount(company.id, tx);
 
     return {
       companyId: company.id,

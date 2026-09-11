@@ -1,4 +1,122 @@
 {
+  "Onboarding": {
+    "dialogTitle": "Set up your Papero workspace",
+    "dialogDescription": "Complete a few steps to prepare your workspace for finance tracking.",
+    "progressLabel": "Workspace setup progress",
+    "stepCount": "Step {current} of {total}",
+    "steps": {
+      "workspace": {
+        "shortTitle": "Workspace",
+        "title": "Name your workspace",
+        "description": "Use the name you want to see across Papero. You can change it later."
+      },
+      "account": {
+        "shortTitle": "Account",
+        "title": "Set your starting balance",
+        "description": "Customize your first operating account so Papero can give your cash flow a reliable starting point."
+      },
+      "transaction": {
+        "shortTitle": "Transactions",
+        "title": "Plan what comes next",
+        "optional": "(optional)",
+        "description": "Add one expected income or expense to see your opening balance turn into a useful forecast."
+      },
+      "plans": {
+        "shortTitle": "Plans",
+        "title": "Choose your plan",
+        "description": "Start free, then adjust the support around your operation when you need it."
+      }
+    },
+    "plans": {
+      "included": "What's included:",
+      "perMonth": "/month",
+      "hosted": {
+        "name": "Hosted",
+        "price": "R$19",
+        "startTrial": "Start 7 free days",
+        "description": "For people who want Papero ready to use, without handling setup, databases, or deployment.",
+        "features": {
+          "0": "Ready-to-use finance dashboard",
+          "1": "Income and expense tracking",
+          "2": "Available cash and reserve visibility",
+          "3": "Automatic updates",
+          "4": "Basic support"
+        }
+      },
+      "custom": {
+        "name": "Custom",
+        "price": "R$49",
+        "startTrial": "Start 14 free days",
+        "description": "For people who want Papero with closer guidance, support, and adjustments for their operation.",
+        "features": {
+          "0": "Everything in Hosted",
+          "1": "Reports and updates via WhatsApp",
+          "2": "Integrations and customizations*",
+          "3": "Priority support"
+        }
+      }
+    },
+    "fields": {
+      "workspaceName": "Workspace name",
+      "workspaceNameDescription": "Usually your business, studio, or project name.",
+      "accountName": "Account name",
+      "institution": "Institution (optional)",
+      "institutionPlaceholder": "Bank or institution",
+      "openingBalance": "Opening balance",
+      "operatingAccount": "Operating account",
+      "transactionKind": "What are you expecting?",
+      "transactionKinds": {
+        "income": "Income",
+        "expense": "Expense"
+      },
+      "transactionDescription": "Description",
+      "transactionDescriptionPlaceholder": "e.g. First client payment",
+      "transactionAmount": "Amount",
+      "transactionDate": "Expected date",
+      "transactionDescriptionHelp": "Saved as planned and unpaid. Edit it in Transactions."
+    },
+    "actions": {
+      "later": "Set up later",
+      "back": "Back",
+      "continue": "Continue",
+      "skipTransaction": "Skip this step",
+      "finish": "Save and open dashboard",
+      "saving": "Saving..."
+    },
+    "preview": {
+      "label": "Live finance preview",
+      "badge": "Live preview",
+      "workspaceFallback": "Your workspace",
+      "description": "A first look at how Papero will organize your operating cash.",
+      "operatingAccount": "Operating account · BRL",
+      "accountFallback": "Main Account",
+      "noInstitution": "No institution",
+      "openingBalance": "Opening balance",
+      "plannedMovement": "First planned movement",
+      "projectedBalance": "Projected balance",
+      "noTransaction": "No planned transaction yet",
+      "noDate": "Choose a date",
+      "note": "Your first plan changes the projection, not the current balance. It will remain unpaid until you mark it as received or paid."
+    },
+    "validation": {
+      "workspaceNameRequired": "Enter at least 2 characters for the workspace name.",
+      "workspaceNameTooLong": "Workspace name must be 120 characters or fewer.",
+      "accountNameRequired": "Enter at least 2 characters for the account name.",
+      "accountNameTooLong": "Account name must be 120 characters or fewer.",
+      "institutionTooLong": "Institution must be 160 characters or fewer.",
+      "amountRequired": "Enter an opening balance.",
+      "amountInvalid": "Enter a valid amount.",
+      "amountTooLarge": "Amount is above the supported limit.",
+      "transactionDescriptionRequired": "Enter a description for the planned transaction.",
+      "transactionDescriptionTooLong": "Description must be 240 characters or fewer.",
+      "transactionAmountPositive": "Enter an amount greater than zero.",
+      "transactionDateRequired": "Choose a valid date."
+    },
+    "errors": {
+      "title": "We couldn't finish setup",
+      "generic": "Papero could not save your setup. Please try again."
+    }
+  },
   "Dashboard": {
     "title": "Dashboard",
     "greeting": "Good morning, {name}.",

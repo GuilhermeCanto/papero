@@ -3,10 +3,12 @@ import type { ReactNode } from "react";
 import { cookies, headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { Bell } from "lucide-react";
 
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
+import { OnboardingFlow } from "@/app/(main)/onboarding/_components/onboarding-flow";
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { isDatabaseMode } from "@/config/papero-mode";
@@ -26,6 +28,15 @@ type DashboardShellUser = {
   id: string;
   name: string;
   role: string;
+};
+
+type DashboardOnboardingState = {
+  account: {
+    institution: string;
+    name: string;
+    openingBalanceCents: number;
+  };
+  companyName: string;
 };
 
 const dashboardFallbackUser: DashboardShellUser = {
@@ -58,15 +69,35 @@ async function getDashboardShellUsers(): Promise<DashboardShellUser[]> {
   ];
 }
 
+async function getDashboardOnboardingState(): Promise<DashboardOnboardingState | null> {
+  if (!isDatabaseMode()) return null;
+
+  const [{ UnauthorizedError }, { getCompanyOnboardingState }] = await Promise.all([
+    import("@/server/auth/active-company"),
+    import("@/server/onboarding/onboarding-service"),
+  ]);
+
+  let onboardingState: Awaited<ReturnType<typeof getCompanyOnboardingState>>;
+  try {
+    onboardingState = await getCompanyOnboardingState(await headers());
+  } catch (error) {
+    if (error instanceof UnauthorizedError) redirect("/auth/v2/login");
+    throw error;
+  }
+
+  return onboardingState.needsOnboarding ? onboardingState : null;
+}
+
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
   const sidebarState = cookieStore.get("sidebar_state")?.value;
   const defaultOpen = sidebarState ? sidebarState === "true" : false;
-  const [variant, collapsible, avatarLocation, dashboardUsers] = await Promise.all([
+  const [variant, collapsible, avatarLocation, dashboardUsers, onboardingState] = await Promise.all([
     getPreference("sidebar_variant", SIDEBAR_VARIANT_VALUES, "inset"),
     getPreference("sidebar_collapsible", SIDEBAR_COLLAPSIBLE_VALUES, "icon"),
     getPreference("avatar_location", AVATAR_LOCATION_VALUES, "navbar"),
     getDashboardShellUsers(),
+    getDashboardOnboardingState(),
   ]);
 
   return (
@@ -134,6 +165,9 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
           {children}
         </div>
       </SidebarInset>
+      {onboardingState ? (
+        <OnboardingFlow initialAccount={onboardingState.account} initialWorkspaceName={onboardingState.companyName} />
+      ) : null}
     </SidebarProvider>
   );
 }
