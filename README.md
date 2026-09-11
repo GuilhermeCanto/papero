@@ -300,6 +300,21 @@ Useful tables to inspect while testing auth:
 - `Session`
 - `Company`
 - `CompanyMember`
+- `Subscription`
+
+### Billing Foundation
+
+Papero includes a provider-neutral, company-level billing foundation for the `Open Source`, `Hosted` and `Custom` plans. Subscriptions can represent monthly or yearly billing, trials, billing periods and common payment states without coupling the app to a payment provider.
+
+Papero remains free to use as an open-source, self-hosted application without Papero-managed billing. This foundation primarily supports the official hosted SaaS and future optional provider integrations. Payment-provider credentials, webhook secrets and production price IDs belong in private deployment environment variables and must never be committed to this repository.
+
+- Existing and newly created companies default to `Open Source` with `Free` status, so current users are not locked out.
+- Optional provider price IDs live in environment variables and are not required for local, demo or database mode.
+- Billing-provider integration is disabled in local and demo modes; database mode can store company-level subscription state without collecting payments.
+- Finance features are not restricted by billing yet.
+- Checkout, webhooks, invoices and payment-provider synchronization are not implemented yet.
+
+The Open Source plan remains free for local and self-hosted use. A future provider integration can connect the internal catalog and subscription records to Stripe, Lemon Squeezy, Mercado Pago, Pagar.me or another service without changing company ownership.
 
 ### Security Notes
 
