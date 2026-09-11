@@ -14,6 +14,7 @@ export type BillingPlanDefinition = {
   name: string;
   prices: Partial<Record<BillingIntervalSlug, BillingPlanPrice>>;
   slug: BillingPlanSlug;
+  trialDays: number | null;
 };
 
 export const billingPlanCatalog = {
@@ -22,6 +23,7 @@ export const billingPlanCatalog = {
     name: "Open Source",
     prices: {},
     slug: "open_source",
+    trialDays: null,
   },
   hosted: {
     description: "Papero hosted and ready to use without infrastructure setup.",
@@ -43,6 +45,7 @@ export const billingPlanCatalog = {
       },
     },
     slug: "hosted",
+    trialDays: 7,
   },
   custom: {
     description: "Hosted Papero with onboarding, priority support and custom work.",
@@ -64,9 +67,15 @@ export const billingPlanCatalog = {
       },
     },
     slug: "custom",
+    trialDays: 14,
   },
 } as const satisfies Record<BillingPlanSlug, BillingPlanDefinition>;
 
 export function getBillingPlan(slug: BillingPlanSlug) {
   return billingPlanCatalog[slug];
+}
+
+export function getBillingPlanPrice(slug: BillingPlanSlug, interval: BillingIntervalSlug) {
+  const plan = billingPlanCatalog[slug] as BillingPlanDefinition;
+  return plan.prices[interval];
 }

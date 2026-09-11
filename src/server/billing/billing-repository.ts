@@ -3,7 +3,15 @@ import type { BillingInterval, BillingPlan, Prisma, Subscription, SubscriptionSt
 import type { BillingIntervalSlug, BillingPlanSlug } from "@/config/billing-plans";
 import { prisma } from "@/server/db/prisma";
 
-export type BillingStatusSlug = "free" | "trialing" | "active" | "past_due" | "canceled" | "unpaid" | "incomplete";
+export type BillingStatusSlug =
+  | "free"
+  | "trialing"
+  | "active"
+  | "past_due"
+  | "canceled"
+  | "unpaid"
+  | "incomplete"
+  | "paused";
 
 export type CompanyBillingState = {
   billingInterval: BillingIntervalSlug | null;
@@ -35,6 +43,7 @@ const prismaStatusToSlug = {
   FREE: "free",
   INCOMPLETE: "incomplete",
   PAST_DUE: "past_due",
+  PAUSED: "paused",
   TRIALING: "trialing",
   UNPAID: "unpaid",
 } as const satisfies Record<SubscriptionStatus, BillingStatusSlug>;

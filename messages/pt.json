@@ -81,7 +81,18 @@
       "continue": "Continuar",
       "skipTransaction": "Pular esta etapa",
       "finish": "Salvar e abrir dashboard",
-      "saving": "Salvando..."
+      "saving": "Salvando...",
+      "redirecting": "Abrindo checkout seguro..."
+    },
+    "billingReturn": {
+      "canceled": {
+        "title": "Checkout cancelado",
+        "description": "Nada foi alterado. Escolha um plano quando estiver pronto."
+      },
+      "success": {
+        "title": "Checkout concluído",
+        "description": "A Stripe confirma sua assinatura separadamente. Salve a configuração para abrir o dashboard."
+      }
     },
     "preview": {
       "label": "Prévia financeira em tempo real",
@@ -114,7 +125,8 @@
     },
     "errors": {
       "title": "Não foi possível concluir a configuração",
-      "generic": "O Papero não conseguiu salvar sua configuração. Tente novamente."
+      "generic": "O Papero não conseguiu salvar sua configuração. Tente novamente.",
+      "checkout": "O Papero não conseguiu abrir o checkout seguro. Tente novamente."
     }
   },
   "Dashboard": {
@@ -776,7 +788,10 @@
     "account": "Conta",
     "billing": "Cobrança",
     "notifications": "Notificações",
-    "logOut": "Sair"
+    "logOut": "Sair",
+    "billingPortalError": "O Papero não conseguiu abrir o gerenciamento da cobrança.",
+    "billingPortalOpening": "Abrindo cobrança...",
+    "manageSubscription": "Gerenciar assinatura"
   },
   "QuickCreate": {
     "trigger": "Criação rápida",

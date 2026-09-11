@@ -37,9 +37,12 @@ type OnboardingFlowProps = {
   initialWorkspaceName: string;
 };
 
-type PendingAction = "complete" | "skip" | null;
+type CheckoutPlan = "custom" | "hosted";
+type PendingAction = "checkout-custom" | "checkout-hosted" | "complete" | "skip" | null;
+type BillingReturn = "canceled" | "success" | null;
 
 const steps = [{ key: "workspace" }, { key: "account" }, { key: "transaction" }, { key: "plans" }] as const;
+const ONBOARDING_CHECKOUT_DRAFT_KEY = "papero:onboarding-checkout-draft";
 
 function getLocalDateString() {
   const date = new Date();
@@ -111,6 +114,7 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [isExiting, setIsExiting] = React.useState(false);
   const [datePickerOpen, setDatePickerOpen] = React.useState(false);
+  const [billingReturn, setBillingReturn] = React.useState<BillingReturn>(null);
   const focusHeading = React.useCallback((node: HTMLHeadingElement | null) => {
     node?.focus();
   }, []);
@@ -140,6 +144,23 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
   React.useEffect(() => {
     if (!form.getValues("transactionDate")) {
       form.setValue("transactionDate", getLocalDateString());
+    }
+  }, [form]);
+
+  React.useEffect(() => {
+    const checkoutReturn = new URLSearchParams(window.location.search).get("billing_checkout");
+    if (checkoutReturn !== "canceled" && checkoutReturn !== "success") return;
+
+    setBillingReturn(checkoutReturn);
+    setStep(steps.length);
+
+    const storedDraft = window.sessionStorage.getItem(ONBOARDING_CHECKOUT_DRAFT_KEY);
+    if (!storedDraft) return;
+    try {
+      const parsedDraft = onboardingFormSchema.safeParse(JSON.parse(storedDraft));
+      if (parsedDraft.success) form.reset(parsedDraft.data);
+    } catch {
+      window.sessionStorage.removeItem(ONBOARDING_CHECKOUT_DRAFT_KEY);
     }
   }, [form]);
 
@@ -186,15 +207,54 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
       throw new Error(body?.error || t("errors.generic"));
     }
 
+    window.sessionStorage.removeItem(ONBOARDING_CHECKOUT_DRAFT_KEY);
+    window.history.replaceState(null, "", window.location.pathname);
     setIsExiting(true);
   }
 
-  async function finish(valuesToSave: OnboardingFormValues, action: Exclude<PendingAction, "skip" | null>) {
+  async function finish(valuesToSave: OnboardingFormValues, action: "complete") {
     setPendingAction(action);
     try {
       await submitRequest({ action: "complete", ...valuesToSave });
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : t("errors.generic"));
+      setPendingAction(null);
+    }
+  }
+
+  async function startCheckout(plan: CheckoutPlan) {
+    setSubmitError(null);
+    setBillingReturn(null);
+
+    const valid = await form.trigger(undefined, { shouldFocus: true });
+    if (!valid) {
+      const invalidStep = form.getFieldState("workspaceName").invalid
+        ? 1
+        : form.getFieldState("accountName").invalid ||
+            form.getFieldState("institution").invalid ||
+            form.getFieldState("openingBalance").invalid
+          ? 2
+          : 3;
+      setStepDirection(-1);
+      setStep(invalidStep);
+      return;
+    }
+
+    const valuesToSave = form.getValues();
+    window.sessionStorage.setItem(ONBOARDING_CHECKOUT_DRAFT_KEY, JSON.stringify(valuesToSave));
+    setPendingAction(`checkout-${plan}`);
+
+    try {
+      const response = await fetch("/api/billing/checkout", {
+        body: JSON.stringify({ interval: "monthly", plan }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const body = (await response.json().catch(() => null)) as { error?: string; url?: string } | null;
+      if (!response.ok || !body?.url) throw new Error(body?.error || t("errors.checkout"));
+      window.location.assign(body.url);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : t("errors.checkout"));
       setPendingAction(null);
     }
   }
@@ -680,8 +740,15 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
                                   </li>
                                 ))}
                               </ul>
-                              <Button className="mt-4 w-full" disabled={isPending} type="submit">
-                                {t("plans.hosted.startTrial")}
+                              <Button
+                                className="mt-4 w-full"
+                                disabled={isPending}
+                                onClick={() => void startCheckout("hosted")}
+                                type="button"
+                              >
+                                {pendingAction === "checkout-hosted"
+                                  ? t("actions.redirecting")
+                                  : t("plans.hosted.startTrial")}
                                 <ArrowRight data-icon="inline-end" />
                               </Button>
                             </CardContent>
@@ -710,8 +777,15 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
                                   </li>
                                 ))}
                               </ul>
-                              <Button className="mt-4 w-full" disabled={isPending} type="submit">
-                                {t("plans.custom.startTrial")}
+                              <Button
+                                className="mt-4 w-full"
+                                disabled={isPending}
+                                onClick={() => void startCheckout("custom")}
+                                type="button"
+                              >
+                                {pendingAction === "checkout-custom"
+                                  ? t("actions.redirecting")
+                                  : t("plans.custom.startTrial")}
                                 <ArrowRight data-icon="inline-end" />
                               </Button>
                             </CardContent>
@@ -725,6 +799,12 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
                     <Alert className="mt-6 max-w-xl" variant="destructive">
                       <AlertTitle>{t("errors.title")}</AlertTitle>
                       <AlertDescription>{submitError}</AlertDescription>
+                    </Alert>
+                  ) : null}
+                  {billingReturn ? (
+                    <Alert className="mt-6 max-w-xl">
+                      <AlertTitle>{t(`billingReturn.${billingReturn}.title`)}</AlertTitle>
+                      <AlertDescription>{t(`billingReturn.${billingReturn}.description`)}</AlertDescription>
                     </Alert>
                   ) : null}
                 </div>
@@ -754,6 +834,16 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
                       <Button disabled={isPending} type="submit">
                         {t("actions.continue")}
                         {step < 3 ? <ArrowRight data-icon="inline-end" /> : null}
+                      </Button>
+                    ) : null}
+                    {isPlansStep && billingReturn === "success" ? (
+                      <Button
+                        disabled={isPending}
+                        onClick={() => void form.handleSubmit((data) => finish(data, "complete"))()}
+                        type="button"
+                      >
+                        {pendingAction === "complete" ? t("actions.saving") : t("actions.finish")}
+                        <ArrowRight data-icon="inline-end" />
                       </Button>
                     ) : null}
                   </div>

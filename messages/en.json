@@ -81,7 +81,18 @@
       "continue": "Continue",
       "skipTransaction": "Skip this step",
       "finish": "Save and open dashboard",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "redirecting": "Opening secure checkout..."
+    },
+    "billingReturn": {
+      "canceled": {
+        "title": "Checkout canceled",
+        "description": "Nothing was changed. Choose a plan whenever you are ready."
+      },
+      "success": {
+        "title": "Checkout completed",
+        "description": "Stripe is confirming your subscription separately. Save your setup to open the dashboard."
+      }
     },
     "preview": {
       "label": "Live finance preview",
@@ -114,7 +125,8 @@
     },
     "errors": {
       "title": "We couldn't finish setup",
-      "generic": "Papero could not save your setup. Please try again."
+      "generic": "Papero could not save your setup. Please try again.",
+      "checkout": "Papero could not open secure checkout. Please try again."
     }
   },
   "Dashboard": {
@@ -776,7 +788,10 @@
     "account": "Account",
     "billing": "Billing",
     "notifications": "Notifications",
-    "logOut": "Log out"
+    "logOut": "Log out",
+    "billingPortalError": "Papero could not open billing management.",
+    "billingPortalOpening": "Opening billing...",
+    "manageSubscription": "Manage subscription"
   },
   "QuickCreate": {
     "trigger": "Quick Create",

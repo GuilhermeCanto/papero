@@ -111,6 +111,17 @@ model Subscription {
   @@index([status])
 }
 
+model BillingWebhookEvent {
+  id              String   @id @default(cuid())
+  provider        String
+  providerEventId String
+  eventType       String
+  processedAt     DateTime @default(now())
+
+  @@unique([provider, providerEventId])
+  @@index([provider, processedAt])
+}
+
 model CompanyMember {
   id        String      @id @default(cuid())
   userId    String
@@ -246,6 +257,7 @@ enum SubscriptionStatus {
   CANCELED
   UNPAID
   INCOMPLETE
+  PAUSED
 }
 
 enum CategoryType {
