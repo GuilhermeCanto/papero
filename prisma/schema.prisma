@@ -80,7 +80,35 @@ model Company {
   categories   Category[]
   contacts     Contact[]
   members      CompanyMember[]
+  subscription Subscription?
   transactions Transaction[]
+}
+
+model Subscription {
+  id                     String             @id @default(cuid())
+  companyId              String             @unique
+  plan                   BillingPlan        @default(OPEN_SOURCE)
+  status                 SubscriptionStatus @default(FREE)
+  billingInterval        BillingInterval?
+  provider               String?
+  providerCustomerId     String?
+  providerSubscriptionId String?
+  providerPriceId        String?
+  trialStart             DateTime?
+  trialEnd               DateTime?
+  currentPeriodStart     DateTime?
+  currentPeriodEnd       DateTime?
+  cancelAtPeriodEnd      Boolean            @default(false)
+  canceledAt             DateTime?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerCustomerId])
+  @@unique([provider, providerSubscriptionId])
+  @@index([plan])
+  @@index([status])
 }
 
 model CompanyMember {
@@ -197,6 +225,27 @@ enum CompanyRole {
   OWNER
   ADMIN
   MEMBER
+}
+
+enum BillingPlan {
+  OPEN_SOURCE
+  HOSTED
+  CUSTOM
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  FREE
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  INCOMPLETE
 }
 
 enum CategoryType {

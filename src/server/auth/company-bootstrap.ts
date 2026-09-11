@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
+import { ensureDefaultCompanyBilling } from "@/server/billing/billing-repository";
 import { prisma } from "@/server/db/prisma";
 
 async function ensureInitialBankAccount(companyId: string, client: Prisma.TransactionClient) {
@@ -54,6 +55,7 @@ export async function ensureDefaultCompanyForUser(user: { id: string; name?: str
 
     if (existingMembership) {
       await ensureInitialBankAccount(existingMembership.companyId, tx);
+      await ensureDefaultCompanyBilling(existingMembership.companyId, tx);
 
       return {
         companyId: existingMembership.companyId,
@@ -83,6 +85,7 @@ export async function ensureDefaultCompanyForUser(user: { id: string; name?: str
     });
 
     await ensureInitialBankAccount(company.id, tx);
+    await ensureDefaultCompanyBilling(company.id, tx);
 
     return {
       companyId: company.id,
