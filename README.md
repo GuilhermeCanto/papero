@@ -300,6 +300,47 @@ Useful tables to inspect while testing auth:
 - `Session`
 - `Company`
 - `CompanyMember`
+- `Subscription`
+
+### Billing and Stripe
+
+Papero includes company-level billing for the `Open Source`, `Hosted` and `Custom` plans. Open-source, self-hosted, local and demo usage does not require Papero-managed billing. Stripe Checkout and Customer Portal are available only when a database-mode deployment is explicitly configured with private Stripe credentials.
+
+Payment-provider credentials, webhook secrets and production Price IDs belong in private deployment environment variables and must never be committed to this repository.
+
+- Existing and newly created companies default to `Open Source` with `Free` status.
+- Stripe variables are not required for local/demo mode or for a database-mode build. Checkout and Portal return a configuration error until Stripe is configured.
+- Billing-provider routes return `404` in local and demo modes and do not initialize Stripe, auth or Prisma there.
+- `PAPERO_BILLING_ENFORCEMENT` defaults to `optional`, preserving unrestricted finance access for forks, self-hosted deployments and existing open-source usage.
+
+The official hosted service can require commercial access with this server-only setting:
+
+```env
+PAPERO_BILLING_ENFORCEMENT="required"
+```
+
+When enforcement is `required`, only `Hosted` or `Custom` subscriptions in `Trialing` or `Active` status can access finance pages and APIs. `Free`, `Canceled`, `Past due`, `Unpaid`, `Incomplete` and `Paused` subscriptions are blocked with a plan-selection flow. Stripe webhooks remain the only authority that grants or removes paid access.
+
+Enabling enforcement does not invent or migrate paid subscriptions. Existing companies that are still `Open Source`/`Free` will be blocked and offered Checkout immediately, so official deployments should coordinate that rollout with current customers. Leave the setting unset or `optional` when this behavior is not intended.
+
+#### Stripe setup
+
+1. In Stripe, create `Hosted` and `Custom` Products with recurring monthly and yearly Prices in BRL. The displayed catalog prices are Hosted R$19/month and Custom R$49/month; yearly Price amounts must match the values in `src/config/billing-plans.ts`.
+2. Configure the four resulting `price_...` identifiers as `BILLING_HOSTED_MONTHLY_PRICE_ID`, `BILLING_HOSTED_YEARLY_PRICE_ID`, `BILLING_CUSTOM_MONTHLY_PRICE_ID` and `BILLING_CUSTOM_YEARLY_PRICE_ID`.
+3. Set `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` only in the private database-mode deployment. Set `NEXT_PUBLIC_APP_URL` to its canonical HTTPS origin.
+4. Enable Stripe Customer Portal in the Stripe Dashboard.
+5. Add a webhook endpoint at `https://your-app.example.com/api/billing/webhook` and select:
+   `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid` and `invoice.payment_failed`.
+
+For local webhook testing, run the database-mode app with Stripe test credentials, then forward Stripe events:
+
+```bash
+stripe listen --forward-to localhost:3000/api/billing/webhook
+```
+
+Use the `whsec_...` value printed by Stripe CLI as the local `STRIPE_WEBHOOK_SECRET`. Use test Products, Prices and cards only.
+
+The Stripe integration migration adds webhook-event deduplication and the paused subscription status. Generate Prisma Client with `npm run db:generate`, then apply migrations only through the appropriate test, staging or production deployment workflow. Do not run development migrations directly against a production database.
 
 ### Security Notes
 

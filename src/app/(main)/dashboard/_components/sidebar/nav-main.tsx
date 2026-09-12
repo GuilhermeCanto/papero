@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -31,6 +31,7 @@ import type { NavGroup, NavMainItem } from "@/navigation/sidebar/sidebar-items";
 import { QuickCreateMenu } from "./quick-create-menu";
 
 interface NavMainProps {
+  readonly canAccessFinanceFeatures?: boolean;
   readonly items: readonly NavGroup[];
 }
 
@@ -152,10 +153,11 @@ const NavItemCollapsed = ({
   );
 };
 
-export function NavMain({ items }: NavMainProps) {
+export function NavMain({ canAccessFinanceFeatures = true, items }: NavMainProps) {
   const path = usePathname();
   const { state, isMobile } = useSidebar();
   const nav = useTranslations("Navigation");
+  const quickCreate = useTranslations("QuickCreate");
 
   const translateNav = (value: string) => {
     try {
@@ -184,7 +186,20 @@ export function NavMain({ items }: NavMainProps) {
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
             <SidebarMenuItem className="flex items-center gap-2">
-              <QuickCreateMenu />
+              {canAccessFinanceFeatures ? (
+                <QuickCreateMenu />
+              ) : (
+                <div className="min-w-0 flex-1">
+                  <SidebarMenuButton
+                    aria-label={quickCreate("trigger")}
+                    className="size-9! w-9! justify-center rounded-full p-0!"
+                    disabled
+                    tooltip={quickCreate("trigger")}
+                  >
+                    <Plus />
+                  </SidebarMenuButton>
+                </div>
+              )}
               <SidebarTrigger
                 size="icon"
                 className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:hidden"

@@ -53,9 +53,14 @@ const _data = {
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
   avatarLocation?: AvatarLocation;
+  canAccessFinanceFeatures?: boolean;
 };
 
-export function AppSidebar({ avatarLocation: initialAvatarLocation = "navbar", ...props }: AppSidebarProps) {
+export function AppSidebar({
+  avatarLocation: initialAvatarLocation = "navbar",
+  canAccessFinanceFeatures = true,
+  ...props
+}: AppSidebarProps) {
   const { sidebarVariant, sidebarCollapsible, avatarLocation, isSynced } = usePreferencesStore(
     useShallow((s) => ({
       sidebarVariant: s.sidebarVariant,
@@ -77,7 +82,7 @@ export function AppSidebar({ avatarLocation: initialAvatarLocation = "navbar", .
       className={cn("group-data-[variant=floating]:group-data-[collapsible=icon]:items-center", props.className)}
     >
       <SidebarContent>
-        <NavMain items={sidebarItems} />
+        <NavMain canAccessFinanceFeatures={canAccessFinanceFeatures} items={sidebarItems} />
         {/* <NavDocuments items={data.documents} /> */}
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>

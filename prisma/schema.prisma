@@ -68,18 +68,58 @@ model Verification {
 }
 
 model Company {
-  id        String   @id @default(cuid())
-  name      String
-  document  String?
-  currency  String   @default("BRL")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String    @id @default(cuid())
+  name                  String
+  document              String?
+  currency              String    @default("BRL")
+  onboardingCompletedAt DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   accounts     BankAccount[]
   categories   Category[]
   contacts     Contact[]
   members      CompanyMember[]
+  subscription Subscription?
   transactions Transaction[]
+}
+
+model Subscription {
+  id                     String             @id @default(cuid())
+  companyId              String             @unique
+  plan                   BillingPlan        @default(OPEN_SOURCE)
+  status                 SubscriptionStatus @default(FREE)
+  billingInterval        BillingInterval?
+  provider               String?
+  providerCustomerId     String?
+  providerSubscriptionId String?
+  providerPriceId        String?
+  trialStart             DateTime?
+  trialEnd               DateTime?
+  currentPeriodStart     DateTime?
+  currentPeriodEnd       DateTime?
+  cancelAtPeriodEnd      Boolean            @default(false)
+  canceledAt             DateTime?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerCustomerId])
+  @@unique([provider, providerSubscriptionId])
+  @@index([plan])
+  @@index([status])
+}
+
+model BillingWebhookEvent {
+  id              String   @id @default(cuid())
+  provider        String
+  providerEventId String
+  eventType       String
+  processedAt     DateTime @default(now())
+
+  @@unique([provider, providerEventId])
+  @@index([provider, processedAt])
 }
 
 model CompanyMember {
@@ -196,6 +236,28 @@ enum CompanyRole {
   OWNER
   ADMIN
   MEMBER
+}
+
+enum BillingPlan {
+  OPEN_SOURCE
+  HOSTED
+  CUSTOM
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  FREE
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  INCOMPLETE
+  PAUSED
 }
 
 enum CategoryType {

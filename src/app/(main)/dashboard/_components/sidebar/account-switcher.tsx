@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, Bell, Check, CreditCard, LogOut } from "lucide-react";
+import { BadgeCheck, Bell, Check, LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,6 +17,7 @@ import type { AvatarLocation } from "@/lib/preferences/layout";
 import { cn, getInitials } from "@/lib/utils";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
+import { BillingPortalMenuItem } from "./billing-portal-menu-item";
 import { type DashboardUser, localDashboardUser, useDatabaseDashboardUser } from "./dashboard-auth-user";
 
 type MenuUser = DashboardUser;
@@ -107,10 +108,7 @@ function AccountSwitcherMenu({
             <BadgeCheck />
             {accountMenu("account")}
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CreditCard />
-            {accountMenu("billing")}
-          </DropdownMenuItem>
+          <BillingPortalMenuItem isAuthenticated={isAuthenticated} />
           <DropdownMenuItem>
             <Bell />
             {accountMenu("notifications")}

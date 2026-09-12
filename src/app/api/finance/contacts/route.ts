@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { ActiveCompanyError, getActiveCompanyContext, UnauthorizedError } from "@/server/auth/active-company";
+import { ActiveCompanyError, UnauthorizedError } from "@/server/auth/active-company";
+import {
+  BILLING_ACCESS_REQUIRED_CODE,
+  BillingAccessRequiredError,
+  requireActiveCompanyFinanceAccess,
+} from "@/server/billing/finance-access";
 import {
   createFinanceContact,
   type FinanceContactType,
@@ -18,6 +23,10 @@ function toErrorResponse(error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 401 });
   }
 
+  if (error instanceof BillingAccessRequiredError) {
+    return NextResponse.json({ code: BILLING_ACCESS_REQUIRED_CODE, error: error.message }, { status: 402 });
+  }
+
   if (error instanceof FinanceContactValidationError) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
@@ -31,7 +40,7 @@ function toErrorResponse(error: unknown) {
 
 export async function GET(request: Request) {
   try {
-    const { companyId } = await getActiveCompanyContext(request.headers);
+    const { companyId } = await requireActiveCompanyFinanceAccess(request.headers);
     const contacts = await listFinanceContacts(companyId, getContactTypeFromRequest(request));
 
     return NextResponse.json({ contacts });
@@ -42,7 +51,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { companyId } = await getActiveCompanyContext(request.headers);
+    const { companyId } = await requireActiveCompanyFinanceAccess(request.headers);
     const input = await request.json();
     const { contact, created } = await createFinanceContact(companyId, input);
 
