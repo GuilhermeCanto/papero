@@ -776,7 +776,10 @@
     "account": "Conta",
     "billing": "Cobrança",
     "notifications": "Notificações",
-    "logOut": "Sair"
+    "logOut": "Sair",
+    "billingPortalError": "O Papero não conseguiu abrir o gerenciamento da cobrança.",
+    "billingPortalOpening": "Abrindo cobrança...",
+    "manageSubscription": "Gerenciar assinatura"
   },
   "QuickCreate": {
     "trigger": "Criação rápida",

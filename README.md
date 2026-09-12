@@ -302,19 +302,35 @@ Useful tables to inspect while testing auth:
 - `CompanyMember`
 - `Subscription`
 
-### Billing Foundation
+### Billing and Stripe
 
-Papero includes a provider-neutral, company-level billing foundation for the `Open Source`, `Hosted` and `Custom` plans. Subscriptions can represent monthly or yearly billing, trials, billing periods and common payment states without coupling the app to a payment provider.
+Papero includes company-level billing for the `Open Source`, `Hosted` and `Custom` plans. Open-source, self-hosted, local and demo usage does not require Papero-managed billing. Stripe Checkout and Customer Portal are available only when a database-mode deployment is explicitly configured with private Stripe credentials.
 
-Papero remains free to use as an open-source, self-hosted application without Papero-managed billing. This foundation primarily supports the official hosted SaaS and future optional provider integrations. Payment-provider credentials, webhook secrets and production price IDs belong in private deployment environment variables and must never be committed to this repository.
+Payment-provider credentials, webhook secrets and production Price IDs belong in private deployment environment variables and must never be committed to this repository. Finance features remain non-blocking while subscription state is synchronized.
 
 - Existing and newly created companies default to `Open Source` with `Free` status, so current users are not locked out.
-- Optional provider price IDs live in environment variables and are not required for local, demo or database mode.
-- Billing-provider integration is disabled in local and demo modes; database mode can store company-level subscription state without collecting payments.
+- Stripe variables are not required for local/demo mode or for a database-mode build. Checkout and Portal return a configuration error until Stripe is configured.
+- Billing-provider routes return `404` in local and demo modes and do not initialize Stripe, auth or Prisma there.
 - Finance features are not restricted by billing yet.
-- Checkout, webhooks, invoices and payment-provider synchronization are not implemented yet.
 
-The Open Source plan remains free for local and self-hosted use. A future provider integration can connect the internal catalog and subscription records to Stripe, Lemon Squeezy, Mercado Pago, Pagar.me or another service without changing company ownership.
+#### Stripe setup
+
+1. In Stripe, create `Hosted` and `Custom` Products with recurring monthly and yearly Prices in BRL. The displayed catalog prices are Hosted R$19/month and Custom R$49/month; yearly Price amounts must match the values in `src/config/billing-plans.ts`.
+2. Configure the four resulting `price_...` identifiers as `BILLING_HOSTED_MONTHLY_PRICE_ID`, `BILLING_HOSTED_YEARLY_PRICE_ID`, `BILLING_CUSTOM_MONTHLY_PRICE_ID` and `BILLING_CUSTOM_YEARLY_PRICE_ID`.
+3. Set `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` only in the private database-mode deployment. Set `NEXT_PUBLIC_APP_URL` to its canonical HTTPS origin.
+4. Enable Stripe Customer Portal in the Stripe Dashboard.
+5. Add a webhook endpoint at `https://your-app.example.com/api/billing/webhook` and select:
+   `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid` and `invoice.payment_failed`.
+
+For local webhook testing, run the database-mode app with Stripe test credentials, then forward Stripe events:
+
+```bash
+stripe listen --forward-to localhost:3000/api/billing/webhook
+```
+
+Use the `whsec_...` value printed by Stripe CLI as the local `STRIPE_WEBHOOK_SECRET`. Use test Products, Prices and cards only.
+
+The Stripe integration migration adds webhook-event deduplication and the paused subscription status. Generate Prisma Client with `npm run db:generate`, then apply migrations only through the appropriate test, staging or production deployment workflow. Do not run development migrations directly against a production database.
 
 ### Security Notes
 
