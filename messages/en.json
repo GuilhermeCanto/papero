@@ -658,7 +658,10 @@
     "account": "Account",
     "billing": "Billing",
     "notifications": "Notifications",
-    "logOut": "Log out"
+    "logOut": "Log out",
+    "billingPortalError": "Papero could not open billing management.",
+    "billingPortalOpening": "Opening billing...",
+    "manageSubscription": "Manage subscription"
   },
   "QuickCreate": {
     "trigger": "Quick Create",

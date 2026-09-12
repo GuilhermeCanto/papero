@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleUser, CreditCard, EllipsisVertical, LogOut, MessageSquareDot } from "lucide-react";
+import { CircleUser, EllipsisVertical, LogOut, MessageSquareDot } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,6 +16,7 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 import { getInitials } from "@/lib/utils";
 
+import { BillingPortalMenuItem } from "./billing-portal-menu-item";
 import { type DashboardUser, localDashboardUser, useDatabaseDashboardUser } from "./dashboard-auth-user";
 
 export function NavUser({
@@ -100,10 +101,7 @@ function NavUserMenu({
                 <CircleUser />
                 {accountMenu("account")}
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                {accountMenu("billing")}
-              </DropdownMenuItem>
+              <BillingPortalMenuItem isAuthenticated={isAuthenticated} />
               <DropdownMenuItem>
                 <MessageSquareDot />
                 {accountMenu("notifications")}
