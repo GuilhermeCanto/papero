@@ -1,8 +1,9 @@
 import type { BillingPlanSlug } from "@/config/billing-plans";
+import { isBillingEnforcementRequired } from "@/server/billing/billing-enforcement";
 import type { BillingStatusSlug, CompanyBillingState } from "@/server/billing/billing-repository";
 
 export type BillingEntitlements = {
-  canAccessFinanceFeatures: true;
+  canAccessFinanceFeatures: boolean;
   canAccessSupportFeatures: boolean;
   canUseCustomIntegrations: boolean;
   canUseHostedDatabase: boolean;
@@ -11,14 +12,14 @@ export type BillingEntitlements = {
 const entitledStatuses = new Set<BillingStatusSlug>(["active", "trialing"]);
 
 function hasPaidAccess(plan: BillingPlanSlug, status: BillingStatusSlug) {
-  return plan !== "open_source" && entitledStatuses.has(status);
+  return (plan === "hosted" || plan === "custom") && entitledStatuses.has(status);
 }
 
 export function getBillingEntitlements(billing: Pick<CompanyBillingState, "plan" | "status">): BillingEntitlements {
   const paidAccess = hasPaidAccess(billing.plan, billing.status);
 
   return {
-    canAccessFinanceFeatures: true,
+    canAccessFinanceFeatures: !isBillingEnforcementRequired() || paidAccess,
     canAccessSupportFeatures: paidAccess,
     canUseCustomIntegrations: paidAccess && billing.plan === "custom",
     canUseHostedDatabase: paidAccess,

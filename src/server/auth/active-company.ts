@@ -36,9 +36,7 @@ export async function getActiveCompanyContext(headers: Headers): Promise<ActiveC
 
   const membership =
     (await prisma.companyMember.findFirst({
-      orderBy: {
-        createdAt: "asc",
-      },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
       select: {
         companyId: true,
         role: true,

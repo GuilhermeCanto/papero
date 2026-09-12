@@ -1,4 +1,143 @@
 {
+  "Onboarding": {
+    "dialogTitle": "Configure seu workspace no Papero",
+    "dialogDescription": "Conclua alguns passos para preparar seu workspace para acompanhar as finanças.",
+    "progressLabel": "Progresso da configuração do workspace",
+    "stepCount": "Etapa {current} de {total}",
+    "steps": {
+      "workspace": {
+        "shortTitle": "Workspace",
+        "title": "Dê um nome ao seu workspace",
+        "description": "Use o nome que você quer ver no Papero. Você poderá alterá-lo depois."
+      },
+      "account": {
+        "shortTitle": "Conta",
+        "title": "Defina seu saldo inicial",
+        "description": "Personalize sua primeira conta operacional para o Papero calcular seu fluxo de caixa a partir de uma base confiável."
+      },
+      "transaction": {
+        "shortTitle": "Transações",
+        "title": "Planeje seus próximos passos",
+        "optional": "(opcional)",
+        "description": "Adicione uma receita ou despesa prevista para projetar seu saldo."
+      },
+      "plans": {
+        "shortTitle": "Planos",
+        "title": "Escolha seu plano",
+        "description": "Comece grátis e ajuste o suporte para a sua operação quando precisar."
+      }
+    },
+    "plans": {
+      "included": "O que está incluso:",
+      "perMonth": "/mês",
+      "hosted": {
+        "name": "Hosted",
+        "price": "R$19",
+        "startTrial": "Começar 7 dias grátis",
+        "description": "Para quem quer usar o Papero pronto, sem cuidar de setup, banco de dados ou deploy.",
+        "features": {
+          "0": "Dashboard financeiro pronto para uso",
+          "1": "Controle de receitas e despesas",
+          "2": "Visão de caixa disponível e reservas",
+          "3": "Atualizações automáticas",
+          "4": "Suporte básico"
+        }
+      },
+      "custom": {
+        "name": "Custom",
+        "price": "R$49",
+        "startTrial": "Começar 14 dias grátis",
+        "description": "Para quem quer usar o Papero com mais acompanhamento, suporte e ajustes para a realidade da operação.",
+        "features": {
+          "0": "Tudo do plano Hosted",
+          "1": "Relatórios e atualizações por WhatsApp",
+          "2": "Integrações e customizações*",
+          "3": "Suporte prioritário"
+        }
+      }
+    },
+    "fields": {
+      "workspaceName": "Nome do workspace",
+      "workspaceNameDescription": "Normalmente, o nome da sua empresa, estúdio ou projeto.",
+      "accountName": "Nome da conta",
+      "institution": "Instituição (opcional)",
+      "institutionPlaceholder": "Banco ou instituição",
+      "openingBalance": "Saldo inicial",
+      "operatingAccount": "Conta operacional",
+      "transactionKind": "O que você está esperando?",
+      "transactionKinds": {
+        "income": "Receita",
+        "expense": "Despesa"
+      },
+      "transactionDescription": "Descrição",
+      "transactionDescriptionPlaceholder": "Ex.: Primeiro pagamento de cliente",
+      "transactionAmount": "Valor",
+      "transactionDate": "Data prevista",
+      "transactionDescriptionHelp": "Será salvo como previsto e não pago. Edite em Transações."
+    },
+    "actions": {
+      "later": "Configurar depois",
+      "back": "Voltar",
+      "continue": "Continuar",
+      "checkBillingStatus": "Verificar status novamente",
+      "skipTransaction": "Pular esta etapa",
+      "finish": "Salvar e abrir dashboard",
+      "redirecting": "Abrindo checkout...",
+      "saving": "Salvando..."
+    },
+    "billingReturn": {
+      "success": {
+        "title": "Checkout concluído",
+        "description": "A Stripe está confirmando sua assinatura. O status será atualizado automaticamente."
+      },
+      "canceled": {
+        "title": "Checkout cancelado",
+        "description": "Nada foi alterado. Escolha um plano quando estiver pronto."
+      },
+      "confirming": {
+        "title": "Confirmando sua assinatura",
+        "description": "A Stripe está processando a atualização. O Papero abrirá seu dashboard assim que o acesso for confirmado."
+      },
+      "delayed": {
+        "title": "A confirmação está demorando mais que o esperado",
+        "description": "Seu status de pagamento não foi alterado pelo Papero. Verifique novamente enquanto a Stripe conclui o processamento da assinatura."
+      }
+    },
+    "preview": {
+      "label": "Prévia financeira em tempo real",
+      "badge": "Prévia em tempo real",
+      "workspaceFallback": "Seu workspace",
+      "description": "Uma primeira visão de como o Papero vai organizar seu caixa operacional.",
+      "operatingAccount": "Conta operacional · BRL",
+      "accountFallback": "Conta Principal",
+      "noInstitution": "Sem instituição",
+      "openingBalance": "Saldo inicial",
+      "plannedMovement": "Primeiro lançamento previsto",
+      "projectedBalance": "Saldo previsto",
+      "noTransaction": "Nenhum lançamento previsto ainda",
+      "noDate": "Escolha uma data",
+      "note": "Seu primeiro plano altera a previsão, não o saldo atual. Ele permanecerá não recebido ou não pago até você atualizar seu status."
+    },
+    "validation": {
+      "workspaceNameRequired": "Digite pelo menos 2 caracteres para o nome do workspace.",
+      "workspaceNameTooLong": "O nome do workspace deve ter no máximo 120 caracteres.",
+      "accountNameRequired": "Digite pelo menos 2 caracteres para o nome da conta.",
+      "accountNameTooLong": "O nome da conta deve ter no máximo 120 caracteres.",
+      "institutionTooLong": "A instituição deve ter no máximo 160 caracteres.",
+      "amountRequired": "Digite um saldo inicial.",
+      "amountInvalid": "Digite um valor válido.",
+      "amountTooLarge": "O valor está acima do limite suportado.",
+      "transactionDescriptionRequired": "Digite uma descrição para o lançamento previsto.",
+      "transactionDescriptionTooLong": "A descrição deve ter no máximo 240 caracteres.",
+      "transactionAmountPositive": "Digite um valor maior que zero.",
+      "transactionDateRequired": "Escolha uma data válida."
+    },
+    "errors": {
+      "checkout": "O Papero não conseguiu abrir o Checkout da Stripe. Tente novamente.",
+      "title": "Não foi possível concluir a configuração",
+      "generic": "O Papero não conseguiu salvar sua configuração. Tente novamente."
+    }
+  },
   "Dashboard": {
     "title": "Dashboard",
     "greeting": "Bom dia, {name}.",
