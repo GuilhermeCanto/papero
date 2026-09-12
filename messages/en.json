@@ -79,9 +79,29 @@
       "later": "Set up later",
       "back": "Back",
       "continue": "Continue",
+      "checkBillingStatus": "Check status again",
       "skipTransaction": "Skip this step",
       "finish": "Save and open dashboard",
+      "redirecting": "Opening checkout...",
       "saving": "Saving..."
+    },
+    "billingReturn": {
+      "success": {
+        "title": "Checkout completed",
+        "description": "Stripe is confirming your subscription. Your billing status will update automatically."
+      },
+      "canceled": {
+        "title": "Checkout canceled",
+        "description": "Nothing was changed. Choose a plan whenever you are ready."
+      },
+      "confirming": {
+        "title": "Confirming your subscription",
+        "description": "Stripe is processing the update. Papero will open your dashboard as soon as access is confirmed."
+      },
+      "delayed": {
+        "title": "Confirmation is taking longer than expected",
+        "description": "Your payment status has not been changed by Papero. Check again while Stripe finishes processing the subscription."
+      }
     },
     "preview": {
       "label": "Live finance preview",
@@ -113,6 +133,7 @@
       "transactionDateRequired": "Choose a valid date."
     },
     "errors": {
+      "checkout": "Papero could not open Stripe Checkout. Please try again.",
       "title": "We couldn't finish setup",
       "generic": "Papero could not save your setup. Please try again."
     }

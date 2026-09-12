@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 import { Bell } from "lucide-react";
 
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
-import { OnboardingFlow } from "@/app/(main)/onboarding/_components/onboarding-flow";
+import { OnboardingDashboardGate } from "@/app/(main)/onboarding/_components/onboarding-dashboard-gate";
 import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { isDatabaseMode } from "@/config/papero-mode";
@@ -36,7 +36,10 @@ type DashboardOnboardingState = {
     name: string;
     openingBalanceCents: number;
   };
+  billingEnforcementRequired: boolean;
+  canAccessFinanceFeatures: boolean;
   companyName: string;
+  needsOnboarding: boolean;
 };
 
 const dashboardFallbackUser: DashboardShellUser = {
@@ -72,20 +75,30 @@ async function getDashboardShellUsers(): Promise<DashboardShellUser[]> {
 async function getDashboardOnboardingState(): Promise<DashboardOnboardingState | null> {
   if (!isDatabaseMode()) return null;
 
-  const [{ UnauthorizedError }, { getCompanyOnboardingState }] = await Promise.all([
+  const [{ UnauthorizedError }, { getActiveCompanyFinanceAccess }, { getCompanyOnboardingState }] = await Promise.all([
     import("@/server/auth/active-company"),
+    import("@/server/billing/finance-access"),
     import("@/server/onboarding/onboarding-service"),
   ]);
 
   let onboardingState: Awaited<ReturnType<typeof getCompanyOnboardingState>>;
+  let financeAccess: Awaited<ReturnType<typeof getActiveCompanyFinanceAccess>>;
   try {
-    onboardingState = await getCompanyOnboardingState(await headers());
+    const requestHeaders = await headers();
+    [onboardingState, financeAccess] = await Promise.all([
+      getCompanyOnboardingState(requestHeaders),
+      getActiveCompanyFinanceAccess(requestHeaders),
+    ]);
   } catch (error) {
     if (error instanceof UnauthorizedError) redirect("/auth/v2/login");
     throw error;
   }
 
-  return onboardingState.needsOnboarding ? onboardingState : null;
+  return {
+    ...onboardingState,
+    billingEnforcementRequired: financeAccess.billingEnforcementRequired,
+    canAccessFinanceFeatures: financeAccess.canAccessFinanceFeatures,
+  };
 }
 
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
@@ -99,6 +112,8 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
     getDashboardShellUsers(),
     getDashboardOnboardingState(),
   ]);
+  const canAccessFinanceFeatures =
+    !onboardingState?.billingEnforcementRequired || onboardingState.canAccessFinanceFeatures;
 
   return (
     <SidebarProvider
@@ -109,7 +124,12 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant={variant} collapsible={collapsible} avatarLocation={avatarLocation} />
+      <AppSidebar
+        variant={variant}
+        collapsible={collapsible}
+        avatarLocation={avatarLocation}
+        canAccessFinanceFeatures={canAccessFinanceFeatures}
+      />
       <Link
         prefetch={false}
         href="/dashboard/finance"
@@ -162,11 +182,17 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
         </header>
         {/* Pages can set data-content-padding="false" to render full-bleed app layouts. */}
         <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden p-4 has-data-[content-padding=false]:p-0 md:p-6 md:has-data-[content-padding=false]:p-0">
-          {children}
+          {canAccessFinanceFeatures ? children : null}
         </div>
       </SidebarInset>
       {onboardingState ? (
-        <OnboardingFlow initialAccount={onboardingState.account} initialWorkspaceName={onboardingState.companyName} />
+        <OnboardingDashboardGate
+          initialAccount={onboardingState.account}
+          billingEnforcementRequired={onboardingState.billingEnforcementRequired}
+          canAccessFinanceFeatures={onboardingState.canAccessFinanceFeatures}
+          initialWorkspaceName={onboardingState.companyName}
+          needsOnboarding={onboardingState.needsOnboarding}
+        />
       ) : null}
     </SidebarProvider>
   );

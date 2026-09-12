@@ -306,12 +306,22 @@ Useful tables to inspect while testing auth:
 
 Papero includes company-level billing for the `Open Source`, `Hosted` and `Custom` plans. Open-source, self-hosted, local and demo usage does not require Papero-managed billing. Stripe Checkout and Customer Portal are available only when a database-mode deployment is explicitly configured with private Stripe credentials.
 
-Payment-provider credentials, webhook secrets and production Price IDs belong in private deployment environment variables and must never be committed to this repository. Finance features remain non-blocking while subscription state is synchronized.
+Payment-provider credentials, webhook secrets and production Price IDs belong in private deployment environment variables and must never be committed to this repository.
 
-- Existing and newly created companies default to `Open Source` with `Free` status, so current users are not locked out.
+- Existing and newly created companies default to `Open Source` with `Free` status.
 - Stripe variables are not required for local/demo mode or for a database-mode build. Checkout and Portal return a configuration error until Stripe is configured.
 - Billing-provider routes return `404` in local and demo modes and do not initialize Stripe, auth or Prisma there.
-- Finance features are not restricted by billing yet.
+- `PAPERO_BILLING_ENFORCEMENT` defaults to `optional`, preserving unrestricted finance access for forks, self-hosted deployments and existing open-source usage.
+
+The official hosted service can require commercial access with this server-only setting:
+
+```env
+PAPERO_BILLING_ENFORCEMENT="required"
+```
+
+When enforcement is `required`, only `Hosted` or `Custom` subscriptions in `Trialing` or `Active` status can access finance pages and APIs. `Free`, `Canceled`, `Past due`, `Unpaid`, `Incomplete` and `Paused` subscriptions are blocked with a plan-selection flow. Stripe webhooks remain the only authority that grants or removes paid access.
+
+Enabling enforcement does not invent or migrate paid subscriptions. Existing companies that are still `Open Source`/`Free` will be blocked and offered Checkout immediately, so official deployments should coordinate that rollout with current customers. Leave the setting unset or `optional` when this behavior is not intended.
 
 #### Stripe setup
 

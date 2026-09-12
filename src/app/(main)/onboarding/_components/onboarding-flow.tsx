@@ -29,15 +29,22 @@ import paperoLogo from "../../../../../media/logo-light-liquid-glass.svg";
 import { OnboardingStepIcon } from "./onboarding-step-icons";
 
 type OnboardingFlowProps = {
+  billingEnforcementRequired?: boolean;
   initialAccount: {
     institution: string;
     name: string;
     openingBalanceCents: number;
   };
+  initialBillingReturn?: "canceled" | "confirming" | "delayed" | null;
+  initialStep?: 1 | 4;
   initialWorkspaceName: string;
+  onboardingCompleted?: boolean;
+  onClosed?: () => void;
+  onRetryBillingStatus?: () => void;
 };
 
-type PendingAction = "complete" | "skip" | null;
+type CheckoutPlan = "custom" | "hosted";
+type PendingAction = `checkout-${CheckoutPlan}` | "skip" | null;
 
 const steps = [{ key: "workspace" }, { key: "account" }, { key: "transaction" }, { key: "plans" }] as const;
 
@@ -100,17 +107,29 @@ function AnimatedCurrencyValue({
   );
 }
 
-export function OnboardingFlow({ initialAccount, initialWorkspaceName }: OnboardingFlowProps) {
+export function OnboardingFlow({
+  billingEnforcementRequired = false,
+  initialAccount,
+  initialBillingReturn = null,
+  initialStep = 1,
+  initialWorkspaceName,
+  onboardingCompleted = false,
+  onClosed,
+  onRetryBillingStatus,
+}: OnboardingFlowProps) {
   const locale = useLocale();
   const router = useRouter();
   const t = useTranslations("Onboarding");
   const prefersReducedMotion = useReducedMotion();
-  const [step, setStep] = React.useState(1);
+  const [step, setStep] = React.useState<number>(initialStep);
   const [stepDirection, setStepDirection] = React.useState<1 | -1>(1);
   const [pendingAction, setPendingAction] = React.useState<PendingAction>(null);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [billingReturn, setBillingReturn] = React.useState(initialBillingReturn);
+  const [onboardingPersisted, setOnboardingPersisted] = React.useState(onboardingCompleted);
   const [isExiting, setIsExiting] = React.useState(false);
   const [datePickerOpen, setDatePickerOpen] = React.useState(false);
+  const pendingActionRef = React.useRef(false);
   const focusHeading = React.useCallback((node: HTMLHeadingElement | null) => {
     node?.focus();
   }, []);
@@ -132,6 +151,7 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
 
   const values = useWatch({ control: form.control });
   const isPending = pendingAction !== null;
+  const isConfirmingBilling = billingReturn === "confirming" || billingReturn === "delayed";
   const debouncedOpeningBalanceCents = useDebouncedValue(parseMoneyToCents(values.openingBalance ?? "") ?? 0);
   const debouncedTransactionAmountCents = useDebouncedValue(
     values.addTransaction ? Math.max(parseMoneyToCents(values.transactionAmount ?? "") ?? 0, 0) : 0,
@@ -142,6 +162,10 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
       form.setValue("transactionDate", getLocalDateString());
     }
   }, [form]);
+
+  React.useEffect(() => {
+    setBillingReturn(initialBillingReturn);
+  }, [initialBillingReturn]);
 
   function validationMessage(message?: string) {
     return message ? t(`validation.${message}`) : undefined;
@@ -185,27 +209,88 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
       }
       throw new Error(body?.error || t("errors.generic"));
     }
+  }
 
+  function closeFlow() {
     setIsExiting(true);
   }
 
-  async function finish(valuesToSave: OnboardingFormValues, action: Exclude<PendingAction, "skip" | null>) {
-    setPendingAction(action);
-    try {
-      await submitRequest({ action: "complete", ...valuesToSave });
-    } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : t("errors.generic"));
-      setPendingAction(null);
-    }
-  }
-
   async function skipOnboarding() {
+    if (pendingActionRef.current) return;
+    pendingActionRef.current = true;
     setPendingAction("skip");
     try {
       await submitRequest({ action: "skip" });
+      setOnboardingPersisted(true);
+      if (billingEnforcementRequired) {
+        setStepDirection(1);
+        setStep(steps.length);
+        setPendingAction(null);
+        pendingActionRef.current = false;
+      } else {
+        closeFlow();
+      }
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : t("errors.generic"));
       setPendingAction(null);
+      pendingActionRef.current = false;
+    }
+  }
+
+  function returnToInvalidStep() {
+    const invalidStep = form.getFieldState("workspaceName").invalid
+      ? 1
+      : form.getFieldState("accountName").invalid ||
+          form.getFieldState("institution").invalid ||
+          form.getFieldState("openingBalance").invalid
+        ? 2
+        : 3;
+
+    setStepDirection(-1);
+    setStep(invalidStep);
+  }
+
+  function markOnboardingCheckoutAttempt() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("billing_checkout");
+    url.searchParams.set("onboarding_plan", "1");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }
+
+  async function startCheckout(plan: CheckoutPlan) {
+    if (pendingActionRef.current) return;
+
+    const valid = onboardingPersisted || (await form.trigger(undefined, { shouldFocus: false }));
+    if (!valid) {
+      returnToInvalidStep();
+      return;
+    }
+
+    pendingActionRef.current = true;
+    setBillingReturn(null);
+    setSubmitError(null);
+    setPendingAction(`checkout-${plan}`);
+    markOnboardingCheckoutAttempt();
+
+    try {
+      if (!onboardingPersisted) {
+        await submitRequest({ action: "complete", ...form.getValues() });
+        setOnboardingPersisted(true);
+      }
+
+      const response = await fetch("/api/billing/checkout", {
+        body: JSON.stringify({ interval: "monthly", plan }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const body = (await response.json().catch(() => null)) as { url?: string } | null;
+
+      if (!response.ok || !body?.url) throw new Error(t("errors.checkout"));
+      window.location.assign(body.url);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : t("errors.checkout"));
+      setPendingAction(null);
+      pendingActionRef.current = false;
     }
   }
 
@@ -220,13 +305,14 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
 
     const timeout = window.setTimeout(
       () => {
+        onClosed?.();
         router.refresh();
       },
       prefersReducedMotion ? 0 : 180,
     );
 
     return () => window.clearTimeout(timeout);
-  }, [isExiting, prefersReducedMotion, router]);
+  }, [isExiting, onClosed, prefersReducedMotion, router]);
 
   function normalizeMoneyField(fieldName: "openingBalance" | "transactionAmount", value: string) {
     const amountCents = parseMoneyToCents(value);
@@ -298,9 +384,11 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
               </span>
               <span className="font-semibold text-lg">Papero</span>
             </div>
-            <Button disabled={isPending} onClick={skipOnboarding} type="button" variant="outline">
-              {pendingAction === "skip" ? t("actions.saving") : t("actions.later")}
-            </Button>
+            {!onboardingPersisted || !billingEnforcementRequired ? (
+              <Button disabled={isPending} onClick={skipOnboarding} type="button" variant="outline">
+                {pendingAction === "skip" ? t("actions.saving") : t("actions.later")}
+              </Button>
+            ) : null}
           </header>
 
           <div
@@ -388,7 +476,6 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
                 onSubmit={(event) => {
                   event.preventDefault();
                   if (step < steps.length) void advanceStep();
-                  else void form.handleSubmit((data) => finish(data, "complete"))();
                 }}
               >
                 <div className={cn(!isPlansStep && "flex-1 sm:min-h-[360px]")}>
@@ -680,8 +767,15 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
                                   </li>
                                 ))}
                               </ul>
-                              <Button className="mt-4 w-full" disabled={isPending} type="submit">
-                                {t("plans.hosted.startTrial")}
+                              <Button
+                                className="mt-4 w-full"
+                                disabled={isPending || isConfirmingBilling}
+                                onClick={() => void startCheckout("hosted")}
+                                type="button"
+                              >
+                                {pendingAction === "checkout-hosted"
+                                  ? t("actions.redirecting")
+                                  : t("plans.hosted.startTrial")}
                                 <ArrowRight data-icon="inline-end" />
                               </Button>
                             </CardContent>
@@ -710,8 +804,15 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
                                   </li>
                                 ))}
                               </ul>
-                              <Button className="mt-4 w-full" disabled={isPending} type="submit">
-                                {t("plans.custom.startTrial")}
+                              <Button
+                                className="mt-4 w-full"
+                                disabled={isPending || isConfirmingBilling}
+                                onClick={() => void startCheckout("custom")}
+                                type="button"
+                              >
+                                {pendingAction === "checkout-custom"
+                                  ? t("actions.redirecting")
+                                  : t("plans.custom.startTrial")}
                                 <ArrowRight data-icon="inline-end" />
                               </Button>
                             </CardContent>
@@ -727,10 +828,39 @@ export function OnboardingFlow({ initialAccount, initialWorkspaceName }: Onboard
                       <AlertDescription>{submitError}</AlertDescription>
                     </Alert>
                   ) : null}
+                  {billingReturn === "canceled" && !submitError ? (
+                    <Alert className="mt-6 max-w-xl">
+                      <AlertTitle>{t("billingReturn.canceled.title")}</AlertTitle>
+                      <AlertDescription>{t("billingReturn.canceled.description")}</AlertDescription>
+                    </Alert>
+                  ) : null}
+                  {billingReturn === "confirming" && !submitError ? (
+                    <Alert className="mt-6 max-w-xl">
+                      <AlertTitle>{t("billingReturn.confirming.title")}</AlertTitle>
+                      <AlertDescription>{t("billingReturn.confirming.description")}</AlertDescription>
+                    </Alert>
+                  ) : null}
+                  {billingReturn === "delayed" && !submitError ? (
+                    <Alert className="mt-6 max-w-xl">
+                      <AlertTitle>{t("billingReturn.delayed.title")}</AlertTitle>
+                      <AlertDescription>{t("billingReturn.delayed.description")}</AlertDescription>
+                      {onRetryBillingStatus ? (
+                        <Button
+                          className="mt-3"
+                          onClick={onRetryBillingStatus}
+                          size="sm"
+                          type="button"
+                          variant="outline"
+                        >
+                          {t("actions.checkBillingStatus")}
+                        </Button>
+                      ) : null}
+                    </Alert>
+                  ) : null}
                 </div>
 
                 <div className={cn("flex flex-wrap items-center gap-2 border-t pt-5", isPlansStep ? "mt-5" : "mt-10")}>
-                  {step > 1 ? (
+                  {step > 1 && !onboardingPersisted ? (
                     <Button
                       disabled={isPending}
                       onClick={() => {

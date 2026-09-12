@@ -79,9 +79,29 @@
       "later": "Configurar depois",
       "back": "Voltar",
       "continue": "Continuar",
+      "checkBillingStatus": "Verificar status novamente",
       "skipTransaction": "Pular esta etapa",
       "finish": "Salvar e abrir dashboard",
+      "redirecting": "Abrindo checkout...",
       "saving": "Salvando..."
+    },
+    "billingReturn": {
+      "success": {
+        "title": "Checkout concluído",
+        "description": "A Stripe está confirmando sua assinatura. O status será atualizado automaticamente."
+      },
+      "canceled": {
+        "title": "Checkout cancelado",
+        "description": "Nada foi alterado. Escolha um plano quando estiver pronto."
+      },
+      "confirming": {
+        "title": "Confirmando sua assinatura",
+        "description": "A Stripe está processando a atualização. O Papero abrirá seu dashboard assim que o acesso for confirmado."
+      },
+      "delayed": {
+        "title": "A confirmação está demorando mais que o esperado",
+        "description": "Seu status de pagamento não foi alterado pelo Papero. Verifique novamente enquanto a Stripe conclui o processamento da assinatura."
+      }
     },
     "preview": {
       "label": "Prévia financeira em tempo real",
@@ -113,6 +133,7 @@
       "transactionDateRequired": "Escolha uma data válida."
     },
     "errors": {
+      "checkout": "O Papero não conseguiu abrir o Checkout da Stripe. Tente novamente.",
       "title": "Não foi possível concluir a configuração",
       "generic": "O Papero não conseguiu salvar sua configuração. Tente novamente."
     }
